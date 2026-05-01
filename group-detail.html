@@ -63,7 +63,12 @@
         .member-badge { background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
         
         .member-card { background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #eee; }
-        .member-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .member-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .member-name { font-size: 15px; font-weight: 600; color: #333; }
+        .creator-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .member-account { background: #f9f9f9; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .account-label { font-size: 12px; color: #666; }
+        .account-id { font-size: 12px; color: #333; font-family: monospace; }
         .member-stats { display: flex; gap: 15px; flex-wrap: wrap; }
         .stat-item { display: flex; align-items: center; gap: 5px; background: #f9f9f9; padding: 6px 10px; border-radius: 8px; font-size: 13px; }
         .stat-icon { font-size: 14px; }
@@ -347,9 +352,17 @@
             const membersHtml = groupData.members ? groupData.members.map(m => {
                 const stats = memberStats[m.accountId];
                 const net = stats.income - stats.expense;
+                const isCreator = m.role === 'admin';
                 return `
                     <div class="member-card">
-                        <div class="member-name">${m.name}</div>
+                        <div class="member-header">
+                            <div class="member-name">${m.name}</div>
+                            ${isCreator ? '<span class="creator-badge">👑 群主</span>' : ''}
+                        </div>
+                        <div class="member-account">
+                            <span class="account-label">账户ID:</span>
+                            <span class="account-id">${m.accountId}</span>
+                        </div>
                         <div class="member-stats">
                             <div class="stat-item">
                                 <span class="stat-icon">📝</span>
