@@ -199,6 +199,44 @@
         </div>
     </div>
 
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">编辑账户</span>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>账户ID</label>
+                <input type="text" id="editAccountId" readonly style="background: #f5f5f5;">
+            </div>
+            <div class="form-group">
+                <label>账户名称</label>
+                <input type="text" id="editAccountName" placeholder="输入账户名称" maxlength="20">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">⚠️ 确认删除</span>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <p style="font-size: 16px; margin-bottom: 10px;">确定要删除这个账户吗？</p>
+                <p style="color: #f44336; font-weight: bold;">此操作不可恢复！</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-primary" style="background: #f44336;" onclick="deleteAccount()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script src="config.js"></script>
@@ -394,6 +432,8 @@
                     <td>${new Date(acc.createTime).toLocaleDateString('zh-CN')}</td>
                     <td>
                         <button class="action-btn view" onclick="viewAccount('${acc.id}')">查看</button>
+                        <button class="action-btn edit" onclick="openEditModal('${acc.id}', '${acc.name}')">编辑</button>
+                        <button class="action-btn delete" onclick="confirmDelete('${acc.id}')">删除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -484,6 +524,68 @@
 
         function openAdjustModal(accountId) {
             viewAccount(accountId);
+        }
+
+        let editingAccountId = null;
+        let deletingAccountId = null;
+
+        function openEditModal(id, name) {
+            editingAccountId = id;
+            document.getElementById('editAccountId').value = id;
+            document.getElementById('editAccountName').value = name;
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            editingAccountId = null;
+        }
+
+        async function saveEdit() {
+            const newName = document.getElementById('editAccountName').value.trim();
+            if (!newName) {
+                showToast('请输入账户名称');
+                return;
+            }
+
+            try {
+                await api.post('/admin/rename-account', {
+                    accountId: editingAccountId,
+                    newName
+                }, { 'admin-key': adminToken });
+
+                showToast('账户已重命名');
+                closeEditModal();
+                loadAccounts();
+            } catch (err) {
+                showToast('重命名失败');
+            }
+        }
+
+        function confirmDelete(id) {
+            deletingAccountId = id;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            deletingAccountId = null;
+        }
+
+        async function deleteAccount() {
+            if (!deletingAccountId) return;
+
+            try {
+                await api.post('/admin/delete-account', {
+                    accountId: deletingAccountId
+                }, { 'admin-key': adminToken });
+
+                showToast('账户已删除');
+                closeDeleteModal();
+                loadAccounts();
+            } catch (err) {
+                showToast('删除失败');
+            }
         }
 
         async function adjustBalance() {
