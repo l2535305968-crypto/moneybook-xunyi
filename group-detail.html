@@ -116,7 +116,7 @@
                             <select id="accountSelect" required></select>
                         </div>
                         <div class="form-group">
-                            <label>分类</label>
+                            <label>分类 <button type="button" onclick="openCategoryModal()" class="btn btn-small btn-secondary" style="padding:4px 8px;font-size:12px;">⚙️</button></label>
                             <select id="categorySelect" required></select>
                         </div>
                     </div>
@@ -175,6 +175,46 @@
         </div>
     </div>
 
+    <div class="modal" id="categoryModal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <span class="modal-title">📦 管理分类</span>
+                <button class="modal-close" onclick="closeCategoryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:20px;padding:15px;background:#f9f9f9;border-radius:10px;">
+                    <div class="form-group">
+                        <label>分类名称</label>
+                        <input type="text" id="newCategoryName" placeholder="输入分类名称" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select id="newCategoryType">
+                            <option value="expense">支出</option>
+                            <option value="income">收入</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>图标</label>
+                        <div id="iconSelect" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>颜色</label>
+                        <div id="colorSelect" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addCategory()">➕ 添加分类</button>
+                </div>
+                <div>
+                    <div style="display:flex;gap:10px;margin-bottom:15px;">
+                        <button class="btn btn-small" onclick="showCategoryType('expense')" id="expenseTypeBtn">支出</button>
+                        <button class="btn btn-small btn-secondary" onclick="showCategoryType('income')" id="incomeTypeBtn">收入</button>
+                    </div>
+                    <div id="categoryList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script src="config.js"></script>
@@ -187,17 +227,22 @@
         let currentAccountName = localStorage.getItem('accountName') || '成员';
 
         const defaultCategories = [
-            { id: 'cat_food', name: '餐饮', icon: '🍜', type: 'expense' },
-            { id: 'cat_trans', name: '交通', icon: '🚗', type: 'expense' },
-            { id: 'cat_shop', name: '购物', icon: '🛒', type: 'expense' },
-            { id: 'cat_entertain', name: '娱乐', icon: '🎮', type: 'expense' },
-            { id: 'cat_living', name: '居住', icon: '🏠', type: 'expense' },
-            { id: 'cat_medical', name: '医疗', icon: '💊', type: 'expense' },
-            { id: 'cat_edu', name: '教育', icon: '📚', type: 'expense' },
-            { id: 'cat_salary', name: '工资', icon: '💰', type: 'income' },
-            { id: 'cat_invest', name: '理财', icon: '📈', type: 'income' },
-            { id: 'cat_other', name: '其他', icon: '📦', type: 'expense' }
+            { id: 'cat_food', name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense' },
+            { id: 'cat_trans', name: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense' },
+            { id: 'cat_shop', name: '购物', icon: '🛒', color: '#45B7D1', type: 'expense' },
+            { id: 'cat_entertain', name: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense' },
+            { id: 'cat_living', name: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense' },
+            { id: 'cat_medical', name: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense' },
+            { id: 'cat_edu', name: '教育', icon: '📚', color: '#87CEEB', type: 'expense' },
+            { id: 'cat_salary', name: '工资', icon: '💰', color: '#90EE90', type: 'income' },
+            { id: 'cat_invest', name: '理财', icon: '📈', color: '#FFD700', type: 'income' },
+            { id: 'cat_other', name: '其他', icon: '📦', color: '#D3D3D3', type: 'expense' }
         ];
+
+        const icons = ['🍜', '🚗', '🛒', '🎮', '🏠', '💊', '📚', '💰', '📈', '📦', '👕', '✈️', '☕', '🎁', '💄', '🎵', '📱', '🏋️', '🛠️', '🌐', '🐱', '🐶', '👶', '🎓', '💪', '🌙', '☀️', '🌸', '🍕', '🍺', '🎬', '📷'];
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#DDA0DD', '#FFB6C1', '#87CEEB', '#D3D3D3', '#FFD700', '#90EE90', '#FFA07A', '#BA55D3', '#00CED1', '#FF69B4', '#8FBC8F', '#F0E68C'];
+        let selectedIcon = '📦';
+        let selectedColor = '#FF6B6B';
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -272,9 +317,14 @@
             ).join('');
         }
 
+        function getCategories() {
+            return groupData && groupData.categories ? groupData.categories : defaultCategories;
+        }
+
         function renderCategories() {
             const select = document.getElementById('categorySelect');
-            const filtered = defaultCategories.filter(c => c.type === currentType);
+            const categories = getCategories();
+            const filtered = categories.filter(c => c.type === currentType);
             select.innerHTML = filtered.map(c => 
                 `<option value="${c.id}">${c.icon} ${c.name}</option>`
             ).join('');
@@ -283,6 +333,7 @@
         function renderRecords() {
             const container = document.getElementById('recordList');
             const records = groupData.records || [];
+            const categories = getCategories();
 
             if (records.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>还没有记录</p></div>';
@@ -290,7 +341,7 @@
             }
 
             container.innerHTML = records.slice().reverse().map(r => {
-                const cat = defaultCategories.find(c => c.id === r.categoryId) || { name: '其他', icon: '📦' };
+                const cat = categories.find(c => c.id === r.categoryId) || { name: '其他', icon: '📦' };
                 return `
                     <div class="record-item">
                         <div class="record-icon">${cat.icon}</div>
@@ -345,6 +396,114 @@
             } catch (err) {
                 showToast('记账失败');
             }
+        }
+
+        // 分类管理
+        let categoryModalType = 'expense';
+
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.add('show');
+            renderIconSelect();
+            renderColorSelect();
+            showCategoryType('expense');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('show');
+        }
+
+        function showCategoryType(type) {
+            categoryModalType = type;
+            document.getElementById('expenseTypeBtn').className = type === 'expense' ? 'btn btn-small' : 'btn btn-small btn-secondary';
+            document.getElementById('incomeTypeBtn').className = type === 'income' ? 'btn btn-small' : 'btn btn-small btn-secondary';
+            document.getElementById('newCategoryType').value = type;
+            renderCategoryList();
+        }
+
+        function renderIconSelect() {
+            const container = document.getElementById('iconSelect');
+            container.innerHTML = icons.map(icon => 
+                `<div onclick="selectIcon('${icon}')" style="cursor:pointer;padding:6px;border-radius:6px;font-size:20px;${selectedIcon === icon ? 'background:#e0e0e0;border:2px solid #667eea' : ''}" title="${icon}">${icon}</div>`
+            ).join('');
+        }
+
+        function renderColorSelect() {
+            const container = document.getElementById('colorSelect');
+            container.innerHTML = colors.map(color => 
+                `<div onclick="selectColor('${color}')" style="cursor:pointer;width:28px;height:28px;border-radius:50%;background:${color};${selectedColor === color ? 'border:2px solid #000' : 'border:1px solid #ddd'}" title="${color}"></div>`
+            ).join('');
+        }
+
+        function selectIcon(icon) {
+            selectedIcon = icon;
+            renderIconSelect();
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            renderColorSelect();
+        }
+
+        async function addCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            const type = document.getElementById('newCategoryType').value;
+
+            if (!name) {
+                showToast('请输入分类名称');
+                return;
+            }
+
+            try {
+                await api.post(`/groups/${groupId}/categories`, {
+                    name,
+                    icon: selectedIcon,
+                    color: selectedColor,
+                    type
+                });
+                showToast('添加成功！');
+                document.getElementById('newCategoryName').value = '';
+                loadGroup();
+                renderCategoryList();
+            } catch (err) {
+                showToast('添加失败');
+            }
+        }
+
+        async function deleteCategory(categoryId) {
+            if (!confirm('确定删除这个分类吗？')) return;
+
+            try {
+                await api.delete(`/groups/${groupId}/categories/${categoryId}`);
+                showToast('删除成功！');
+                loadGroup();
+                renderCategoryList();
+            } catch (err) {
+                showToast('删除失败');
+            }
+        }
+
+        function renderCategoryList() {
+            const categories = getCategories();
+            const filtered = categories.filter(c => c.type === categoryModalType);
+            const container = document.getElementById('categoryList');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:30px;"><div class="empty-state-icon">📦</div><p>暂无分类</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(c => `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid #eee;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:${c.color || '#e0e0e0'}">${c.icon || '📦'}</div>
+                        <div>
+                            <div style="font-weight:600;">${c.name}</div>
+                            <div style="font-size:12px;color:#999;">${c.type === 'expense' ? '支出' : '收入'}${c.custom ? ' · 自定义' : ''}</div>
+                        </div>
+                    </div>
+                    ${c.custom ? `<button class="btn btn-small btn-secondary" onclick="deleteCategory('${c.id}')" style="padding:6px 12px;font-size:12px;">删除</button>` : ''}
+                </div>
+            `).join('');
         }
 
         // 初始化

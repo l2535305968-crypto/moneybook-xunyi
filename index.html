@@ -142,11 +142,11 @@
             
             <div class="divider" id="loginDivider" style="display: none;"></div>
             
-            <!-- 已有账户ID登录 -->
+            <!-- 已有账户登录 -->
             <div style="margin-bottom: 15px;">
-                <h3 style="font-size: 15px; margin-bottom: 8px; color: #333;">已有账户ID</h3>
-                <input type="text" id="accountIdInput" class="login-input" placeholder="输入您的账户ID（如：acc_xxx）">
-                <button class="login-btn" onclick="loginWithAccountId()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">使用账户ID登录</button>
+                <h3 style="font-size: 15px; margin-bottom: 8px; color: #333;">已有账户</h3>
+                <input type="text" id="accountIdInput" class="login-input" placeholder="输入账户ID（如：acc_xxx）或账户名称">
+                <button class="login-btn" onclick="loginWithAccountId()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">使用账户登录</button>
             </div>
             
             <div class="divider" style="margin: 20px 0;"></div>
@@ -383,26 +383,30 @@
         }
 
         async function loginWithAccountId() {
-            const accountId = document.getElementById('accountIdInput').value.trim();
+            const accountInput = document.getElementById('accountIdInput').value.trim();
             
-            if (!accountId) {
-                showToast('请输入账户ID');
+            if (!accountInput) {
+                showToast('请输入账户ID或账户名称');
                 return;
             }
 
-            if (!accountId.startsWith('acc_')) {
-                showToast('账户ID格式不正确，应以acc_开头');
-                return;
-            }
-
-            currentAccountId = accountId;
-            localStorage.setItem('accountId', currentAccountId);
+            let accountId = accountInput;
             
             try {
+                if (!accountInput.startsWith('acc_')) {
+                    const searchResult = await api.get(`/api/account/find?name=${encodeURIComponent(accountInput)}`);
+                    if (searchResult && searchResult.id) {
+                        accountId = searchResult.id;
+                    }
+                }
+                
+                currentAccountId = accountId;
+                localStorage.setItem('accountId', currentAccountId);
+                
                 await loadAccount();
                 showToast('登录成功！');
             } catch (err) {
-                showToast('账户不存在或加载失败，请检查账户ID');
+                showToast('账户不存在或加载失败，请检查账户ID或名称');
                 currentAccountId = null;
                 localStorage.removeItem('accountId');
             }

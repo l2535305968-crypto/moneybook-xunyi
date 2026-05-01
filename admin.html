@@ -276,7 +276,7 @@
 
         async function loadAccounts() {
             try {
-                accounts = await api.get('/admin/list', { 'admin-key': adminToken });
+                accounts = await api.get('/admin/accounts', { 'admin-key': adminToken });
                 renderAccounts();
                 updateStats();
             } catch (err) {
