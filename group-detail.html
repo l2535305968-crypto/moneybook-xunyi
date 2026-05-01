@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 群详情</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; }
+        .back-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
+        .main-content { max-width: 800px; margin: 0 auto; padding: 15px; padding-bottom: 80px; }
+
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #f5f5f5; color: #333; }
+        .btn-small { padding: 8px 15px; font-size: 14px; }
+
+        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
+
+        .balance-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .balance-label { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .balance-amount { font-size: 40px; font-weight: bold; color: #4CAF50; }
+        .account-list { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        .account-badge { background: #f0f0f0; padding: 10px 15px; border-radius: 20px; font-size: 13px; }
+        .account-badge span { color: #4CAF50; font-weight: bold; }
+
+        .quick-add { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .quick-add-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: #333; }
+        .type-toggle { display: flex; background: #f5f5f5; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
+        .type-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+        .type-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .type-btn.expense.active { color: #f44336; }
+        .type-btn.income.active { color: #4CAF50; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .amount-input { font-size: 20px !important; font-weight: bold; text-align: center; }
+        .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+
+        .record-list { max-height: 300px; overflow-y: auto; }
+        .record-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+        .record-item:last-child { border-bottom: none; }
+        .record-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #f5f5f5; }
+        .record-info { flex: 1; }
+        .record-category { font-size: 14px; font-weight: 500; color: #333; }
+        .record-remark { font-size: 12px; color: #999; margin-top: 2px; }
+        .record-amount { font-size: 15px; font-weight: 600; }
+        .record-amount.expense { color: #f44336; }
+        .record-amount.income { color: #4CAF50; }
+        .record-meta { font-size: 11px; color: #999; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
+
+        .member-list { display: flex; flex-direction: column; gap: 10px; }
+        .copy-btn { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background: #f0f0f0; }
+        .member-badge { background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
+        
+        .member-card { background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #eee; }
+        .member-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .member-name { font-size: 15px; font-weight: 600; color: #333; }
+        .creator-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .member-account { background: #f9f9f9; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .account-label { font-size: 12px; color: #666; }
+        .account-id { font-size: 12px; color: #333; font-family: monospace; }
+        .member-stats { display: flex; gap: 15px; flex-wrap: wrap; }
+        .stat-item { display: flex; align-items: center; gap: 5px; background: #f9f9f9; padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+        .stat-icon { font-size: 14px; }
+        .stat-value { color: #666; }
+        .stat-value.expense { color: #f44336; font-weight: 600; }
+        .stat-value.income { color: #4CAF50; font-weight: 600; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 16px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 16px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-body { padding: 20px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group .btn { flex: 1; }
+
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <button class="back-btn" onclick="location.href='groups.html'">◀ 返回</button>
+            <h1 id="groupName">群详情</h1>
+            <div style="width: 60px;"></div>
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="empty-state" id="loadingState">
+            <div class="empty-state-icon">⏳</div>
+            <p>加载中...</p>
+        </div>
+
+        <div id="detailContent" style="display: none;">
+            <div class="balance-card">
+                <div class="balance-label">群总资金</div>
+                <div class="balance-amount" id="groupBalance">¥0.00</div>
+                <div class="account-list" id="groupAccounts"></div>
+                <div style="margin-top:15px;padding:12px;background:#fff;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="font-size:13px;color:#666;">
+                        <span style="color:#333;font-weight:600;">群ID:</span>
+                        <span id="groupIdDisplay" style="font-family:monospace;">-</span>
+                    </div>
+                    <button class="copy-btn" onclick="copyGroupId()" style="padding:6px 12px;font-size:12px;">复制</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>👥 群成员</span>
+                </div>
+                <div class="member-list" id="memberList"></div>
+            </div>
+
+            <div class="quick-add">
+                <div class="quick-add-title">📝 在群中记账</div>
+                <div class="type-toggle">
+                    <div class="type-btn expense active" onclick="setType('expense')">💸 支出</div>
+                    <div class="type-btn income" onclick="setType('income')">💰 收入</div>
+                </div>
+                <form onsubmit="submitRecord(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>记到账户</label>
+                            <select id="accountSelect" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>分类 <button type="button" onclick="openCategoryModal()" class="btn btn-small btn-secondary" style="padding:4px 8px;font-size:12px;">⚙️</button></label>
+                            <select id="categorySelect" required></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>金额</label>
+                            <input type="number" id="amountInput" class="amount-input" placeholder="0.00" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>日期</label>
+                            <input type="date" id="dateInput" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <input type="text" id="remarkInput" placeholder="可选">
+                    </div>
+                    <button type="submit" class="submit-btn">保存记录</button>
+                </form>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>📜 群记账记录</span>
+                </div>
+                <div class="record-list" id="recordList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addAccountModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">添加群账户</span>
+                <button class="modal-close" onclick="closeAddAccountModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>账户名称</label>
+                    <input type="text" id="newAccountName" placeholder="输入账户名称" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>类型</label>
+                    <select id="newAccountType">
+                        <option value="cash">现金</option>
+                        <option value="wechat">微信</option>
+                        <option value="alipay">支付宝</option>
+                        <option value="bank">银行卡</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="closeAddAccountModal()">取消</button>
+                    <button class="btn btn-primary" onclick="addAccount()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="categoryModal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <span class="modal-title">📦 管理分类</span>
+                <button class="modal-close" onclick="closeCategoryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:20px;padding:15px;background:#f9f9f9;border-radius:10px;">
+                    <div class="form-group">
+                        <label>分类名称</label>
+                        <input type="text" id="newCategoryName" placeholder="输入分类名称" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select id="newCategoryType">
+                            <option value="expense">支出</option>
+                            <option value="income">收入</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>图标</label>
+                        <div id="iconSelect" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>颜色</label>
+                        <div id="colorSelect" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addCategory()">➕ 添加分类</button>
+                </div>
+                <div>
+                    <div style="display:flex;gap:10px;margin-bottom:15px;">
+                        <button class="btn btn-small" onclick="showCategoryType('expense')" id="expenseTypeBtn">支出</button>
+                        <button class="btn btn-small btn-secondary" onclick="showCategoryType('income')" id="incomeTypeBtn">收入</button>
+                    </div>
+                    <div id="categoryList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script>
+        let groupId = new URLSearchParams(location.search).get('id');
+        let groupData = null;
+        let currentType = 'expense';
+        let currentAccountId = localStorage.getItem('accountId');
+        let currentAccountName = localStorage.getItem('accountName') || '成员';
+        let isCreator = false;
+
+        async function loadAccountInfo() {
+            if (!currentAccountId) return;
+            try {
+                const accountData = await api.get('/account/' + currentAccountId);
+                if (accountData && accountData.name) {
+                    currentAccountName = accountData.name;
+                    localStorage.setItem('accountName', currentAccountName);
+                }
+            } catch (err) {
+                console.error('加载账户信息失败:', err);
+            }
+        }
+
+        const defaultCategories = [
+            { id: 'cat_food', name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense' },
+            { id: 'cat_trans', name: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense' },
+            { id: 'cat_shop', name: '购物', icon: '🛒', color: '#45B7D1', type: 'expense' },
+            { id: 'cat_entertain', name: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense' },
+            { id: 'cat_living', name: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense' },
+            { id: 'cat_medical', name: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense' },
+            { id: 'cat_edu', name: '教育', icon: '📚', color: '#87CEEB', type: 'expense' },
+            { id: 'cat_salary', name: '工资', icon: '💰', color: '#90EE90', type: 'income' },
+            { id: 'cat_invest', name: '理财', icon: '📈', color: '#FFD700', type: 'income' },
+            { id: 'cat_other', name: '其他', icon: '📦', color: '#D3D3D3', type: 'expense' }
+        ];
+
+        const icons = ['🍜', '🚗', '🛒', '🎮', '🏠', '💊', '📚', '💰', '📈', '📦', '👕', '✈️', '☕', '🎁', '💄', '🎵', '📱', '🏋️', '🛠️', '🌐', '🐱', '🐶', '👶', '🎓', '💪', '🌙', '☀️', '🌸', '🍕', '🍺', '🎬', '📷'];
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#DDA0DD', '#FFB6C1', '#87CEEB', '#D3D3D3', '#FFD700', '#90EE90', '#FFA07A', '#BA55D3', '#00CED1', '#FF69B4', '#8FBC8F', '#F0E68C'];
+        let selectedIcon = '📦';
+        let selectedColor = '#FF6B6B';
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function generateId(prefix) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = prefix + '_';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function setType(type) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.type-btn.${type}`).classList.add('active');
+            renderCategories();
+        }
+
+        async function loadGroup() {
+            if (!groupId) {
+                location.href = 'groups.html';
+                return;
+            }
+
+            try {
+                groupData = await api.get(`/groups/${groupId}`);
+                document.getElementById('groupName').textContent = groupData.name;
+                document.getElementById('groupIdDisplay').textContent = groupData.id;
+                
+                // 检查当前用户是否是群主
+                isCreator = groupData.creatorId === currentAccountId;
+                
+                renderGroup();
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('detailContent').style.display = 'block';
+            } catch (err) {
+                document.getElementById('loadingState').innerHTML = '<div class="empty-state-icon">❌</div><p>加载失败</p>';
+            }
+        }
+
+        async function copyGroupId() {
+            try {
+                await navigator.clipboard.writeText(groupId);
+                showToast('群ID已复制！');
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = groupId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('群ID已复制！');
+            }
+        }
+
+        function renderGroup() {
+            const totalBalance = groupData.accounts ? groupData.accounts.reduce((sum, a) => sum + a.balance, 0) : 0;
+            document.getElementById('groupBalance').textContent = `¥${totalBalance.toFixed(2)}`;
+
+            const accountsHtml = groupData.accounts ? groupData.accounts.map(a => 
+                `<div class="account-badge">${a.name} <span>¥${a.balance.toFixed(2)}</span></div>`
+            ).join('') : '';
+            document.getElementById('groupAccounts').innerHTML = accountsHtml;
+
+            // 计算成员统计
+            const memberStats = {};
+            (groupData.members || []).forEach(m => {
+                memberStats[m.accountId] = { name: m.name, income: 0, expense: 0, count: 0 };
+            });
+
+            (groupData.records || []).forEach(r => {
+                if (memberStats[r.memberId]) {
+                    if (r.type === 'income') {
+                        memberStats[r.memberId].income += r.amount;
+                    } else {
+                        memberStats[r.memberId].expense += r.amount;
+                    }
+                    memberStats[r.memberId].count++;
+                }
+            });
+
+            const membersHtml = groupData.members ? groupData.members.map(m => {
+                const stats = memberStats[m.accountId];
+                const net = stats.income - stats.expense;
+                const isMemberCreator = m.role === 'admin';
+                const isCurrentUser = m.accountId === currentAccountId;
+                return `
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-name">${m.name}</div>
+                            ${isMemberCreator ? '<span class="creator-badge">👑 群主</span>' : ''}
+                        </div>
+                        ${isCreator ? `
+                            <div class="member-account">
+                                <span class="account-label">账户ID:</span>
+                                <span class="account-id">${m.accountId}</span>
+                            </div>
+                        ` : ''}
+                        <div class="member-stats">
+                            <div class="stat-item">
+                                <span class="stat-icon">📝</span>
+                                <span class="stat-value">${stats.count}条</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💸</span>
+                                <span class="stat-value expense">¥${stats.expense.toFixed(2)}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💰</span>
+                                <span class="stat-value income">¥${stats.income.toFixed(2)}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">📊</span>
+                                <span class="stat-value ${net >= 0 ? 'income' : 'expense'}">${net >= 0 ? '+' : ''}¥${net.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        ${isCreator && !isMemberCreator ? `
+                            <div style="margin-top:10px;">
+                                <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;background:#ffebee;color:#c62828;" onclick="removeMember('${m.accountId}')">🚪 移出群</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('') : '';
+            document.getElementById('memberList').innerHTML = membersHtml;
+
+            renderAccountSelect();
+            renderCategories();
+            renderRecords();
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+        }
+
+        function renderAccountSelect() {
+            const select = document.getElementById('accountSelect');
+            if (!groupData.accounts || groupData.accounts.length === 0) {
+                select.innerHTML = '<option value="">暂无账户</option>';
+                return;
+            }
+            select.innerHTML = groupData.accounts.map(a => 
+                `<option value="${a.id}">${a.name}</option>`
+            ).join('');
+        }
+
+        function getCategories() {
+            return groupData && groupData.categories ? groupData.categories : defaultCategories;
+        }
+
+        function renderCategories() {
+            const select = document.getElementById('categorySelect');
+            const categories = getCategories();
+            const filtered = categories.filter(c => c.type === currentType);
+            select.innerHTML = filtered.map(c => 
+                `<option value="${c.id}">${c.icon} ${c.name}</option>`
+            ).join('');
+        }
+
+        function renderRecords() {
+            const container = document.getElementById('recordList');
+            const records = groupData.records || [];
+            const categories = getCategories();
+
+            if (records.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>还没有记录</p></div>';
+                return;
+            }
+
+            container.innerHTML = records.slice().reverse().map(r => {
+                const cat = categories.find(c => c.id === r.categoryId) || { name: '其他', icon: '📦' };
+                return `
+                    <div class="record-item">
+                        <div class="record-icon">${cat.icon}</div>
+                        <div class="record-info">
+                            <div class="record-category">${cat.name}</div>
+                            <div class="record-remark">${r.remark || ''} · ${r.memberName || ''}</div>
+                        </div>
+                        <div>
+                            <div class="record-amount ${r.type}">${r.type === 'income' ? '+' : '-'}${parseFloat(r.amount).toFixed(2)}</div>
+                            <div class="record-meta">${new Date(r.date).toLocaleDateString('zh-CN')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function submitRecord(e) {
+            e.preventDefault();
+
+            if (!groupData.accounts || groupData.accounts.length === 0) {
+                showToast('请先添加群账户');
+                return;
+            }
+
+            const accountId = document.getElementById('accountSelect').value;
+            const categoryId = document.getElementById('categorySelect').value;
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const date = document.getElementById('dateInput').value;
+            const remark = document.getElementById('remarkInput').value;
+
+            if (!accountId || !categoryId || !amount || !date) {
+                showToast('请填写完整信息');
+                return;
+            }
+
+            try {
+                await api.post(`/groups/${groupId}/record`, {
+                    accountId,
+                    categoryId,
+                    amount,
+                    type: currentType,
+                    date,
+                    remark,
+                    memberId: currentAccountId,
+                    memberName: currentAccountName
+                });
+
+                showToast('记账成功！');
+                document.getElementById('amountInput').value = '';
+                document.getElementById('remarkInput').value = '';
+                loadGroup();
+            } catch (err) {
+                showToast('记账失败');
+            }
+        }
+
+        // 分类管理
+        let categoryModalType = 'expense';
+
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.add('show');
+            renderIconSelect();
+            renderColorSelect();
+            showCategoryType('expense');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('show');
+        }
+
+        function showCategoryType(type) {
+            categoryModalType = type;
+            document.getElementById('expenseTypeBtn').className = type === 'expense' ? 'btn btn-small' : 'btn btn-small btn-secondary';
+            document.getElementById('incomeTypeBtn').className = type === 'income' ? 'btn btn-small' : 'btn btn-small btn-secondary';
+            document.getElementById('newCategoryType').value = type;
+            renderCategoryList();
+        }
+
+        function renderIconSelect() {
+            const container = document.getElementById('iconSelect');
+            container.innerHTML = icons.map(icon => 
+                `<div onclick="selectIcon('${icon}')" style="cursor:pointer;padding:6px;border-radius:6px;font-size:20px;${selectedIcon === icon ? 'background:#e0e0e0;border:2px solid #667eea' : ''}" title="${icon}">${icon}</div>`
+            ).join('');
+        }
+
+        function renderColorSelect() {
+            const container = document.getElementById('colorSelect');
+            container.innerHTML = colors.map(color => 
+                `<div onclick="selectColor('${color}')" style="cursor:pointer;width:28px;height:28px;border-radius:50%;background:${color};${selectedColor === color ? 'border:2px solid #000' : 'border:1px solid #ddd'}" title="${color}"></div>`
+            ).join('');
+        }
+
+        function selectIcon(icon) {
+            selectedIcon = icon;
+            renderIconSelect();
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            renderColorSelect();
+        }
+
+        async function addCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            const type = document.getElementById('newCategoryType').value;
+
+            if (!name) {
+                showToast('请输入分类名称');
+                return;
+            }
+
+            try {
+                await api.post(`/groups/${groupId}/categories`, {
+                    name,
+                    icon: selectedIcon,
+                    color: selectedColor,
+                    type
+                });
+                showToast('添加成功！');
+                document.getElementById('newCategoryName').value = '';
+                loadGroup();
+                renderCategoryList();
+            } catch (err) {
+                showToast('添加失败');
+            }
+        }
+
+        async function deleteCategory(categoryId) {
+            if (!confirm('确定删除这个分类吗？')) return;
+
+            try {
+                await api.delete(`/groups/${groupId}/categories/${categoryId}`);
+                showToast('删除成功！');
+                loadGroup();
+                renderCategoryList();
+            } catch (err) {
+                showToast('删除失败');
+            }
+        }
+
+        async function removeMember(memberAccountId) {
+            if (!confirm('确定要把这个成员移出群吗？')) return;
+
+            try {
+                await api.post(`/groups/${groupId}/remove-member`, {
+                    accountId: currentAccountId,
+                    memberAccountId: memberAccountId
+                });
+                showToast('成员已移出群！');
+                loadGroup();
+            } catch (err) {
+                showToast('移出失败');
+            }
+        }
+
+        function renderCategoryList() {
+            const categories = getCategories();
+            const filtered = categories.filter(c => c.type === categoryModalType);
+            const container = document.getElementById('categoryList');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:30px;"><div class="empty-state-icon">📦</div><p>暂无分类</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(c => `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid #eee;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:${c.color || '#e0e0e0'}">${c.icon || '📦'}</div>
+                        <div>
+                            <div style="font-weight:600;">${c.name}</div>
+                            <div style="font-size:12px;color:#999;">${c.type === 'expense' ? '支出' : '收入'}${c.custom ? ' · 自定义' : ''}</div>
+                        </div>
+                    </div>
+                    ${c.custom ? `<button class="btn btn-small btn-secondary" onclick="deleteCategory('${c.id}')" style="padding:6px 12px;font-size:12px;">删除</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 初始化
+        loadAccountInfo().then(() => {
+            loadGroup();
+        });
+    </script>
+</body>
+</html>

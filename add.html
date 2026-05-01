@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>➕ 记账 - 记账本</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
+        .header h1 { font-size: 20px; }
+        .header-links { display: flex; gap: 15px; margin-top: 10px; }
+        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
+        .main-content { max-width: 600px; margin: 0 auto; padding: 15px; }
+        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
+        .type-toggle { display: flex; background: #f5f5f5; border-radius: 12px; padding: 5px; margin-bottom: 20px; }
+        .type-btn { flex: 1; padding: 12px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 15px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .type-btn.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .type-btn.expense.active { color: #f44336; }
+        .type-btn.income.active { color: #4CAF50; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 14px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .amount-input { font-size: 28px !important; font-weight: bold; text-align: center; }
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
+        .category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px; }
+        .category-item { padding: 12px 8px; text-align: center; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+        .category-item:hover { transform: scale(1.05); }
+        .category-item.selected { border-color: #667eea; background: #f0f0ff; }
+        .category-icon { font-size: 24px; margin-bottom: 5px; }
+        .category-name { font-size: 11px; color: #666; }
+        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .submit-btn:hover { opacity: 0.9; }
+        .bill-section { background: #f8f8ff; border-radius: 12px; padding: 15px; margin-top: 20px; }
+        .bill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; }
+        .bill-title { font-size: 14px; color: #666; display: flex; align-items: center; gap: 5px; }
+        .bill-toggle { font-size: 12px; color: #999; }
+        .bill-content { display: none; }
+        .bill-content.show { display: block; }
+        .bill-source-btns { display: flex; gap: 10px; margin: 10px 0; }
+        .bill-source-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; text-align: center; }
+        .bill-source-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .bill-textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 10px; padding: 12px; font-size: 14px; resize: none; }
+        .parse-result { margin-top: 10px; padding: 12px; background: white; border-radius: 10px; font-size: 14px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; }
+        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tab-item.active { color: #667eea; }
+        .tab-item-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>➕ 记账</h1>
+        <div class="header-links">
+            <a href="index.html">🏠 首页</a>
+            <a href="accounts.html">🏦 账户</a>
+            <a href="categories.html">📂 分类</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <div class="card-title">💰 记账金额</div>
+            <div class="type-toggle">
+                <div class="type-btn expense active" data-type="expense" onclick="switchType('expense')">
+                    <span>💸</span> 支出
+                </div>
+                <div class="type-btn income" data-type="income" onclick="switchType('income')">
+                    <span>💰</span> 收入
+                </div>
+            </div>
+
+            <form id="recordForm">
+                <div class="form-group">
+                    <input type="number" id="amountInput" class="amount-input" placeholder="0.00" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>选择分类</label>
+                    <div class="category-grid" id="categoryGrid"></div>
+                    <input type="hidden" id="selectedCategory" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>账户</label>
+                        <select id="accountSelect" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="text" id="dateInput" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>时间</label>
+                        <input type="time" id="timeInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <input type="text" id="remarkInput" placeholder="可选">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">保存记录</button>
+            </form>
+
+            <div class="bill-section">
+                <div class="bill-header" onclick="toggleBillSection()">
+                    <span class="bill-title">📋 微信/支付宝账单识别</span>
+                    <span class="bill-toggle" id="billToggle">▼</span>
+                </div>
+                <div class="bill-content" id="billContent">
+                    <div class="bill-source-btns">
+                        <div class="bill-source-btn active" data-source="wechat" onclick="selectBillSource('wechat')">微信</div>
+                        <div class="bill-source-btn" data-source="alipay" onclick="selectBillSource('alipay')">支付宝</div>
+                    </div>
+                    <textarea class="bill-textarea" id="billText" placeholder="粘贴账单文本，自动识别金额、日期..."></textarea>
+                    <button class="submit-btn" style="margin-top: 10px; padding: 12px;" onclick="parseBill()">识别账单</button>
+                    <div class="parse-result" id="parseResult" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="tab-bar">
+        <a href="index.html" class="tab-item">
+            <span class="tab-item-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="add.html" class="tab-item active">
+            <span class="tab-item-icon">➕</span>
+            <span>记账</span>
+        </a>
+        <a href="statistics.html" class="tab-item">
+            <span class="tab-item-icon">📊</span>
+            <span>统计</span>
+        </a>
+        <a href="export.html" class="tab-item">
+            <span class="tab-item-icon">📤</span>
+            <span>导出</span>
+        </a>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+    <script>
+        let currentAccountId = localStorage.getItem('accountId');
+        let accountData = null;
+        let currentType = 'expense';
+        let selectedCategory = null;
+        let billSource = 'wechat';
+
+        async function loadAccount() {
+            try {
+                accountData = await api.get(`/account/${currentAccountId}`);
+                initApp();
+            } catch (err) {
+                showToast('加载失败');
+            }
+        }
+
+        function initApp() {
+            initDatePicker();
+            updateAccountSelect();
+            renderCategories();
+        }
+
+        function initDatePicker() {
+            const now = new Date();
+            flatpickr('#dateInput', {
+                locale: 'zh',
+                dateFormat: 'Y-m-d',
+                defaultDate: now,
+                allowInput: true
+            });
+            document.getElementById('timeInput').value = now.toTimeString().substring(0, 5);
+        }
+
+        function updateAccountSelect() {
+            const select = document.getElementById('accountSelect');
+            select.innerHTML = '';
+            accountData.accounts.filter(a => a.status === 'active').forEach(acc => {
+                select.innerHTML += `<option value="${acc.id}">${acc.name}</option>`;
+            });
+        }
+
+        function switchType(type) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+            renderCategories();
+        }
+
+        function renderCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+
+            const filtered = accountData.categories.filter(c => c.type === currentType);
+            filtered.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                item.dataset.id = cat.id;
+                item.innerHTML = `
+                    <div class="category-icon">${cat.icon}</div>
+                    <div class="category-name">${cat.name}</div>
+                `;
+                item.addEventListener('click', () => selectCategory(cat.id));
+                grid.appendChild(item);
+            });
+        }
+
+        function selectCategory(id) {
+            selectedCategory = id;
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.toggle('selected', item.dataset.id === id);
+            });
+            document.getElementById('selectedCategory').value = id;
+        }
+
+        function toggleBillSection() {
+            const content = document.getElementById('billContent');
+            const toggle = document.getElementById('billToggle');
+            content.classList.toggle('show');
+            toggle.textContent = content.classList.contains('show') ? '▲' : '▼';
+        }
+
+        function selectBillSource(source) {
+            billSource = source;
+            document.querySelectorAll('.bill-source-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.source === source);
+            });
+        }
+
+        async function parseBill() {
+            const text = document.getElementById('billText').value.trim();
+            if (!text) {
+                showToast('请输入账单文本');
+                return;
+            }
+
+            try {
+                const result = await api.post('/parse-bill', { text, source: billSource });
+
+                if (result.amount) {
+                    document.getElementById('amountInput').value = result.amount;
+                    document.getElementById('remarkInput').value = result.remark || '';
+
+                    if (result.date) {
+                        const dateStr = result.date.split('T')[0];
+                        document.getElementById('dateInput')._flatpickr.setDate(dateStr);
+                    }
+
+                    if (result.type === 'income') {
+                        switchType('income');
+                    } else {
+                        switchType('expense');
+                    }
+
+                    if (result.categorySuggestions && result.categorySuggestions.length > 0) {
+                        selectCategory(result.categorySuggestions[0]);
+                    }
+
+                    const parseResultEl = document.getElementById('parseResult');
+                    parseResultEl.style.display = 'block';
+                    parseResultEl.innerHTML = `
+                        <div style="color: #4CAF50; margin-bottom: 5px;">✅ 识别成功</div>
+                        <div>金额: <strong>¥${result.amount}</strong></div>
+                        <div>类型: ${result.type === 'income' ? '收入' : '支出'}</div>
+                        ${result.remark ? `<div>备注: ${result.remark}</div>` : ''}
+                    `;
+
+                    showToast('账单识别成功');
+                } else {
+                    showToast('无法识别账单，请手动输入');
+                }
+            } catch (err) {
+                showToast('识别失败');
+            }
+        }
+
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || amount <= 0) {
+                showToast('请输入有效金额');
+                return;
+            }
+
+            if (!selectedCategory) {
+                showToast('请选择分类');
+                return;
+            }
+
+            const dateValue = document.getElementById('dateInput').value;
+            const timeValue = document.getElementById('timeInput').value;
+            const dateTime = new Date(`${dateValue}T${timeValue}`).toISOString();
+
+            const record = {
+                accountId: document.getElementById('accountSelect').value,
+                categoryId: selectedCategory,
+                amount: amount,
+                type: currentType,
+                date: dateTime,
+                remark: document.getElementById('remarkInput').value,
+                source: 'manual'
+            };
+
+            try {
+                await api.post('/records', { accountId: currentAccountId, record });
+                showToast('记录已保存');
+                document.getElementById('recordForm').reset();
+                initDatePicker();
+                selectedCategory = null;
+                renderCategories();
+            } catch (err) {
+                showToast('保存失败');
+            }
+        });
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        loadAccount();
+    </script>
+</body>
+</html>

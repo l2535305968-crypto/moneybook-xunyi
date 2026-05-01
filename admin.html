@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 管理后台 - 记账本</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
+        .header h1 { font-size: 20px; }
+        .header-links { display: flex; gap: 15px; margin-top: 10px; }
+        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
+        .main-content { max-width: 1000px; margin: 0 auto; padding: 15px; }
+        .login-section { max-width: 400px; margin: 100px auto; text-align: center; }
+        .login-box { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        .login-box h2 { margin-bottom: 20px; font-size: 24px; }
+        .login-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 15px; }
+        .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        .login-btn:hover { opacity: 0.9; }
+        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #f8f8ff; padding: 15px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #667eea; }
+        .stat-label { font-size: 12px; color: #999; margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        th { font-weight: 500; color: #999; font-size: 12px; }
+        td { color: #333; }
+        .account-cell { display: flex; align-items: center; gap: 8px; }
+        .account-id { font-family: monospace; font-size: 11px; color: #667eea; background: #f0f0ff; padding: 2px 6px; border-radius: 4px; }
+        .action-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 5px; }
+        .action-btn.view { background: #e3f2fd; color: #2196F3; }
+        .action-btn.adjust { background: #fff3e0; color: #FF9800; }
+        .action-btn.delete { background: #ffebee; color: #f44336; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .detail-item { background: #f8f8ff; padding: 12px; border-radius: 8px; }
+        .detail-label { font-size: 11px; color: #999; margin-bottom: 3px; }
+        .detail-value { font-size: 14px; font-weight: 500; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+        .hidden { display: none !important; }
+        .records-list { max-height: 300px; overflow-y: auto; }
+        .record-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .record-row:last-child { border-bottom: none; }
+        .no-data { text-align: center; padding: 30px; color: #999; }
+        .action-btn.approve { background: #e8f5e9; color: #4CAF50; }
+        .action-btn.reject { background: #ffebee; color: #f44336; }
+        .action-btn.export { background: #e3f2fd; color: #2196F3; }
+        .pending-badge { background: #fff3e0; color: #FF9800; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔐 管理后台</h1>
+        <div class="header-links">
+            <a href="index.html">🏠 返回首页</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="login-section" id="loginSection">
+            <div class="login-box">
+                <h2>🔑 管理员登录</h2>
+                <input type="password" id="adminKey" placeholder="请输入管理员密钥">
+                <button class="login-btn" onclick="adminLogin()">登录</button>
+            </div>
+        </div>
+
+        <div id="adminContent" class="hidden">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalAccounts">0</div>
+                    <div class="stat-label">账户总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">记账记录</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalBalance">¥0</div>
+                    <div class="stat-label">总资产</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingRequests">0</div>
+                    <div class="stat-label">待审批</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>➕ 直接创建账户</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label>账户名称</label>
+                        <input type="text" id="newAccountName" placeholder="输入账户名称" maxlength="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="createAccount()" style="white-space: nowrap;">创建账户</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>📝 账户申请列表</span>
+                    <button class="action-btn view" onclick="refreshRequests()">🔄 刷新</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>申请ID</th>
+                                <th>姓名</th>
+                                <th>申请时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>📋 账户列表</span>
+                    <button class="action-btn view" onclick="refreshAccounts()">🔄 刷新</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>账户ID</th>
+                                <th>账户名</th>
+                                <th>账户数</th>
+                                <th>记录数</th>
+                                <th>总资产</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">账户详情</span>
+                <button class="modal-close" onclick="closeDetailModal()">×</button>
+            </div>
+            <div class="detail-grid" id="accountDetails"></div>
+
+            <div class="section" style="margin-top: 20px;">
+                <div class="section-title">💰 账户余额</div>
+                <div id="accountBalances"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📜 最近记账记录</div>
+                <div class="records-list" id="accountRecords"></div>
+            </div>
+
+            <div class="section" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px;">
+                <div class="section-title" style="color: #856404;">
+                    <span>⚙️ 调整账户余额</span>
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <select id="adjustAccountSelect" style="flex: 1;"></select>
+                        <input type="number" id="adjustAmount" placeholder="输入金额（正数增加，负数减少）" style="flex: 2;">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="adjustBalance()">确认调整</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeDetailModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">编辑账户</span>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>账户ID</label>
+                <input type="text" id="editAccountId" readonly style="background: #f5f5f5;">
+            </div>
+            <div class="form-group">
+                <label>账户名称</label>
+                <input type="text" id="editAccountName" placeholder="输入账户名称" maxlength="20">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">⚠️ 确认删除</span>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <p style="font-size: 16px; margin-bottom: 10px;">确定要删除这个账户吗？</p>
+                <p style="color: #f44336; font-weight: bold;">此操作不可恢复！</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-primary" style="background: #f44336;" onclick="deleteAccount()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script>
+        let adminToken = localStorage.getItem('adminToken');
+        let accounts = [];
+        let requests = [];
+        let currentDetailAccount = null;
+
+        function adminLogin() {
+            const key = document.getElementById('adminKey').value;
+            if (key === 'moneybook_admin_2026_secure_key') {
+                adminToken = key;
+                localStorage.setItem('adminToken', adminToken);
+                showAdminContent();
+                loadAccounts();
+                loadRequests();
+            } else {
+                showToast('密钥错误');
+            }
+        }
+
+        function showAdminContent() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('adminContent').classList.remove('hidden');
+        }
+
+        function checkAuth() {
+            if (adminToken === 'moneybook_admin_2026_secure_key') {
+                showAdminContent();
+                loadAccounts();
+                loadRequests();
+            }
+        }
+
+        async function loadAccounts() {
+            try {
+                accounts = await api.get('/admin/accounts', { 'admin-key': adminToken });
+                renderAccounts();
+                updateStats();
+            } catch (err) {
+                if (err.message.includes('403')) {
+                    localStorage.removeItem('adminToken');
+                    adminToken = null;
+                    showToast('会话已过期');
+                    return;
+                }
+                showToast('加载失败');
+            }
+        }
+
+        function refreshAccounts() {
+            loadAccounts();
+        }
+
+        async function loadRequests() {
+            try {
+                let pendingRequests = [];
+                const saved = localStorage.getItem('pendingRequests');
+                if (saved) pendingRequests = JSON.parse(saved);
+                requests = pendingRequests;
+                renderRequests();
+                updateStats();
+            } catch (err) {
+                showToast('加载申请失败');
+            }
+        }
+
+        function refreshRequests() {
+            loadRequests();
+        }
+
+        function renderRequests() {
+            const tbody = document.getElementById('requestsTable');
+            const pendingRequests = requests.filter(r => r.status === 'pending');
+
+            if (pendingRequests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">暂无申请</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pendingRequests.map(req => `
+                <tr>
+                    <td><span class="account-id">${req.id}</span></td>
+                    <td>${req.name}</td>
+                    <td>${new Date(req.requestTime).toLocaleString('zh-CN')}</td>
+                    <td><span class="pending-badge">待审批</span></td>
+                    <td>
+                        <button class="action-btn approve" onclick="approveRequest('${req.id}', '${req.name}')">通过</button>
+                        <button class="action-btn reject" onclick="rejectRequest('${req.id}')">拒绝</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function createAccount() {
+            const accountName = document.getElementById('newAccountName').value.trim();
+            
+            if (!accountName) {
+                showToast('请输入账户名称');
+                return;
+            }
+
+            try {
+                const newAccountId = 'acc_' + Math.random().toString(36).substr(2, 8);
+                await api.post('/account', { id: newAccountId, name: accountName });
+                
+                showToast(`账户创建成功！账户ID: ${newAccountId}`);
+                document.getElementById('newAccountName').value = '';
+                loadAccounts();
+            } catch (err) {
+                console.error('创建账户失败:', err);
+                showToast('创建账户失败，请检查控制台错误信息');
+            }
+        }
+
+        async function approveRequest(requestId, accountName) {
+            if (!confirm(`确定要通过 ${accountName} 的账户申请吗？`)) return;
+
+            try {
+                const newAccountId = 'acc_' + Math.random().toString(36).substr(2, 8);
+                await api.post('/account', { id: newAccountId, name: accountName });
+
+                let pendingRequests = [];
+                const saved = localStorage.getItem('pendingRequests');
+                if (saved) pendingRequests = JSON.parse(saved);
+
+                pendingRequests = pendingRequests.map(r => {
+                    if (r.id === requestId) {
+                        return { ...r, status: 'approved', approvedTime: new Date().toISOString() };
+                    }
+                    return r;
+                });
+                localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
+
+                showToast(`账户已创建！账户ID: ${newAccountId}`);
+                loadRequests();
+                loadAccounts();
+            } catch (err) {
+                console.error('审批失败:', err);
+                showToast('创建账户失败，请检查控制台错误信息');
+            }
+        }
+
+        function rejectRequest(requestId) {
+            if (!confirm('确定要拒绝这个申请吗？')) return;
+
+            let pendingRequests = [];
+            const saved = localStorage.getItem('pendingRequests');
+            if (saved) pendingRequests = JSON.parse(saved);
+
+            pendingRequests = pendingRequests.map(r => {
+                if (r.id === requestId) {
+                    return { ...r, status: 'rejected', rejectedTime: new Date().toISOString() };
+                }
+                return r;
+            });
+            localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
+
+            showToast('申请已拒绝');
+            loadRequests();
+        }
+
+        function updateStats() {
+            const totalBalance = accounts.reduce((sum, acc) => sum + acc.totalBalance, 0);
+            const totalRecords = accounts.reduce((sum, acc) => sum + acc.recordCount, 0);
+            const pendingRequests = requests.filter(r => r.status === 'pending').length;
+
+            document.getElementById('totalAccounts').textContent = accounts.length;
+            document.getElementById('totalRecords').textContent = totalRecords;
+            document.getElementById('totalBalance').textContent = `¥${totalBalance.toFixed(0)}`;
+            document.getElementById('pendingRequests').textContent = pendingRequests;
+        }
+
+        function renderAccounts() {
+            const tbody = document.getElementById('accountsTable');
+            tbody.innerHTML = '';
+
+            if (accounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">暂无数据</td></tr>';
+                return;
+            }
+
+            accounts.forEach(acc => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="account-id">${acc.id}</span></td>
+                    <td>${acc.name}</td>
+                    <td>${acc.accountCount}</td>
+                    <td>${acc.recordCount}</td>
+                    <td style="color: ${acc.totalBalance >= 0 ? '#4CAF50' : '#f44336'};">¥${acc.totalBalance.toFixed(2)}</td>
+                    <td>${new Date(acc.createTime).toLocaleDateString('zh-CN')}</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewAccount('${acc.id}')">查看</button>
+                        <button class="action-btn edit" onclick="openEditModal('${acc.id}', '${acc.name}')">编辑</button>
+                        <button class="action-btn export" onclick="exportAccount('${acc.id}', '${acc.name}')">导出</button>
+                        <button class="action-btn" style="background:#ff9800;" onclick="resetAccount('${acc.id}', '${acc.name}')">重置</button>
+                        <button class="action-btn delete" onclick="confirmDelete('${acc.id}')">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function viewAccount(id) {
+            try {
+                currentDetailAccount = await api.get(`/admin/account/${id}`, { 'admin-key': adminToken });
+                renderAccountDetail();
+                openDetailModal();
+            } catch (err) {
+                showToast('加载失败');
+            }
+        }
+
+        function renderAccountDetail() {
+            const acc = currentDetailAccount;
+
+            document.getElementById('accountDetails').innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">账户ID</div>
+                    <div class="detail-value"><span class="account-id">${acc.id}</span></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">账户名称</div>
+                    <div class="detail-value">${acc.name}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">账户数量</div>
+                    <div class="detail-value">${acc.accounts.length} 个</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">记账记录</div>
+                    <div class="detail-value">${acc.records.length} 条</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">分类数量</div>
+                    <div class="detail-value">${acc.categories.length} 个</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">创建时间</div>
+                    <div class="detail-value">${new Date(acc.createTime).toLocaleString('zh-CN')}</div>
+                </div>
+            `;
+
+            const categoryMap = {};
+            acc.categories.forEach(c => categoryMap[c.id] = c);
+
+            const balancesHtml = acc.accounts.map(a => `
+                <div class="detail-item">
+                    <div class="detail-label">${a.name} (${a.type})</div>
+                    <div class="detail-value" style="color: ${a.balance >= 0 ? '#4CAF50' : '#f44336'};">¥${a.balance.toFixed(2)}</div>
+                </div>
+            `).join('');
+            document.getElementById('accountBalances').innerHTML = balancesHtml;
+
+            const adjustSelect = document.getElementById('adjustAccountSelect');
+            adjustSelect.innerHTML = acc.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+
+            const recordsList = document.getElementById('accountRecords');
+            if (acc.records.length === 0) {
+                recordsList.innerHTML = '<div class="no-data">暂无记账记录</div>';
+            } else {
+                recordsList.innerHTML = acc.records.slice(0, 20).map(r => {
+                    const cat = categoryMap[r.categoryId] || { name: '未知', icon: '📦' };
+                    return `
+                        <div class="record-row">
+                            <span>${cat.icon} ${cat.name}</span>
+                            <span style="color: ${r.type === 'income' ? '#4CAF50' : '#f44336'};">
+                                ${r.type === 'income' ? '+' : '-'}${parseFloat(r.amount).toFixed(2)}
+                            </span>
+                            <span style="color: #999;">${new Date(r.date).toLocaleDateString('zh-CN')}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function openDetailModal() {
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('show');
+            currentDetailAccount = null;
+        }
+
+        function openAdjustModal(accountId) {
+            viewAccount(accountId);
+        }
+
+        let editingAccountId = null;
+        let deletingAccountId = null;
+
+        function openEditModal(id, name) {
+            editingAccountId = id;
+            document.getElementById('editAccountId').value = id;
+            document.getElementById('editAccountName').value = name;
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            editingAccountId = null;
+        }
+
+        async function saveEdit() {
+            const newName = document.getElementById('editAccountName').value.trim();
+            if (!newName) {
+                showToast('请输入账户名称');
+                return;
+            }
+
+            try {
+                await api.post('/admin/rename-account', {
+                    accountId: editingAccountId,
+                    newName
+                }, { 'admin-key': adminToken });
+
+                showToast('账户已重命名');
+                closeEditModal();
+                loadAccounts();
+            } catch (err) {
+                showToast('重命名失败');
+            }
+        }
+
+        function confirmDelete(id) {
+            deletingAccountId = id;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            deletingAccountId = null;
+        }
+
+        async function deleteAccount() {
+            if (!deletingAccountId) return;
+
+            try {
+                await api.post('/admin/delete-account', {
+                    accountId: deletingAccountId
+                }, { 'admin-key': adminToken });
+
+                showToast('账户已删除');
+                closeDeleteModal();
+                loadAccounts();
+            } catch (err) {
+                showToast('删除失败');
+            }
+        }
+
+        async function exportAccount(id, name) {
+            try {
+                const data = await api.get(`/admin/account/${id}`, { 'admin-key': adminToken });
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${name}_${id}_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('导出成功！');
+            } catch (err) {
+                showToast('导出失败');
+            }
+        }
+
+        async function resetAccount(id, name) {
+            if (!confirm(`确定要重置账户"${name}"吗？\n\n此操作会清空所有记账记录和余额，但保留账户结构！`)) return;
+
+            try {
+                await api.post('/admin/reset-account', {
+                    accountId: id
+                }, { 'admin-key': adminToken });
+
+                showToast('账户已重置！');
+                loadAccounts();
+            } catch (err) {
+                showToast('重置失败');
+            }
+        }
+
+        async function adjustBalance() {
+            if (!currentDetailAccount) return;
+
+            const targetAccountId = document.getElementById('adjustAccountSelect').value;
+            const adjustment = parseFloat(document.getElementById('adjustAmount').value);
+
+            if (!adjustment || adjustment === 0) {
+                showToast('请输入有效金额');
+                return;
+            }
+
+            try {
+                await api.post('/admin/adjust-balance', {
+                    accountId: currentDetailAccount.id,
+                    targetAccountId,
+                    adjustment
+                }, { 'admin-key': adminToken });
+
+                showToast('余额已调整');
+                document.getElementById('adjustAmount').value = '';
+                viewAccount(currentDetailAccount.id);
+                loadAccounts();
+            } catch (err) {
+                showToast('调整失败');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>
