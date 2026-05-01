@@ -58,6 +58,9 @@
         .record-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
         .record-row:last-child { border-bottom: none; }
         .no-data { text-align: center; padding: 30px; color: #999; }
+        .action-btn.approve { background: #e8f5e9; color: #4CAF50; }
+        .action-btn.reject { background: #ffebee; color: #f44336; }
+        .pending-badge { background: #fff3e0; color: #FF9800; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
         @media (max-width: 600px) {
             .stats-row { grid-template-columns: repeat(2, 1fr); }
             .detail-grid { grid-template-columns: 1fr; }
@@ -96,8 +99,29 @@
                     <div class="stat-label">总资产</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="activeToday">0</div>
-                    <div class="stat-label">今日活跃</div>
+                    <div class="stat-value" id="pendingRequests">0</div>
+                    <div class="stat-label">待审批</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>📝 账户申请列表</span>
+                    <button class="action-btn view" onclick="refreshRequests()">🔄 刷新</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>申请ID</th>
+                                <th>姓名</th>
+                                <th>申请时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTable"></tbody>
+                    </table>
                 </div>
             </div>
 
@@ -163,6 +187,7 @@
     <script>
         let adminToken = localStorage.getItem('adminToken');
         let accounts = [];
+        let requests = [];
         let currentDetailAccount = null;
 
         function adminLogin() {
@@ -172,6 +197,7 @@
                 localStorage.setItem('adminToken', adminToken);
                 showAdminContent();
                 loadAccounts();
+                loadRequests();
             } else {
                 showToast('密钥错误');
             }
@@ -186,6 +212,7 @@
             if (adminToken === 'moneybook_admin_2026_secure_key') {
                 showAdminContent();
                 loadAccounts();
+                loadRequests();
             }
         }
 
@@ -209,18 +236,101 @@
             loadAccounts();
         }
 
+        async function loadRequests() {
+            try {
+                let pendingRequests = [];
+                const saved = localStorage.getItem('pendingRequests');
+                if (saved) pendingRequests = JSON.parse(saved);
+                requests = pendingRequests;
+                renderRequests();
+                updateStats();
+            } catch (err) {
+                showToast('加载申请失败');
+            }
+        }
+
+        function refreshRequests() {
+            loadRequests();
+        }
+
+        function renderRequests() {
+            const tbody = document.getElementById('requestsTable');
+            const pendingRequests = requests.filter(r => r.status === 'pending');
+
+            if (pendingRequests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">暂无申请</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pendingRequests.map(req => `
+                <tr>
+                    <td><span class="account-id">${req.id}</span></td>
+                    <td>${req.name}</td>
+                    <td>${new Date(req.requestTime).toLocaleString('zh-CN')}</td>
+                    <td><span class="pending-badge">待审批</span></td>
+                    <td>
+                        <button class="action-btn approve" onclick="approveRequest('${req.id}', '${req.name}')">通过</button>
+                        <button class="action-btn reject" onclick="rejectRequest('${req.id}')">拒绝</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function approveRequest(requestId, accountName) {
+            if (!confirm(`确定要通过 ${accountName} 的账户申请吗？`)) return;
+
+            try {
+                const newAccountId = 'acc_' + Math.random().toString(36).substr(2, 8);
+                await api.post('/account', { id: newAccountId, name: accountName });
+
+                let pendingRequests = [];
+                const saved = localStorage.getItem('pendingRequests');
+                if (saved) pendingRequests = JSON.parse(saved);
+
+                pendingRequests = pendingRequests.map(r => {
+                    if (r.id === requestId) {
+                        return { ...r, status: 'approved', approvedTime: new Date().toISOString() };
+                    }
+                    return r;
+                });
+                localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
+
+                showToast('账户已创建！');
+                loadRequests();
+                loadAccounts();
+            } catch (err) {
+                showToast('创建账户失败');
+            }
+        }
+
+        function rejectRequest(requestId) {
+            if (!confirm('确定要拒绝这个申请吗？')) return;
+
+            let pendingRequests = [];
+            const saved = localStorage.getItem('pendingRequests');
+            if (saved) pendingRequests = JSON.parse(saved);
+
+            pendingRequests = pendingRequests.map(r => {
+                if (r.id === requestId) {
+                    return { ...r, status: 'rejected', rejectedTime: new Date().toISOString() };
+                }
+                return r;
+            });
+            localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
+
+            showToast('申请已拒绝');
+            loadRequests();
+        }
+
         function updateStats() {
             const totalBalance = accounts.reduce((sum, acc) => sum + acc.totalBalance, 0);
             const totalRecords = accounts.reduce((sum, acc) => sum + acc.recordCount, 0);
-            const today = new Date().toISOString().split('T')[0];
-            const activeToday = accounts.filter(acc => {
-                return acc.createTime && acc.createTime.split('T')[0] === today;
-            }).length;
+            const pendingRequests = requests.filter(r => r.status === 'pending').length;
 
             document.getElementById('totalAccounts').textContent = accounts.length;
             document.getElementById('totalRecords').textContent = totalRecords;
             document.getElementById('totalBalance').textContent = `¥${totalBalance.toFixed(0)}`;
-            document.getElementById('activeToday').textContent = activeToday;
+            document.getElementById('pendingRequests').textContent = pendingRequests;
         }
 
         function renderAccounts() {

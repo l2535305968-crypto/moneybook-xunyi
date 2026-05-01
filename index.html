@@ -97,6 +97,27 @@
         .toast.show { opacity: 1; }
 
         .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 800px; margin: 0 auto; }
+
+        .login-section { display: none; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; }
+        .login-section.show { display: flex; }
+        .login-card { background: white; border-radius: 20px; padding: 40px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .login-card h2 { font-size: 28px; margin-bottom: 10px; color: #333; }
+        .login-card p { color: #666; margin-bottom: 30px; }
+        .login-input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; margin-bottom: 20px; transition: border-color 0.3s; }
+        .login-input:focus { outline: none; border-color: #667eea; }
+        .login-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .login-btn:hover { opacity: 0.9; }
+        .login-hint { margin-top: 20px; font-size: 12px; color: #999; }
+        .recent-accounts { margin-top: 20px; text-align: left; }
+        .recent-accounts-title { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .account-item { padding: 12px 15px; background: #f8f8ff; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+        .account-item:hover { background: #f0f0ff; }
+        .account-item-name { font-weight: 500; color: #333; }
+        .account-item-delete { color: #999; font-size: 18px; cursor: pointer; }
+        .account-item-delete:hover { color: #f44336; }
+        .divider { margin: 20px 0; height: 1px; background: #eee; }
+        .switch-account-btn { background: #f0f0f0; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; color: #666; }
+        .switch-account-btn:hover { background: #e0e0e0; }
         .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .tab-item.active { color: #667eea; }
         .tab-item-icon { font-size: 20px; }
@@ -109,12 +130,33 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="login-section show" id="loginSection">
+        <div class="login-card">
+            <h2>💰 记账本</h2>
+            <p>选择账户或申请新账户</p>
+            
+            <div class="recent-accounts" id="recentAccounts" style="display: none;">
+                <div class="recent-accounts-title">最近登录的账户</div>
+                <div id="recentAccountsList"></div>
+            </div>
+            
+            <div class="divider" id="loginDivider" style="display: none;"></div>
+            
+            <input type="text" id="accountNameInput" class="login-input" placeholder="输入您的姓名申请账户" maxlength="20">
+            <button class="login-btn" onclick="requestAccount()">申请账户</button>
+            <div class="login-hint">提示：账户需要管理员审批，审批通过后会收到通知</div>
+        </div>
+    </div>
+
+    <div class="header" id="mainHeader" style="display: none;">
         <div class="header-top">
             <h1>💰 记账本</h1>
-            <select class="account-selector" id="accountSelector">
-                <option value="">加载中...</option>
-            </select>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select class="account-selector" id="accountSelector">
+                    <option value="">加载中...</option>
+                </select>
+                <button class="switch-account-btn" onclick="switchAccount()">切换账户</button>
+            </div>
         </div>
         <div class="header-links">
             <a href="accounts.html">🏦 账户</a>
@@ -122,10 +164,11 @@
             <a href="budget.html">📊 预算</a>
             <a href="statistics.html">📈 统计</a>
             <a href="export.html">📤 导出</a>
+            <a href="admin.html">🔐 管理</a>
         </div>
     </div>
 
-    <div class="main-content">
+    <div class="main-content" id="mainContent" style="display: none;">
         <div class="balance-card">
             <div class="balance-label">总资产</div>
             <div class="balance-amount positive" id="totalBalance">¥0.00</div>
@@ -252,6 +295,117 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
+        function getRecentAccounts() {
+            const saved = localStorage.getItem('recentAccounts');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveRecentAccount(accountId, accountName) {
+            let recentAccounts = getRecentAccounts();
+            recentAccounts = recentAccounts.filter(a => a.id !== accountId);
+            recentAccounts.unshift({ id: accountId, name: accountName });
+            if (recentAccounts.length > 10) {
+                recentAccounts = recentAccounts.slice(0, 10);
+            }
+            localStorage.setItem('recentAccounts', JSON.stringify(recentAccounts));
+        }
+
+        function removeRecentAccount(accountId) {
+            let recentAccounts = getRecentAccounts();
+            recentAccounts = recentAccounts.filter(a => a.id !== accountId);
+            localStorage.setItem('recentAccounts', JSON.stringify(recentAccounts));
+            renderRecentAccounts();
+        }
+
+        function renderRecentAccounts() {
+            const recentAccounts = getRecentAccounts();
+            const container = document.getElementById('recentAccounts');
+            const list = document.getElementById('recentAccountsList');
+            const divider = document.getElementById('loginDivider');
+
+            if (recentAccounts.length === 0) {
+                container.style.display = 'none';
+                divider.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            divider.style.display = 'block';
+
+            list.innerHTML = recentAccounts.map(account => `
+                <div class="account-item" onclick="selectAccount('${account.id}')">
+                    <span class="account-item-name">${account.name}</span>
+                    <span class="account-item-delete" onclick="event.stopPropagation(); removeRecentAccount('${account.id}')">×</span>
+                </div>
+            `).join('');
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.add('show');
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            renderRecentAccounts();
+        }
+
+        function showMain() {
+            document.getElementById('loginSection').classList.remove('show');
+            document.getElementById('mainHeader').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        function switchAccount() {
+            currentAccountId = null;
+            localStorage.removeItem('accountId');
+            showLogin();
+        }
+
+        async function selectAccount(accountId) {
+            currentAccountId = accountId;
+            localStorage.setItem('accountId', currentAccountId);
+            await loadAccount();
+        }
+
+        async function requestAccount() {
+            const accountName = document.getElementById('accountNameInput').value.trim();
+            
+            if (!accountName) {
+                showToast('请输入您的姓名');
+                return;
+            }
+
+            try {
+                const requestId = generateId('req');
+                const requestData = {
+                    id: requestId,
+                    name: accountName,
+                    status: 'pending',
+                    requestTime: new Date().toISOString()
+                };
+
+                let pendingRequests = [];
+                try {
+                    const saved = localStorage.getItem('pendingRequests');
+                    if (saved) pendingRequests = JSON.parse(saved);
+                } catch (e) {}
+
+                pendingRequests.push(requestData);
+                localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
+
+                showToast('申请已提交，请联系管理员审批！');
+                
+                setTimeout(() => {
+                    const existingRequests = JSON.parse(localStorage.getItem('pendingRequests') || '[]');
+                    const myRequest = existingRequests.find(r => r.name === accountName && r.status === 'pending');
+                    if (myRequest) {
+                        showToast(`您的申请（${accountName}）正在等待审批，请稍后再试`);
+                    }
+                }, 2000);
+
+            } catch (err) {
+                showToast('提交申请失败，请稍后再试');
+            }
+        }
+
         async function loadAccount() {
             const urlParams = new URLSearchParams(window.location.search);
             const aidParam = urlParams.get('aid');
@@ -262,8 +416,8 @@
             }
 
             if (!currentAccountId) {
-                currentAccountId = generateId('acc');
-                localStorage.setItem('accountId', currentAccountId);
+                showLogin();
+                return;
             }
 
             document.title = '💰 记账本 - ' + currentAccountId;
@@ -274,20 +428,16 @@
             try {
                 accountData = await api.get('/account/' + currentAccountId);
                 console.log('账户数据加载成功:', accountData);
+                
+                if (accountData.name) {
+                    saveRecentAccount(currentAccountId, accountData.name);
+                }
+                
+                showMain();
                 initApp();
             } catch (err) {
                 console.error('加载账户失败:', err);
-                console.log('尝试创建新账户...');
-                currentAccountId = generateId('acc');
-                localStorage.setItem('accountId', currentAccountId);
-                try {
-                    accountData = await api.post('/account', { id: currentAccountId });
-                    console.log('新账户创建成功:', accountData);
-                    initApp();
-                } catch (e) {
-                    console.error('创建账户失败:', e);
-                    showToast('加载失败，请刷新重试');
-                }
+                showLogin();
             }
         }
 
