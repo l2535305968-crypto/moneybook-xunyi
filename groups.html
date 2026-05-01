@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👥 记账小群</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 20px; }
+        .main-content { max-width: 800px; margin: 0 auto; padding: 15px; }
+
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 100%; }
+        .btn-secondary { background: #f5f5f5; color: #333; }
+
+        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
+
+        .group-card { background: #f9f9f9; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+        .group-card:hover { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .group-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .group-name { font-size: 16px; font-weight: 600; color: #333; }
+        .group-balance { font-size: 18px; font-weight: bold; color: #4CAF50; }
+        .group-meta { font-size: 12px; color: #999; display: flex; gap: 15px; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 16px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 16px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-body { padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group .btn { flex: 1; }
+
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding-bottom: env(safe-area-inset-bottom); }
+        .tab-item { flex: 1; text-align: center; padding: 12px 5px; text-decoration: none; color: #666; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tab-item.active { color: #667eea; }
+        .tab-item-icon { font-size: 20px; }
+
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 记账小群</h1>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="empty-state" id="loginPrompt">
+            <div class="empty-state-icon">🔐</div>
+            <p>请先登录您的账户</p>
+            <button class="btn btn-primary" style="margin-top: 15px;" onclick="location.href='index.html'">去登录</button>
+        </div>
+
+        <div id="groupContent" style="display: none;">
+            <div class="section">
+                <div class="section-title">
+                    <span>我的群</span>
+                    <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 14px;" onclick="openCreateGroupModal()">➕ 创建群</button>
+                </div>
+                <div id="groupList"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>加入群</span>
+                </div>
+                <div class="form-group">
+                    <label>输入群ID</label>
+                    <input type="text" id="joinGroupId" placeholder="输入群ID加入">
+                </div>
+                <button class="btn btn-primary" onclick="joinGroup()">加入群</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <a href="index.html" class="tab-item">
+            <span class="tab-item-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="groups.html" class="tab-item active">
+            <span class="tab-item-icon">👥</span>
+            <span>群</span>
+        </a>
+        <a href="add.html" class="tab-item">
+            <span class="tab-item-icon">➕</span>
+            <span>记账</span>
+        </a>
+        <a href="statistics.html" class="tab-item">
+            <span class="tab-item-icon">📊</span>
+            <span>统计</span>
+        </a>
+        <a href="export.html" class="tab-item">
+            <span class="tab-item-icon">📤</span>
+            <span>导出</span>
+        </a>
+    </div>
+
+    <div class="modal" id="createGroupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">创建新群</span>
+                <button class="modal-close" onclick="closeCreateGroupModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>群名称</label>
+                    <input type="text" id="newGroupName" placeholder="输入群名称" maxlength="20">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="closeCreateGroupModal()">取消</button>
+                    <button class="btn btn-primary" onclick="createGroup()">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script>
+        let currentAccountId = localStorage.getItem('accountId');
+        let myGroups = [];
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function generateId(prefix) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = prefix + '_';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function checkLogin() {
+            if (!currentAccountId) {
+                document.getElementById('loginPrompt').style.display = 'block';
+                document.getElementById('groupContent').style.display = 'none';
+                return false;
+            }
+            document.getElementById('loginPrompt').style.display = 'none';
+            document.getElementById('groupContent').style.display = 'block';
+            return true;
+        }
+
+        async function loadGroups() {
+            if (!checkLogin()) return;
+            
+            try {
+                const groups = await api.get(`/groups/my?accountId=${currentAccountId}`);
+                myGroups = groups || [];
+                renderGroups();
+            } catch (err) {
+                console.error('加载群失败', err);
+                document.getElementById('groupList').innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><p>加载失败，请稍后重试</p></div>';
+            }
+        }
+
+        function renderGroups() {
+            const container = document.getElementById('groupList');
+            
+            if (myGroups.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>还没有加入任何群</p></div>';
+                return;
+            }
+
+            container.innerHTML = myGroups.map(group => {
+                const totalBalance = group.accounts ? group.accounts.reduce((sum, a) => sum + a.balance, 0) : 0;
+                const memberCount = group.members ? group.members.length : 0;
+                const recordCount = group.records ? group.records.length : 0;
+                
+                return `
+                    <div class="group-card" onclick="openGroupDetail('${group.id}')">
+                        <div class="group-card-header">
+                            <div class="group-name">${group.name}</div>
+                            <div class="group-balance">¥${totalBalance.toFixed(2)}</div>
+                        </div>
+                        <div class="group-meta">
+                            <span>👥 ${memberCount}人</span>
+                            <span>📝 ${recordCount}条记录</span>
+                            <span>🆔 ${group.id}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openCreateGroupModal() {
+            document.getElementById('newGroupName').value = '';
+            document.getElementById('createGroupModal').classList.add('show');
+        }
+
+        function closeCreateGroupModal() {
+            document.getElementById('createGroupModal').classList.remove('show');
+        }
+
+        async function createGroup() {
+            const name = document.getElementById('newGroupName').value.trim();
+            if (!name) {
+                showToast('请输入群名称');
+                return;
+            }
+
+            try {
+                const group = await api.post('/groups/create', {
+                    name,
+                    creatorId: currentAccountId,
+                    creatorName: localStorage.getItem('accountName') || '成员'
+                });
+
+                showToast('群创建成功！');
+                closeCreateGroupModal();
+                loadGroups();
+            } catch (err) {
+                showToast('创建失败');
+            }
+        }
+
+        async function joinGroup() {
+            const groupId = document.getElementById('joinGroupId').value.trim();
+            if (!groupId) {
+                showToast('请输入群ID');
+                return;
+            }
+
+            try {
+                await api.post('/groups/join', {
+                    groupId,
+                    accountId: currentAccountId,
+                    accountName: localStorage.getItem('accountName') || '成员'
+                });
+
+                showToast('加入成功！');
+                document.getElementById('joinGroupId').value = '';
+                loadGroups();
+            } catch (err) {
+                showToast('加入失败，请检查群ID');
+            }
+        }
+
+        function openGroupDetail(groupId) {
+            location.href = `group-detail.html?id=${groupId}`;
+        }
+
+        // 初始化
+        checkLogin();
+        if (currentAccountId) {
+            loadGroups();
+        }
+    </script>
+</body>
+</html>
