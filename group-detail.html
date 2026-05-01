@@ -248,6 +248,7 @@
         let currentType = 'expense';
         let currentAccountId = localStorage.getItem('accountId');
         let currentAccountName = localStorage.getItem('accountName') || '成员';
+        let isCreator = false;
 
         const defaultCategories = [
             { id: 'cat_food', name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense' },
@@ -300,6 +301,10 @@
                 groupData = await api.get(`/groups/${groupId}`);
                 document.getElementById('groupName').textContent = groupData.name;
                 document.getElementById('groupIdDisplay').textContent = groupData.id;
+                
+                // 检查当前用户是否是群主
+                isCreator = groupData.creatorId === currentAccountId;
+                
                 renderGroup();
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('detailContent').style.display = 'block';
@@ -352,17 +357,19 @@
             const membersHtml = groupData.members ? groupData.members.map(m => {
                 const stats = memberStats[m.accountId];
                 const net = stats.income - stats.expense;
-                const isCreator = m.role === 'admin';
+                const isMemberCreator = m.role === 'admin';
                 return `
                     <div class="member-card">
                         <div class="member-header">
                             <div class="member-name">${m.name}</div>
-                            ${isCreator ? '<span class="creator-badge">👑 群主</span>' : ''}
+                            ${isMemberCreator ? '<span class="creator-badge">👑 群主</span>' : ''}
                         </div>
-                        <div class="member-account">
-                            <span class="account-label">账户ID:</span>
-                            <span class="account-id">${m.accountId}</span>
-                        </div>
+                        ${isCreator ? `
+                            <div class="member-account">
+                                <span class="account-label">账户ID:</span>
+                                <span class="account-id">${m.accountId}</span>
+                            </div>
+                        ` : ''}
                         <div class="member-stats">
                             <div class="stat-item">
                                 <span class="stat-icon">📝</span>
