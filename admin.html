@@ -60,6 +60,7 @@
         .no-data { text-align: center; padding: 30px; color: #999; }
         .action-btn.approve { background: #e8f5e9; color: #4CAF50; }
         .action-btn.reject { background: #ffebee; color: #f44336; }
+        .action-btn.export { background: #e3f2fd; color: #2196F3; }
         .pending-badge { background: #fff3e0; color: #FF9800; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
         @media (max-width: 600px) {
             .stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -433,6 +434,8 @@
                     <td>
                         <button class="action-btn view" onclick="viewAccount('${acc.id}')">查看</button>
                         <button class="action-btn edit" onclick="openEditModal('${acc.id}', '${acc.name}')">编辑</button>
+                        <button class="action-btn export" onclick="exportAccount('${acc.id}', '${acc.name}')">导出</button>
+                        <button class="action-btn" style="background:#ff9800;" onclick="resetAccount('${acc.id}', '${acc.name}')">重置</button>
                         <button class="action-btn delete" onclick="confirmDelete('${acc.id}')">删除</button>
                     </td>
                 `;
@@ -585,6 +588,37 @@
                 loadAccounts();
             } catch (err) {
                 showToast('删除失败');
+            }
+        }
+
+        async function exportAccount(id, name) {
+            try {
+                const data = await api.get(`/admin/account/${id}`, { 'admin-key': adminToken });
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${name}_${id}_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('导出成功！');
+            } catch (err) {
+                showToast('导出失败');
+            }
+        }
+
+        async function resetAccount(id, name) {
+            if (!confirm(`确定要重置账户"${name}"吗？\n\n此操作会清空所有记账记录和余额，但保留账户结构！`)) return;
+
+            try {
+                await api.post('/admin/reset-account', {
+                    accountId: id
+                }, { 'admin-key': adminToken });
+
+                showToast('账户已重置！');
+                loadAccounts();
+            } catch (err) {
+                showToast('重置失败');
             }
         }
 
