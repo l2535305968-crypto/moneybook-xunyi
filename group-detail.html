@@ -358,6 +358,7 @@
                 const stats = memberStats[m.accountId];
                 const net = stats.income - stats.expense;
                 const isMemberCreator = m.role === 'admin';
+                const canRemove = isCreator && !isMemberCreator;
                 return `
                     <div class="member-card">
                         <div class="member-header">
@@ -388,6 +389,11 @@
                                 <span class="stat-value ${net >= 0 ? 'income' : 'expense'}">${net >= 0 ? '+' : ''}¥${net.toFixed(2)}</span>
                             </div>
                         </div>
+                        ${canRemove ? `
+                            <div style="margin-top:10px;text-align:right;">
+                                <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;background:#ffebee;color:#c62828;" onclick="removeMember('${m.accountId}')">🚪 移出群</button>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('') : '';
@@ -599,6 +605,23 @@
                     ${c.custom ? `<button class="btn btn-small btn-secondary" onclick="deleteCategory('${c.id}')" style="padding:6px 12px;font-size:12px;">删除</button>` : ''}
                 </div>
             `).join('');
+        }
+
+        async function removeMember(memberAccountId) {
+            if (!confirm(`确定要将成员移出群吗？`)) {
+                return;
+            }
+
+            try {
+                await api.delete(`/api/groups/${groupId}/members/${memberAccountId}`, {
+                    creatorId: currentAccountId
+                });
+
+                showToast('成员已移出群！');
+                loadGroup();
+            } catch (err) {
+                showToast('移出失败');
+            }
         }
 
         // 初始化
