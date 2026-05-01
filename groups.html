@@ -23,9 +23,10 @@
         .group-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .group-name { font-size: 16px; font-weight: 600; color: #333; }
         .group-balance { font-size: 18px; font-weight: bold; color: #4CAF50; }
-        .group-meta { font-size: 12px; color: #999; display: flex; gap: 15px; align-items: center; }
+        .group-meta { font-size: 12px; color: #999; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .copy-btn { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
         .copy-btn:hover { background: #f0f0f0; }
+        .group-actions { display: flex; gap: 10px; margin-top: 10px; }
         .empty-state { text-align: center; padding: 40px 20px; color: #999; }
         .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
 
@@ -128,13 +129,46 @@
         </div>
     </div>
 
+    <div class="modal" id="editGroupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">修改群名称</span>
+                <button class="modal-close" onclick="closeEditGroupModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>群名称</label>
+                    <input type="text" id="editGroupName" placeholder="输入新的群名称" maxlength="20">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="closeEditGroupModal()">取消</button>
+                    <button class="btn btn-primary" onclick="updateGroup()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script src="config.js"></script>
     <script src="api.js"></script>
     <script>
         let currentAccountId = localStorage.getItem('accountId');
+        let currentAccountName = localStorage.getItem('accountName') || '成员';
         let myGroups = [];
+
+        async function loadAccountInfo() {
+            if (!currentAccountId) return;
+            try {
+                const accountData = await api.get('/account/' + currentAccountId);
+                if (accountData && accountData.name) {
+                    currentAccountName = accountData.name;
+                    localStorage.setItem('accountName', currentAccountName);
+                }
+            } catch (err) {
+                console.error('加载账户信息失败:', err);
+            }
+        }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -165,7 +199,7 @@
 
         async function loadGroups() {
             if (!checkLogin()) return;
-            
+
             try {
                 const groups = await api.get(`/groups/my?accountId=${currentAccountId}`);
                 myGroups = groups || [];
@@ -178,7 +212,7 @@
 
         function renderGroups() {
             const container = document.getElementById('groupList');
-            
+
             if (myGroups.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>还没有加入任何群</p></div>';
                 return;
@@ -188,10 +222,11 @@
                 const totalBalance = group.accounts ? group.accounts.reduce((sum, a) => sum + a.balance, 0) : 0;
                 const memberCount = group.members ? group.members.length : 0;
                 const recordCount = group.records ? group.records.length : 0;
-                
+                const isCreator = group.creatorId === currentAccountId;
+
                 return `
-                    <div class="group-card" onclick="openGroupDetail('${group.id}')">
-                        <div class="group-card-header">
+                    <div class="group-card">
+                        <div class="group-card-header" onclick="openGroupDetail('${group.id}')" style="cursor:pointer;">
                             <div class="group-name">${group.name}</div>
                             <div class="group-balance">¥${totalBalance.toFixed(2)}</div>
                         </div>
@@ -203,6 +238,12 @@
                                 <button class="copy-btn" onclick="event.stopPropagation();copyGroupId('${group.id}')">复制</button>
                             </span>
                         </div>
+                        ${isCreator ? `
+                            <div class="group-actions" style="margin-top:10px;">
+                                <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="event.stopPropagation();openEditGroupModal('${group.id}')">✏️ 修改</button>
+                                <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;background:#ffebee;color:#c62828;" onclick="event.stopPropagation();deleteGroup('${group.id}')">🗑️ 删除</button>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
@@ -243,7 +284,7 @@
                 const group = await api.post('/groups/create', {
                     name,
                     creatorId: currentAccountId,
-                    creatorName: localStorage.getItem('accountName') || '成员'
+                    creatorName: currentAccountName
                 });
 
                 showToast('群创建成功！');
@@ -265,7 +306,7 @@
                 await api.post('/groups/join', {
                     groupId,
                     accountId: currentAccountId,
-                    accountName: localStorage.getItem('accountName') || '成员'
+                    accountName: currentAccountName
                 });
 
                 showToast('加入成功！');
@@ -276,6 +317,60 @@
             }
         }
 
+        let currentEditGroupId = null;
+
+        function openEditGroupModal(groupId) {
+            const group = myGroups.find(g => g.id === groupId);
+            if (group) {
+                currentEditGroupId = groupId;
+                document.getElementById('editGroupName').value = group.name;
+                document.getElementById('editGroupModal').classList.add('show');
+            }
+        }
+
+        function closeEditGroupModal() {
+            document.getElementById('editGroupModal').classList.remove('show');
+            currentEditGroupId = null;
+        }
+
+        async function updateGroup() {
+            const name = document.getElementById('editGroupName').value.trim();
+            if (!name) {
+                showToast('请输入群名称');
+                return;
+            }
+
+            try {
+                await api.post(`/groups/${currentEditGroupId}/update`, {
+                    name,
+                    accountId: currentAccountId
+                });
+
+                showToast('群名称修改成功！');
+                closeEditGroupModal();
+                loadGroups();
+            } catch (err) {
+                showToast('修改失败');
+            }
+        }
+
+        async function deleteGroup(groupId) {
+            if (!confirm('确定要删除这个群吗？删除后将无法恢复！')) {
+                return;
+            }
+
+            try {
+                await api.post(`/groups/${groupId}/delete`, {
+                    accountId: currentAccountId
+                });
+
+                showToast('群删除成功！');
+                loadGroups();
+            } catch (err) {
+                showToast('删除失败');
+            }
+        }
+
         function openGroupDetail(groupId) {
             location.href = `group-detail.html?id=${groupId}`;
         }
@@ -283,7 +378,9 @@
         // 初始化
         checkLogin();
         if (currentAccountId) {
-            loadGroups();
+            loadAccountInfo().then(() => {
+                loadGroups();
+            });
         }
     </script>
 </body>
