@@ -57,10 +57,19 @@
         .empty-state { text-align: center; padding: 40px 20px; color: #999; }
         .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
 
-        .member-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .member-list { display: flex; flex-direction: column; gap: 10px; }
         .copy-btn { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
         .copy-btn:hover { background: #f0f0f0; }
         .member-badge { background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
+        
+        .member-card { background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #eee; }
+        .member-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .member-stats { display: flex; gap: 15px; flex-wrap: wrap; }
+        .stat-item { display: flex; align-items: center; gap: 5px; background: #f9f9f9; padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+        .stat-icon { font-size: 14px; }
+        .stat-value { color: #666; }
+        .stat-value.expense { color: #f44336; font-weight: 600; }
+        .stat-value.income { color: #4CAF50; font-weight: 600; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal.show { display: flex; }
@@ -318,9 +327,50 @@
             ).join('') : '';
             document.getElementById('groupAccounts').innerHTML = accountsHtml;
 
-            const membersHtml = groupData.members ? groupData.members.map(m => 
-                `<div class="member-badge">${m.name}</div>`
-            ).join('') : '';
+            // 计算成员统计
+            const memberStats = {};
+            (groupData.members || []).forEach(m => {
+                memberStats[m.accountId] = { name: m.name, income: 0, expense: 0, count: 0 };
+            });
+
+            (groupData.records || []).forEach(r => {
+                if (memberStats[r.memberId]) {
+                    if (r.type === 'income') {
+                        memberStats[r.memberId].income += r.amount;
+                    } else {
+                        memberStats[r.memberId].expense += r.amount;
+                    }
+                    memberStats[r.memberId].count++;
+                }
+            });
+
+            const membersHtml = groupData.members ? groupData.members.map(m => {
+                const stats = memberStats[m.accountId];
+                const net = stats.income - stats.expense;
+                return `
+                    <div class="member-card">
+                        <div class="member-name">${m.name}</div>
+                        <div class="member-stats">
+                            <div class="stat-item">
+                                <span class="stat-icon">📝</span>
+                                <span class="stat-value">${stats.count}条</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💸</span>
+                                <span class="stat-value expense">¥${stats.expense.toFixed(2)}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💰</span>
+                                <span class="stat-value income">¥${stats.income.toFixed(2)}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">📊</span>
+                                <span class="stat-value ${net >= 0 ? 'income' : 'expense'}">${net >= 0 ? '+' : ''}¥${net.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('') : '';
             document.getElementById('memberList').innerHTML = membersHtml;
 
             renderAccountSelect();
