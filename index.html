@@ -397,6 +397,7 @@
                     const searchResult = await api.get(`/api/account/find?name=${encodeURIComponent(accountInput)}`);
                     if (searchResult && searchResult.id) {
                         accountId = searchResult.id;
+                        localStorage.setItem('accountName', searchResult.name);
                     }
                 }
                 
@@ -409,6 +410,7 @@
                 showToast('账户不存在或加载失败，请检查账户ID或名称');
                 currentAccountId = null;
                 localStorage.removeItem('accountId');
+                localStorage.removeItem('accountName');
             }
         }
 
@@ -478,6 +480,7 @@
                 
                 if (accountData.name) {
                     saveRecentAccount(currentAccountId, accountData.name);
+                    localStorage.setItem('accountName', accountData.name);
                 }
                 
                 showMain();
