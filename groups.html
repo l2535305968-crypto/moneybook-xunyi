@@ -23,7 +23,9 @@
         .group-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .group-name { font-size: 16px; font-weight: 600; color: #333; }
         .group-balance { font-size: 18px; font-weight: bold; color: #4CAF50; }
-        .group-meta { font-size: 12px; color: #999; display: flex; gap: 15px; }
+        .group-meta { font-size: 12px; color: #999; display: flex; gap: 15px; align-items: center; }
+        .copy-btn { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background: #f0f0f0; }
         .empty-state { text-align: center; padding: 40px 20px; color: #999; }
         .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
 
@@ -196,11 +198,29 @@
                         <div class="group-meta">
                             <span>👥 ${memberCount}人</span>
                             <span>📝 ${recordCount}条记录</span>
-                            <span>🆔 ${group.id}</span>
+                            <span style="display:flex;align-items:center;gap:5px;">
+                                🆔 ${group.id}
+                                <button class="copy-btn" onclick="event.stopPropagation();copyGroupId('${group.id}')">复制</button>
+                            </span>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        async function copyGroupId(groupId) {
+            try {
+                await navigator.clipboard.writeText(groupId);
+                showToast('群ID已复制！');
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = groupId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('群ID已复制！');
+            }
         }
 
         function openCreateGroupModal() {

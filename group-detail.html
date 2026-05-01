@@ -58,6 +58,8 @@
         .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
 
         .member-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .copy-btn { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { background: #f0f0f0; }
         .member-badge { background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
@@ -94,6 +96,13 @@
                 <div class="balance-label">群总资金</div>
                 <div class="balance-amount" id="groupBalance">¥0.00</div>
                 <div class="account-list" id="groupAccounts"></div>
+                <div style="margin-top:15px;padding:12px;background:#fff;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="font-size:13px;color:#666;">
+                        <span style="color:#333;font-weight:600;">群ID:</span>
+                        <span id="groupIdDisplay" style="font-family:monospace;">-</span>
+                    </div>
+                    <button class="copy-btn" onclick="copyGroupId()" style="padding:6px 12px;font-size:12px;">复制</button>
+                </div>
             </div>
 
             <div class="section">
@@ -276,11 +285,27 @@
             try {
                 groupData = await api.get(`/groups/${groupId}`);
                 document.getElementById('groupName').textContent = groupData.name;
+                document.getElementById('groupIdDisplay').textContent = groupData.id;
                 renderGroup();
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('detailContent').style.display = 'block';
             } catch (err) {
                 document.getElementById('loadingState').innerHTML = '<div class="empty-state-icon">❌</div><p>加载失败</p>';
+            }
+        }
+
+        async function copyGroupId() {
+            try {
+                await navigator.clipboard.writeText(groupId);
+                showToast('群ID已复制！');
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = groupId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('群ID已复制！');
             }
         }
 
