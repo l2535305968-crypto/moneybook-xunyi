@@ -1,9 +1,5 @@
 window.APP_CONFIG = {
-    apiBaseUrl: (window.location.hostname === 'moneybook-xunyi.netlify.app') ?
-        'https://159.75.91.40:3443' :
-        ((window.location.protocol === 'https:') ?
-            'https://' + window.location.hostname + ':3443' :
-            'http://' + window.location.hostname + ':3001'),
+    apiBaseUrl: 'https://159.75.91.40:3443',
     adminKey: 'moneybook_admin_2026_secure_key'
 };
 
