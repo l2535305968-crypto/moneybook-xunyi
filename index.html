@@ -133,7 +133,7 @@
     <div class="login-section show" id="loginSection">
         <div class="login-card">
             <h2>💰 记账本</h2>
-            <p>选择账户或申请新账户</p>
+            <p>选择登录方式</p>
             
             <div class="recent-accounts" id="recentAccounts" style="display: none;">
                 <div class="recent-accounts-title">最近登录的账户</div>
@@ -142,9 +142,22 @@
             
             <div class="divider" id="loginDivider" style="display: none;"></div>
             
-            <input type="text" id="accountNameInput" class="login-input" placeholder="输入您的姓名申请账户" maxlength="20">
-            <button class="login-btn" onclick="requestAccount()">申请账户</button>
-            <div class="login-hint">提示：账户需要管理员审批，审批通过后会收到通知</div>
+            <!-- 已有账户ID登录 -->
+            <div style="margin-bottom: 15px;">
+                <h3 style="font-size: 15px; margin-bottom: 8px; color: #333;">已有账户ID</h3>
+                <input type="text" id="accountIdInput" class="login-input" placeholder="输入您的账户ID（如：acc_xxx）">
+                <button class="login-btn" onclick="loginWithAccountId()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">使用账户ID登录</button>
+            </div>
+            
+            <div class="divider" style="margin: 20px 0;"></div>
+            
+            <!-- 申请新账户 -->
+            <div>
+                <h3 style="font-size: 15px; margin-bottom: 8px; color: #333;">申请新账户</h3>
+                <input type="text" id="accountNameInput" class="login-input" placeholder="输入您的姓名申请账户" maxlength="20">
+                <button class="login-btn" onclick="requestAccount()">申请账户</button>
+                <div class="login-hint">提示：账户需要管理员审批，审批通过后会收到通知</div>
+            </div>
         </div>
     </div>
 
@@ -363,6 +376,32 @@
             currentAccountId = accountId;
             localStorage.setItem('accountId', currentAccountId);
             await loadAccount();
+        }
+
+        async function loginWithAccountId() {
+            const accountId = document.getElementById('accountIdInput').value.trim();
+            
+            if (!accountId) {
+                showToast('请输入账户ID');
+                return;
+            }
+
+            if (!accountId.startsWith('acc_')) {
+                showToast('账户ID格式不正确，应以acc_开头');
+                return;
+            }
+
+            currentAccountId = accountId;
+            localStorage.setItem('accountId', currentAccountId);
+            
+            try {
+                await loadAccount();
+                showToast('登录成功！');
+            } catch (err) {
+                showToast('账户不存在或加载失败，请检查账户ID');
+                currentAccountId = null;
+                localStorage.removeItem('accountId');
+            }
         }
 
         async function requestAccount() {
