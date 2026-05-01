@@ -298,7 +298,7 @@
             }
 
             try {
-                groupData = await api.get(`/groups/${groupId}`);
+                groupData = await api.get(`/api/groups/${groupId}`);
                 document.getElementById('groupName').textContent = groupData.name;
                 document.getElementById('groupIdDisplay').textContent = groupData.id;
                 
@@ -479,7 +479,7 @@
             }
 
             try {
-                await api.post(`/groups/${groupId}/record`, {
+                await api.post(`/api/groups/${groupId}/record`, {
                     accountId,
                     categoryId,
                     amount,
@@ -555,7 +555,7 @@
             }
 
             try {
-                await api.post(`/groups/${groupId}/categories`, {
+                await api.post(`/api/groups/${groupId}/categories`, {
                     name,
                     icon: selectedIcon,
                     color: selectedColor,
@@ -574,7 +574,7 @@
             if (!confirm('确定删除这个分类吗？')) return;
 
             try {
-                await api.delete(`/groups/${groupId}/categories/${categoryId}`);
+                await api.delete(`/api/groups/${groupId}/categories/${categoryId}`);
                 showToast('删除成功！');
                 loadGroup();
                 renderCategoryList();

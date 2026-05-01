@@ -201,7 +201,7 @@
             if (!checkLogin()) return;
 
             try {
-                const groups = await api.get(`/groups/my?accountId=${currentAccountId}`);
+                const groups = await api.get(`/api/groups/my?accountId=${currentAccountId}`);
                 myGroups = groups || [];
                 renderGroups();
             } catch (err) {
@@ -281,7 +281,7 @@
             }
 
             try {
-                const group = await api.post('/groups/create', {
+                const group = await api.post('/api/groups/create', {
                     name,
                     creatorId: currentAccountId,
                     creatorName: currentAccountName
@@ -303,7 +303,7 @@
             }
 
             try {
-                await api.post('/groups/join', {
+                await api.post('/api/groups/join', {
                     groupId,
                     accountId: currentAccountId,
                     accountName: currentAccountName
