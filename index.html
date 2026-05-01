@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 记账本</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; }
+        .account-selector { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        .header-links { display: flex; gap: 15px; margin-top: 10px; }
+        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
+        .header-links a:hover { opacity: 1; }
+
+        .main-content { max-width: 800px; margin: 0 auto; padding: 15px; }
+
+        .balance-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .balance-label { font-size: 13px; color: #666; margin-bottom: 5px; }
+        .balance-amount { font-size: 32px; font-weight: bold; color: #333; }
+        .balance-amount.positive { color: #4CAF50; }
+        .balance-amount.negative { color: #f44336; }
+        .account-balances { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .account-badge { background: #f0f0f0; padding: 8px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+
+        .quick-add { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .quick-add-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: #333; }
+        .type-toggle { display: flex; background: #f5f5f5; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
+        .type-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+        .type-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .type-btn.expense.active { color: #f44336; }
+        .type-btn.income.active { color: #4CAF50; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .amount-input { font-size: 20px !important; font-weight: bold; text-align: center; }
+        .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .submit-btn:hover { opacity: 0.9; }
+
+        .calendar-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .calendar-nav { display: flex; gap: 10px; align-items: center; }
+        .calendar-nav button { background: #f5f5f5; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        .calendar-title { font-size: 16px; font-weight: 600; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .calendar-day-header { text-align: center; font-size: 12px; color: #999; padding: 5px; }
+        .calendar-day { text-align: center; padding: 10px 5px; border-radius: 8px; cursor: pointer; font-size: 14px; position: relative; min-height: 45px; }
+        .calendar-day:hover { background: #f5f5f5; }
+        .calendar-day.today { background: #667eea; color: white; }
+        .calendar-day.selected { background: #764ba2; color: white; }
+        .calendar-day.other-month { color: #ccc; }
+        .day-expense { font-size: 10px; color: #f44336; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); }
+        .day-income { font-size: 10px; color: #4CAF50; position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); }
+
+        .records-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .record-list { max-height: 400px; overflow-y: auto; }
+        .record-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+        .record-item:last-child { border-bottom: none; }
+        .record-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .record-info { flex: 1; }
+        .record-category { font-size: 14px; font-weight: 500; color: #333; }
+        .record-remark { font-size: 12px; color: #999; margin-top: 2px; }
+        .record-amount { font-size: 15px; font-weight: 600; }
+        .record-amount.expense { color: #f44336; }
+        .record-amount.income { color: #4CAF50; }
+        .record-date { font-size: 11px; color: #999; }
+        .record-delete { background: none; border: none; color: #999; cursor: pointer; padding: 5px; font-size: 16px; }
+        .record-delete:hover { color: #f44336; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-close:hover { color: #333; }
+
+        .bill-parse { background: #f8f8ff; border-radius: 12px; padding: 15px; margin-top: 15px; }
+        .bill-parse-title { font-size: 13px; color: #666; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .bill-parse textarea { width: 100%; height: 80px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-size: 13px; resize: none; }
+        .bill-source-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .bill-source-btn { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; }
+        .bill-source-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .parse-result { margin-top: 10px; padding: 10px; background: white; border-radius: 8px; font-size: 13px; }
+
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+
+        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 800px; margin: 0 auto; }
+        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tab-item.active { color: #667eea; }
+        .tab-item-icon { font-size: 20px; }
+
+        @media (min-width: 768px) {
+            body { padding-bottom: 0; }
+            .tab-bar { position: static; border-top: none; background: transparent; }
+            .main-content { padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <h1>💰 记账本</h1>
+            <select class="account-selector" id="accountSelector">
+                <option value="">加载中...</option>
+            </select>
+        </div>
+        <div class="header-links">
+            <a href="accounts.html">🏦 账户</a>
+            <a href="categories.html">📂 分类</a>
+            <a href="budget.html">📊 预算</a>
+            <a href="statistics.html">📈 统计</a>
+            <a href="export.html">📤 导出</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="balance-card">
+            <div class="balance-label">总资产</div>
+            <div class="balance-amount positive" id="totalBalance">¥0.00</div>
+            <div class="account-balances" id="accountBalances"></div>
+        </div>
+
+        <div class="quick-add">
+            <div class="quick-add-title">📝 快速记账</div>
+            <div class="type-toggle">
+                <div class="type-btn expense active" data-type="expense">💸 支出</div>
+                <div class="type-btn income" data-type="income">💰 收入</div>
+            </div>
+            <form id="recordForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>金额</label>
+                        <input type="number" id="amountInput" class="amount-input" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="categorySelect" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>账户</label>
+                        <select id="accountSelect" required></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="text" id="dateInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label>时间</label>
+                        <input type="time" id="timeInput" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label>备注</label>
+                    <input type="text" id="remarkInput" placeholder="可选">
+                </div>
+                <button type="submit" class="submit-btn">保存记录</button>
+            </form>
+            <div class="bill-parse">
+                <div class="bill-parse-title">📋 账单识别</div>
+                <textarea id="billText" placeholder="粘贴微信/支付宝账单文本，自动识别金额、日期..."></textarea>
+                <div class="bill-source-btns">
+                    <button class="bill-source-btn active" data-source="wechat">微信</button>
+                    <button class="bill-source-btn" data-source="alipay">支付宝</button>
+                </div>
+                <button class="submit-btn" style="margin-top: 10px; padding: 10px;" onclick="parseBill()">识别账单</button>
+                <div class="parse-result" id="parseResult" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(-1)">◀</button>
+                    <span class="calendar-title" id="calendarTitle">2026年4月</span>
+                    <button onclick="changeMonth(1)">▶</button>
+                </div>
+                <button onclick="goToToday()" style="background: #f5f5f5; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">今天</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <div class="records-section">
+            <div class="section-title">
+                <span>📜 记账记录</span>
+                <span id="recordsCount" style="font-size: 12px; color: #999; font-weight: normal;"></span>
+            </div>
+            <div class="record-list" id="recordList"></div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <a href="index.html" class="tab-item active">
+            <span class="tab-item-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="add.html" class="tab-item">
+            <span class="tab-item-icon">➕</span>
+            <span>记账</span>
+        </a>
+        <a href="statistics.html" class="tab-item">
+            <span class="tab-item-icon">📊</span>
+            <span>统计</span>
+        </a>
+        <a href="export.html" class="tab-item">
+            <span class="tab-item-icon">📤</span>
+            <span>导出</span>
+        </a>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+    <script>
+        let currentAccountId = localStorage.getItem('accountId');
+        let accountData = null;
+        let currentType = 'expense';
+        let currentMonth = new Date();
+        let selectedDate = null;
+
+        function generateId(prefix) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = prefix + '_';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        async function loadAccount() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const aidParam = urlParams.get('aid');
+
+            if (aidParam) {
+                currentAccountId = aidParam;
+                localStorage.setItem('accountId', currentAccountId);
+            }
+
+            if (!currentAccountId) {
+                currentAccountId = generateId('acc');
+                localStorage.setItem('accountId', currentAccountId);
+            }
+
+            document.title = '💰 记账本 - ' + currentAccountId;
+
+            console.log('尝试加载账户:', currentAccountId);
+            console.log('API URL:', getApiBaseUrl() + '/api/account/' + currentAccountId);
+
+            try {
+                accountData = await api.get('/account/' + currentAccountId);
+                console.log('账户数据加载成功:', accountData);
+                initApp();
+            } catch (err) {
+                console.error('加载账户失败:', err);
+                console.log('尝试创建新账户...');
+                currentAccountId = generateId('acc');
+                localStorage.setItem('accountId', currentAccountId);
+                try {
+                    accountData = await api.post('/account', { id: currentAccountId });
+                    console.log('新账户创建成功:', accountData);
+                    initApp();
+                } catch (e) {
+                    console.error('创建账户失败:', e);
+                    showToast('加载失败，请刷新重试');
+                }
+            }
+        }
+
+        function initApp() {
+            updateAccountSelector();
+            updateBalance();
+            updateCategorySelect();
+            updateAccountSelect();
+            updateCalendar();
+            loadRecords();
+            initDatePicker();
+        }
+
+        function updateAccountSelector() {
+            const selector = document.getElementById('accountSelector');
+            selector.innerHTML = '';
+            accountData.accounts.forEach(acc => {
+                const option = document.createElement('option');
+                option.value = acc.id;
+                option.textContent = `${acc.name} (¥${acc.balance.toFixed(2)})`;
+                if (acc.id === currentAccountId) {
+                    option.selected = true;
+                }
+                selector.appendChild(option);
+            });
+        }
+
+        function updateBalance() {
+            const total = accountData.accounts.reduce((sum, acc) => sum + acc.balance, 0);
+            const balanceEl = document.getElementById('totalBalance');
+            balanceEl.textContent = `¥${total.toFixed(2)}`;
+            balanceEl.className = `balance-amount ${total >= 0 ? 'positive' : 'negative'}`;
+
+            const badgesEl = document.getElementById('accountBalances');
+            badgesEl.innerHTML = '';
+            accountData.accounts.forEach(acc => {
+                const badge = document.createElement('div');
+                badge.className = 'account-badge';
+                badge.innerHTML = `<span>${acc.name}</span><span>¥${acc.balance.toFixed(2)}</span>`;
+                badgesEl.appendChild(badge);
+            });
+        }
+
+        function updateCategorySelect() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '';
+            const filtered = accountData.categories.filter(c => c.type === currentType);
+            filtered.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = `${cat.icon} ${cat.name}`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateAccountSelect() {
+            const select = document.getElementById('accountSelect');
+            select.innerHTML = '';
+            accountData.accounts.filter(a => a.status === 'active').forEach(acc => {
+                const option = document.createElement('option');
+                option.value = acc.id;
+                option.textContent = acc.name;
+                select.appendChild(option);
+            });
+        }
+
+        function initDatePicker() {
+            const now = new Date();
+            flatpickr('#dateInput', {
+                locale: 'zh',
+                dateFormat: 'Y-m-d',
+                defaultDate: now,
+                allowInput: true
+            });
+            document.getElementById('timeInput').value = now.toTimeString().substring(0, 5);
+        }
+
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentType = btn.dataset.type;
+                updateCategorySelect();
+            });
+        });
+
+        document.querySelectorAll('.bill-source-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.bill-source-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        async function parseBill() {
+            const text = document.getElementById('billText').value.trim();
+            if (!text) {
+                showToast('请输入账单文本');
+                return;
+            }
+            const source = document.querySelector('.bill-source-btn.active').dataset.source;
+
+            try {
+                const result = await api.post('/parse-bill', { text, source });
+
+                if (result.amount) {
+                    document.getElementById('amountInput').value = result.amount;
+                    document.getElementById('remarkInput').value = result.remark || '';
+
+                    const dateStr = result.date.split('T')[0];
+                    document.getElementById('dateInput')._flatpickr.setDate(dateStr);
+
+                    if (result.type === 'income') {
+                        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelector('.type-btn.income').classList.add('active');
+                        currentType = 'income';
+                        updateCategorySelect();
+                    }
+
+                    if (result.categorySuggestions && result.categorySuggestions.length > 0) {
+                        document.getElementById('categorySelect').value = result.categorySuggestions[0];
+                    }
+
+                    const parseResultEl = document.getElementById('parseResult');
+                    parseResultEl.style.display = 'block';
+                    parseResultEl.innerHTML = `
+                        <div style="color: #4CAF50;">✅ 识别成功</div>
+                        <div>金额: ¥${result.amount}</div>
+                        <div>类型: ${result.type === 'income' ? '收入' : '支出'}</div>
+                        ${result.remark ? `<div>备注: ${result.remark}</div>` : ''}
+                    `;
+
+                    showToast('账单识别成功');
+                } else {
+                    showToast('无法识别账单，请手动输入');
+                }
+            } catch (err) {
+                showToast('识别失败');
+            }
+        }
+
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || amount <= 0) {
+                showToast('请输入有效金额');
+                return;
+            }
+
+            const dateValue = document.getElementById('dateInput').value;
+            const timeValue = document.getElementById('timeInput').value;
+            const dateTime = new Date(`${dateValue}T${timeValue}`).toISOString();
+
+            const record = {
+                accountId: document.getElementById('accountSelect').value,
+                categoryId: document.getElementById('categorySelect').value,
+                amount: amount,
+                type: currentType,
+                date: dateTime,
+                remark: document.getElementById('remarkInput').value,
+                source: 'manual'
+            };
+
+            try {
+                await api.post('/records', { accountId: currentAccountId, record });
+                showToast('记录已保存');
+                document.getElementById('recordForm').reset();
+                initDatePicker();
+
+                accountData = await api.get(`/account/${currentAccountId}`);
+                updateBalance();
+                updateCalendar();
+                loadRecords();
+            } catch (err) {
+                showToast('保存失败');
+            }
+        });
+
+        async function loadRecords() {
+            try {
+                const records = await api.get(`/records/${currentAccountId}`);
+
+                const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+                const monthRecords = records.filter(r => {
+                    const d = new Date(r.date);
+                    return d >= startOfMonth && d <= endOfMonth;
+                });
+
+                document.getElementById('recordsCount').textContent = `本月 ${monthRecords.length} 条`;
+
+                const listEl = document.getElementById('recordList');
+                listEl.innerHTML = '';
+
+                if (records.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <div>暂无记账记录</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const categoryMap = {};
+                accountData.categories.forEach(c => categoryMap[c.id] = c);
+
+                records.slice(0, 50).forEach(record => {
+                    const cat = categoryMap[record.categoryId] || { icon: '📦', name: '未知' };
+                    const date = new Date(record.date);
+                    const dateStr = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+                    const timeStr = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+                    const item = document.createElement('div');
+                    item.className = 'record-item';
+                    item.innerHTML = `
+                        <div class="record-icon" style="background: ${cat.color || '#f0f0f0'}20;">${cat.icon}</div>
+                        <div class="record-info">
+                            <div class="record-category">${cat.name}</div>
+                            <div class="record-remark">${record.remark || '无备注'} · ${timeStr}</div>
+                        </div>
+                        <div>
+                            <div class="record-amount ${record.type}">${record.type === 'income' ? '+' : '-'}${parseFloat(record.amount).toFixed(2)}</div>
+                            <div class="record-date">${dateStr}</div>
+                        </div>
+                        <button class="record-delete" onclick="deleteRecord('${record.id}')">×</button>
+                    `;
+                    listEl.appendChild(item);
+                });
+            } catch (err) {
+                console.error('加载记录失败:', err);
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (!confirm('确定删除这条记录？')) return;
+
+            try {
+                await api.delete(`/records/${id}`, { accountId: currentAccountId });
+                showToast('已删除');
+                accountData = await api.get(`/account/${currentAccountId}`);
+                updateBalance();
+                updateCalendar();
+                loadRecords();
+            } catch (err) {
+                showToast('删除失败');
+            }
+        }
+
+        function updateCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
+            days.forEach(d => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = d;
+                grid.appendChild(header);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            const recordsByDate = {};
+            accountData.records.forEach(r => {
+                const d = r.date.split('T')[0];
+                if (!recordsByDate[d]) recordsByDate[d] = { income: 0, expense: 0 };
+                recordsByDate[d][r.type] += parseFloat(r.amount);
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day other-month';
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+
+                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+                if (isToday) dayEl.classList.add('today');
+
+                if (selectedDate === dateStr) dayEl.classList.add('selected');
+
+                dayEl.innerHTML = `<span>${day}</span>`;
+
+                if (recordsByDate[dateStr]) {
+                    if (recordsByDate[dateStr].expense > 0) {
+                        dayEl.innerHTML += `<div class="day-expense">-${recordsByDate[dateStr].expense.toFixed(0)}</div>`;
+                    }
+                    if (recordsByDate[dateStr].income > 0) {
+                        dayEl.innerHTML += `<div class="day-income">+${recordsByDate[dateStr].income.toFixed(0)}</div>`;
+                    }
+                }
+
+                dayEl.addEventListener('click', () => selectDate(dateStr));
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function selectDate(dateStr) {
+            selectedDate = dateStr;
+            updateCalendar();
+            loadRecordsForDate(dateStr);
+        }
+
+        async function loadRecordsForDate(dateStr) {
+            try {
+                const startDate = dateStr + 'T00:00:00.000Z';
+                const endDate = dateStr + 'T23:59:59.999Z';
+                const records = await api.get(`/records/${currentAccountId}?startDate=${startDate}&endDate=${endDate}`);
+
+                const listEl = document.getElementById('recordList');
+                listEl.innerHTML = '';
+
+                const categoryMap = {};
+                accountData.categories.forEach(c => categoryMap[c.id] = c);
+
+                if (records.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <div>${dateStr} 暂无记录</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                records.forEach(record => {
+                    const cat = categoryMap[record.categoryId] || { icon: '📦', name: '未知' };
+                    const date = new Date(record.date);
+                    const timeStr = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+                    const item = document.createElement('div');
+                    item.className = 'record-item';
+                    item.innerHTML = `
+                        <div class="record-icon" style="background: ${cat.color || '#f0f0f0'}20;">${cat.icon}</div>
+                        <div class="record-info">
+                            <div class="record-category">${cat.name}</div>
+                            <div class="record-remark">${record.remark || '无备注'} · ${timeStr}</div>
+                        </div>
+                        <div>
+                            <div class="record-amount ${record.type}">${record.type === 'income' ? '+' : '-'}${parseFloat(record.amount).toFixed(2)}</div>
+                        </div>
+                        <button class="record-delete" onclick="deleteRecord('${record.id}')">×</button>
+                    `;
+                    listEl.appendChild(item);
+                });
+            } catch (err) {
+                console.error('加载记录失败:', err);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            updateCalendar();
+            loadRecords();
+        }
+
+        function goToToday() {
+            currentMonth = new Date();
+            selectedDate = null;
+            updateCalendar();
+            loadRecords();
+        }
+
+        document.getElementById('accountSelector').addEventListener('change', (e) => {
+            window.location.href = `?aid=${e.target.value}`;
+        });
+
+        loadAccount();
+    </script>
+</body>
+</html>

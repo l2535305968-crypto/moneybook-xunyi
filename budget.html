@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 预算管理 - 记账本</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
+        .header h1 { font-size: 20px; }
+        .header-links { display: flex; gap: 15px; margin-top: 10px; }
+        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
+        .main-content { max-width: 600px; margin: 0 auto; padding: 15px; }
+        .month-selector { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .month-nav { background: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .month-display { font-size: 18px; font-weight: 600; color: #333; }
+        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
+        .total-budget { text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px; }
+        .total-budget-label { font-size: 13px; opacity: 0.9; }
+        .total-budget-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
+        .total-budget-progress { height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 10px; }
+        .total-budget-progress-bar { height: 100%; background: white; border-radius: 4px; transition: width 0.3s; }
+        .budget-card { display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; gap: 12px; }
+        .budget-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .budget-info { flex: 1; }
+        .budget-name { font-size: 14px; font-weight: 500; color: #333; }
+        .budget-progress { height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 6px; }
+        .budget-progress-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .budget-stats { text-align: right; }
+        .budget-spent { font-size: 14px; font-weight: 600; color: #333; }
+        .budget-remaining { font-size: 11px; color: #999; }
+        .budget-over { color: #f44336; }
+        .add-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; margin-top: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 450px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; }
+        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tab-item.active { color: #667eea; }
+        .tab-item-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 预算管理</h1>
+        <div class="header-links">
+            <a href="index.html">🏠 首页</a>
+            <a href="accounts.html">🏦 账户</a>
+            <a href="categories.html">📂 分类</a>
+            <a href="statistics.html">📈 统计</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="month-selector">
+            <button class="month-nav" onclick="changeMonth(-1)">◀</button>
+            <span class="month-display" id="monthDisplay">2026年4月</span>
+            <button class="month-nav" onclick="changeMonth(1)">▶</button>
+        </div>
+
+        <div class="section">
+            <div class="total-budget">
+                <div class="total-budget-label">本月总预算</div>
+                <div class="total-budget-amount" id="totalBudgetAmount">¥0.00</div>
+                <div style="font-size: 12px; opacity: 0.9;">
+                    <span id="totalSpent">已花费 ¥0.00</span> / <span id="totalBudgetDisplay">预算 ¥0.00</span>
+                </div>
+                <div class="total-budget-progress">
+                    <div class="total-budget-progress-bar" id="totalProgressBar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="section-title">📋 分类预算</div>
+            <div id="budgetList"></div>
+            <button class="add-btn" onclick="openAddModal()">➕ 添加预算</button>
+        </div>
+    </div>
+
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">添加预算</span>
+                <button class="modal-close" onclick="closeAddModal()">×</button>
+            </div>
+            <form id="addBudgetForm">
+                <div class="form-group">
+                    <label>分类（留空为总预算）</label>
+                    <select id="newBudgetCategory">
+                        <option value="">总预算</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>预算金额</label>
+                    <input type="number" id="newBudgetAmount" placeholder="0.00" step="0.01" min="0" required>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="tab-bar">
+        <a href="index.html" class="tab-item">
+            <span class="tab-item-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="add.html" class="tab-item">
+            <span class="tab-item-icon">➕</span>
+            <span>记账</span>
+        </a>
+        <a href="statistics.html" class="tab-item">
+            <span class="tab-item-icon">📊</span>
+            <span>统计</span>
+        </a>
+        <a href="export.html" class="tab-item">
+            <span class="tab-item-icon">📤</span>
+            <span>导出</span>
+        </a>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script>
+        let currentAccountId = localStorage.getItem('accountId');
+        let accountData = null;
+        let budgets = [];
+        let currentMonth = new Date();
+
+        function formatMonth(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function formatMonthDisplay(date) {
+            return `${date.getFullYear()}年${date.getMonth() + 1}月`;
+        }
+
+        async function loadAccount() {
+            try {
+                accountData = await api.get(`/account/${currentAccountId}`);
+                budgets = await api.get(`/budgets/${currentAccountId}`);
+
+                updateMonthDisplay();
+                renderBudgets();
+                updateCategorySelect();
+            } catch (err) {
+                showToast('加载失败');
+            }
+        }
+
+        function updateMonthDisplay() {
+            document.getElementById('monthDisplay').textContent = formatMonthDisplay(currentMonth);
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            updateMonthDisplay();
+            renderBudgets();
+        }
+
+        function getMonthBudgets() {
+            const monthStr = formatMonth(currentMonth);
+            return budgets.filter(b => b.month === monthStr);
+        }
+
+        function getMonthExpenses() {
+            const monthStr = formatMonth(currentMonth);
+            const startDate = monthStr + '-01T00:00:00.000Z';
+            const endDate = monthStr + '-' + new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate() + 'T23:59:59.999Z';
+
+            return accountData.records.filter(r => {
+                if (r.type !== 'expense') return false;
+                return r.date >= startDate && r.date <= endDate;
+            });
+        }
+
+        function renderBudgets() {
+            const monthBudgets = getMonthBudgets();
+            const monthExpenses = getMonthExpenses();
+            const expensesByCategory = {};
+            monthExpenses.forEach(r => {
+                if (!expensesByCategory[r.categoryId]) {
+                    expensesByCategory[r.categoryId] = 0;
+                }
+                expensesByCategory[r.categoryId] += parseFloat(r.amount);
+            });
+
+            const totalExpenses = monthExpenses.reduce((sum, r) => sum + parseFloat(r.amount), 0);
+            const totalBudgetAmount = monthBudgets.find(b => !b.categoryId)?.amount || 0;
+            const totalSpent = totalExpenses;
+            const totalPercent = totalBudgetAmount > 0 ? Math.min((totalSpent / totalBudgetAmount) * 100, 100) : 0;
+
+            document.getElementById('totalBudgetAmount').textContent = `¥${totalBudgetAmount.toFixed(2)}`;
+            document.getElementById('totalSpent').textContent = `已花费 ¥${totalSpent.toFixed(2)}`;
+            document.getElementById('totalBudgetDisplay').textContent = `预算 ¥${totalBudgetAmount.toFixed(2)}`;
+            document.getElementById('totalProgressBar').style.width = `${totalPercent}%`;
+
+            if (totalSpent > totalBudgetAmount && totalBudgetAmount > 0) {
+                document.getElementById('totalProgressBar').style.background = '#f44336';
+            } else {
+                document.getElementById('totalProgressBar').style.background = 'white';
+            }
+
+            const listEl = document.getElementById('budgetList');
+            listEl.innerHTML = '';
+
+            const categoryBudgets = monthBudgets.filter(b => b.categoryId);
+            if (categoryBudgets.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>暂无分类预算</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const categoryMap = {};
+            accountData.categories.forEach(c => categoryMap[c.id] = c);
+
+            categoryBudgets.forEach(budget => {
+                const cat = categoryMap[budget.categoryId] || { icon: '📦', name: '未知', color: '#D3D3D3' };
+                const spent = expensesByCategory[budget.categoryId] || 0;
+                const percent = budget.amount > 0 ? Math.min((spent / budget.amount) * 100, 100) : 0;
+                const remaining = budget.amount - spent;
+                const isOver = remaining < 0;
+
+                const card = document.createElement('div');
+                card.className = 'budget-card';
+                card.innerHTML = `
+                    <div class="budget-icon" style="background: ${cat.color}30;">${cat.icon}</div>
+                    <div class="budget-info">
+                        <div class="budget-name">${cat.name}</div>
+                        <div class="budget-progress">
+                            <div class="budget-progress-bar" style="width: ${percent}%; background: ${isOver ? '#f44336' : cat.color};"></div>
+                        </div>
+                    </div>
+                    <div class="budget-stats">
+                        <div class="budget-spent ${isOver ? 'budget-over' : ''}">¥${spent.toFixed(2)}</div>
+                        <div class="budget-remaining">${isOver ? '超支' : '剩余'} ¥${Math.abs(remaining).toFixed(2)}</div>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function updateCategorySelect() {
+            const select = document.getElementById('newBudgetCategory');
+            select.innerHTML = '<option value="">总预算</option>';
+
+            const expenseCategories = accountData.categories.filter(c => c.type === 'expense');
+            expenseCategories.forEach(cat => {
+                select.innerHTML += `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`;
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('show');
+            document.getElementById('addBudgetForm').reset();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('show');
+        }
+
+        document.getElementById('addBudgetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const categoryId = document.getElementById('newBudgetCategory').value;
+            const amount = parseFloat(document.getElementById('newBudgetAmount').value);
+
+            if (!amount || amount <= 0) {
+                showToast('请输入有效金额');
+                return;
+            }
+
+            const budget = {
+                month: formatMonth(currentMonth),
+                categoryId: categoryId || null,
+                amount
+            };
+
+            try {
+                await api.post('/budgets', { accountId: currentAccountId, budget });
+                showToast('预算已添加');
+                closeAddModal();
+
+                budgets = await api.get(`/budgets/${currentAccountId}`);
+                renderBudgets();
+            } catch (err) {
+                showToast('添加失败');
+            }
+        });
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        loadAccount();
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "moneybook",
+  "version": "1.0.0",
+  "description": "智能记账系统 - 支持手动记账、微信/支付宝账单识别、多账户管理",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["记账", "财务管理", "Express"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  }
+}

@@ -1,0 +1,21 @@
+# 后端文件（服务器上运行）
+server.js
+
+# 数据目录
+data/
+
+# Node模块
+node_modules/
+
+# 日志文件
+*.log
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# SSL证书（如果是本地自签名的）
+*.pem
+*.key
