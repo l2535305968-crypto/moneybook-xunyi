@@ -106,6 +106,19 @@
 
             <div class="section">
                 <div class="section-title">
+                    <span>➕ 直接创建账户</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label>账户名称</label>
+                        <input type="text" id="newAccountName" placeholder="输入账户名称" maxlength="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="createAccount()" style="white-space: nowrap;">创建账户</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
                     <span>📝 账户申请列表</span>
                     <button class="action-btn view" onclick="refreshRequests()">🔄 刷新</button>
                 </div>
@@ -276,6 +289,27 @@
             `).join('');
         }
 
+        async function createAccount() {
+            const accountName = document.getElementById('newAccountName').value.trim();
+            
+            if (!accountName) {
+                showToast('请输入账户名称');
+                return;
+            }
+
+            try {
+                const newAccountId = 'acc_' + Math.random().toString(36).substr(2, 8);
+                await api.post('/account', { id: newAccountId, name: accountName });
+                
+                showToast(`账户创建成功！账户ID: ${newAccountId}`);
+                document.getElementById('newAccountName').value = '';
+                loadAccounts();
+            } catch (err) {
+                console.error('创建账户失败:', err);
+                showToast('创建账户失败，请检查控制台错误信息');
+            }
+        }
+
         async function approveRequest(requestId, accountName) {
             if (!confirm(`确定要通过 ${accountName} 的账户申请吗？`)) return;
 
@@ -295,11 +329,12 @@
                 });
                 localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
 
-                showToast('账户已创建！');
+                showToast(`账户已创建！账户ID: ${newAccountId}`);
                 loadRequests();
                 loadAccounts();
             } catch (err) {
-                showToast('创建账户失败');
+                console.error('审批失败:', err);
+                showToast('创建账户失败，请检查控制台错误信息');
             }
         }
 
