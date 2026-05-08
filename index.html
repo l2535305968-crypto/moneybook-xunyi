@@ -3,13 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="记账本">
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192x192.png">
     <title>💰 记账本</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
@@ -875,51 +868,6 @@
         });
 
         loadAccount();
-    </script>
-    <script>
-        let deferredPrompt;
-        
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('SW registered:', registration);
-                    })
-                    .catch(error => {
-                        console.log('SW registration failed:', error);
-                    });
-            });
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        // 页面加载完成后就显示按钮！
-        window.addEventListener('load', () => {
-            setTimeout(showInstallButton, 1000);
-        });
-
-        function showInstallButton() {
-            const installBtn = document.createElement('button');
-            installBtn.textContent = '📱 安装到桌面';
-            installBtn.style.cssText = 'position:fixed;bottom:80px;right:15px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:12px 20px;border-radius:25px;font-size:14px;cursor:pointer;z-index:1000;box-shadow:0 4px 15px rgba(102,126,234,0.4);';
-            installBtn.onclick = installPWA;
-            document.body.appendChild(installBtn);
-        }
-
-        async function installPWA() {
-            if (deferredPrompt) {
-                // 如果有原生安装提示，使用它
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-            } else {
-                // 如果没有，显示手动安装说明
-                alert('📱 请手动添加到桌面：\n\n✅ iPhone: 点击分享按钮 → 添加到主屏幕\n✅ Android: 点击菜单 → 安装应用');
-            }
-        }
     </script>
 </body>
 </html>
