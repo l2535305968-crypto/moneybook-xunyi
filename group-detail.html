@@ -658,22 +658,30 @@
         let isCreator = false;
 
         const defaultCategories = [
-            { id: 'cat_food', name: '烟火食事', modernName: '餐饮', icon: '🍵', color: '#4A4A4A', type: 'expense' },
-            { id: 'cat_trans', name: '车马之费', modernName: '交通', icon: '🏮', color: '#6B5B4F', type: 'expense' },
-            { id: 'cat_shop', name: '采买之需', modernName: '购物', icon: '🏷️', color: '#5D5149', type: 'expense' },
-            { id: 'cat_entertain', name: '闲情雅趣', modernName: '娱乐', icon: '🎭', color: '#3D3D3D', type: 'expense' },
-            { id: 'cat_living', name: '屋舍之费', modernName: '居住', icon: '🏯', color: '#7A6B5D', type: 'expense' },
-            { id: 'cat_medical', name: '药石之费', modernName: '医疗', icon: '💚', color: '#5E6B5D', type: 'expense' },
-            { id: 'cat_edu', name: '诗书之资', modernName: '教育', icon: '📜', color: '#4C5866', type: 'expense' },
-            { id: 'cat_salary', name: '俸禄之入', modernName: '工资', icon: '🥇', color: '#8B7355', type: 'income' },
-            { id: 'cat_invest', name: '生息之利', modernName: '理财', icon: '📊', color: '#6E6357', type: 'income' },
-            { id: 'cat_other', name: '杂项支用', modernName: '其他', icon: '🎋', color: '#4D4D4D', type: 'expense' }
+            { id: 'cat_food',     name: '饮馔', modernName: '餐饮', icon: '🍵', color: '#FCE4EC', type: 'expense' },
+            { id: 'cat_trans',    name: '舟车', modernName: '交通', icon: '⛵', color: '#E8F5E9', type: 'expense' },
+            { id: 'cat_shop',     name: '采买', modernName: '购物', icon: '🧺', color: '#E3F2FD', type: 'expense' },
+            { id: 'cat_entertain', name: '闲乐', modernName: '娱乐', icon: '🎯', color: '#E8F5E9', type: 'expense' },
+            { id: 'cat_living',   name: '居处', modernName: '居住', icon: '🏯', color: '#F3E5F5', type: 'expense' },
+            { id: 'cat_medical',  name: '药石', modernName: '医疗', icon: '🏺', color: '#FCE4EC', type: 'expense' },
+            { id: 'cat_edu',      name: '束脩', modernName: '教育', icon: '📜', color: '#E0F7FA', type: 'expense' },
+            { id: 'cat_clothes',  name: '衣饰', modernName: '服饰', icon: '👘', color: '#FCE4EC', type: 'expense' },
+            { id: 'cat_comm',     name: '鸿雁', modernName: '通讯', icon: '🕊️', color: '#E3F2FD', type: 'expense' },
+            { id: 'cat_beauty',   name: '妆奁', modernName: '美妆', icon: '🪞', color: '#FCE4EC', type: 'expense' },
+            { id: 'cat_social',   name: '人情', modernName: '往来', icon: '🎁', color: '#F5F5DC', type: 'expense' },
+            { id: 'cat_other',    name: '杂项', modernName: '其他', icon: '🎋', color: '#F5F5DC', type: 'expense' },
+            { id: 'cat_salary',   name: '俸禄', modernName: '工资', icon: '🪙', color: '#E8F5E9', type: 'income' },
+            { id: 'cat_invest',   name: '利市', modernName: '理财', icon: '🧮', color: '#FFF8E1', type: 'income' },
+            { id: 'cat_bonus',    name: '赏银', modernName: '奖金', icon: '🥇', color: '#FFF3E0', type: 'income' },
+            { id: 'cat_parttime', name: '佣钱', modernName: '兼职', icon: '🔨', color: '#F5F5DC', type: 'income' },
+            { id: 'cat_gift',     name: '贺仪', modernName: '红包', icon: '🧧', color: '#FCE4EC', type: 'income' },
+            { id: 'cat_writing',  name: '润笔', modernName: '稿费', icon: '✒️', color: '#E0F7FA', type: 'income' }
         ];
 
-        const icons = ['🍵', '🏮', '🏷️', '🎭', '🏯', '💚', '📜', '🥇', '📊', '🎋', '🎋', '🎴', '🎐', '🎑', '🎎', '🎏', '🎐', '🎏', '🎐', '🎎', '🎋', '🎐', '🎑', '🎏', '🎎', '🎐', '🎑', '🎏', '🎎', '🎋', '🎐', '🎑'];
-        const colors = ['#4A4A4A', '#6B5B4F', '#5D5149', '#3D3D3D', '#7A6B5D', '#5E6B5D', '#4C5866', '#8B7355', '#6E6357', '#4D4D4D', '#5A4F45', '#6B5B4F', '#7A6B5D', '#5B4F45', '#6A5E54', '#796E63'];
+        const icons = ['🍵','⛵','🧺','🎯','🏯','🏺','📜','👘','🕊️','🪞','🎁','🎋','🪙','🧮','🥇','🔨','🧧','✒️','🎐','🎎','🎴','🎑','🎏','🏮','🎀','🌸','🎋','🍃','🌿','☘️','🪷','🪶'];
+        const colors = ['#FCE4EC','#E8F5E9','#E3F2FD','#F3E5F5','#E0F7FA','#FFF8E1','#FFF3E0','#F5F5DC','#E8F5E9','#FCE4EC','#E3F2FD','#F3E5F5','#E0F7FA','#F5F5DC','#FFF3E0','#FFF8E1','#FCE4EC','#E8F5E9'];
         let selectedIcon = '🎋';
-        let selectedColor = '#4D4D4D';
+        let selectedColor = '#F5F5DC';
 
         function showToast(message) {
             const toast = document.getElementById('toast');
