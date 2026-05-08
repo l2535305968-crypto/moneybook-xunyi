@@ -85,7 +85,42 @@ app.get('/api/account/find', (req, res) => {
 
 app.get('/api/account/:id', (req, res) => {
     const file = path.join(DATA_DIR, `${req.params.id}.json`);
-    if (!fs.existsSync(file)) return res.status(404).json({ error: 'Not found' });
+    if (!fs.existsSync(file)) {
+        const newAccount = {
+            id: req.params.id,
+            name: req.params.id,
+            accounts: [
+                { id: 'acc_' + Math.random().toString(36).substr(2, 8), name: '现金', type: 'cash', balance: 0, createTime: new Date().toISOString(), status: 'active' },
+                { id: 'acc_' + Math.random().toString(36).substr(2, 8), name: '微信', type: 'wechat', balance: 0, createTime: new Date().toISOString(), status: 'active' },
+                { id: 'acc_' + Math.random().toString(36).substr(2, 8), name: '支付宝', type: 'alipay', balance: 0, createTime: new Date().toISOString(), status: 'active' }
+            ],
+            categories: [
+                { id: 'cat_food',     name: '饮馔', modernName: '餐饮', icon: '🍵', color: '#FCE4EC', type: 'expense', custom: false },
+                { id: 'cat_trans',    name: '舟车', modernName: '交通', icon: '⛵', color: '#E8F5E9', type: 'expense', custom: false },
+                { id: 'cat_shop',     name: '采买', modernName: '购物', icon: '🧺', color: '#E3F2FD', type: 'expense', custom: false },
+                { id: 'cat_entertain', name: '闲乐', modernName: '娱乐', icon: '🎯', color: '#E8F5E9', type: 'expense', custom: false },
+                { id: 'cat_living',   name: '居处', modernName: '居住', icon: '🏯', color: '#F3E5F5', type: 'expense', custom: false },
+                { id: 'cat_medical',  name: '药石', modernName: '医疗', icon: '🏺', color: '#FCE4EC', type: 'expense', custom: false },
+                { id: 'cat_edu',      name: '束脩', modernName: '教育', icon: '📜', color: '#E0F7FA', type: 'expense', custom: false },
+                { id: 'cat_clothes',  name: '衣饰', modernName: '服饰', icon: '👘', color: '#FCE4EC', type: 'expense', custom: false },
+                { id: 'cat_comm',     name: '鸿雁', modernName: '通讯', icon: '🕊️', color: '#E3F2FD', type: 'expense', custom: false },
+                { id: 'cat_beauty',   name: '妆奁', modernName: '美妆', icon: '🪞', color: '#FCE4EC', type: 'expense', custom: false },
+                { id: 'cat_social',   name: '人情', modernName: '往来', icon: '🎁', color: '#F5F5DC', type: 'expense', custom: false },
+                { id: 'cat_other',    name: '杂项', modernName: '其他', icon: '🎋', color: '#F5F5DC', type: 'expense', custom: false },
+                { id: 'cat_salary',   name: '俸禄', modernName: '工资', icon: '🪙', color: '#E8F5E9', type: 'income', custom: false },
+                { id: 'cat_invest',   name: '利市', modernName: '理财', icon: '🧮', color: '#FFF8E1', type: 'income', custom: false },
+                { id: 'cat_bonus',    name: '赏银', modernName: '奖金', icon: '🥇', color: '#FFF3E0', type: 'income', custom: false },
+                { id: 'cat_parttime', name: '佣钱', modernName: '兼职', icon: '🔨', color: '#F5F5DC', type: 'income', custom: false },
+                { id: 'cat_gift',     name: '贺仪', modernName: '红包', icon: '🧧', color: '#FCE4EC', type: 'income', custom: false },
+                { id: 'cat_writing',  name: '润笔', modernName: '稿费', icon: '✒️', color: '#E0F7FA', type: 'income', custom: false }
+            ],
+            records: [],
+            budgets: [],
+            createTime: new Date().toISOString()
+        };
+        fs.writeFileSync(file, JSON.stringify(newAccount, null, 2));
+        return res.json(newAccount);
+    }
     res.json(JSON.parse(fs.readFileSync(file, 'utf8')));
 });
 
