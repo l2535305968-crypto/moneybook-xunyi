@@ -313,6 +313,8 @@
         </a>
     </div>
 
+    <script src="api.js"></script>
+    <script src="ink-transition.js"></script>
     <script>
         let currentAccountId = localStorage.getItem('accountId');
         let accountData = null;
@@ -321,6 +323,11 @@
         let expensePieChart = null;
         let trendLineChart = null;
         let comparisonBarChart = null;
+
+        if (!currentAccountId) {
+            alert('请先登录');
+            location.href = 'index.html';
+        }
 
         function getDateRange(range) {
             const now = new Date();
@@ -349,6 +356,12 @@
         }
 
         async function loadStatistics() {
+            if (!currentAccountId) {
+                alert('请先登录');
+                location.href = 'index.html';
+                return;
+            }
+            
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
 
@@ -359,9 +372,15 @@
                 renderCharts();
                 renderCategoryTable();
             } catch (err) {
-                console.error('加载失败:', err);
+                console.error('加载账户失败:', err);
+                localStorage.removeItem('accountId');
+                localStorage.removeItem('accountName');
+                alert('账户无效或不存在，请重新登录');
+                location.href = 'index.html';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', loadStatistics);
 
         function setTimeRange(range) {
             currentRange = range;

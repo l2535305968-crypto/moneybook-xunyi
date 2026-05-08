@@ -326,6 +326,11 @@
         let selectedIcon = '🎋';
         let selectedColor = '#F5F5DC';
 
+        if (!currentAccountId) {
+            alert('请先登录');
+            location.href = 'index.html';
+        }
+
         const icons = ['🍵','⛵','🧺','🎯','🏯','🏺','📜','👘','🕊️','🪞','🎁','🎋','🪙','🧮','🥇','🔨','🧧','✒️','🎐','🎎','🎴','🎑','🎏','🏮','🎀','🌸','🎋','🍃','🌿','☘️','🪷','🪶'];
 
         const colors = ['#FCE4EC','#E8F5E9','#E3F2FD','#F3E5F5','#E0F7FA','#FFF8E1','#FFF3E0','#F5F5DC'];

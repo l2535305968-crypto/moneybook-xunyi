@@ -438,6 +438,11 @@
         let currentAccountId = localStorage.getItem('accountId');
         let accountData = null;
 
+        if (!currentAccountId) {
+            alert('请先登录');
+            location.href = 'index.html';
+        }
+
         const typeIcons = {
             cash: '💵',
             card: '🏦',
@@ -455,14 +460,26 @@
         };
 
         async function loadAccount() {
+            if (!currentAccountId) {
+                alert('请先登录');
+                location.href = 'index.html';
+                return;
+            }
+            
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
                 renderAccounts();
                 updateTransferSelects();
             } catch (err) {
-                showToast('加载失败');
+                console.error('加载账户失败:', err);
+                localStorage.removeItem('accountId');
+                localStorage.removeItem('accountName');
+                alert('账户无效或不存在，请重新登录');
+                location.href = 'index.html';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', loadAccount);
 
         function renderAccounts() {
             const listEl = document.getElementById('accountList');

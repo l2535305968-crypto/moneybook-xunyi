@@ -296,6 +296,11 @@
         let budgets = [];
         let currentMonth = new Date();
 
+        if (!currentAccountId) {
+            alert('请先登录');
+            location.href = 'index.html';
+        }
+
         function formatMonth(date) {
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         }
@@ -312,6 +317,12 @@
         }
 
         async function loadAccount() {
+            if (!currentAccountId) {
+                alert('请先登录');
+                location.href = 'index.html';
+                return;
+            }
+            
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
                 budgets = await api.get(`/budgets/${currentAccountId}`);
@@ -320,9 +331,15 @@
                 renderBudgets();
                 updateCategorySelect();
             } catch (err) {
-                showToast('加载失败');
+                console.error('加载账户失败:', err);
+                localStorage.removeItem('accountId');
+                localStorage.removeItem('accountName');
+                alert('账户无效或不存在，请重新登录');
+                location.href = 'index.html';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', loadAccount);
 
         function updateMonthDisplay() {
             document.getElementById('monthDisplay').textContent = formatMonthDisplay(currentMonth);

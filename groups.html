@@ -404,6 +404,11 @@
         let currentAccountName = localStorage.getItem('accountName') || '成员';
         let myGroups = [];
 
+        if (!currentAccountId) {
+            alert('请先登录');
+            location.href = 'index.html';
+        }
+
         async function loadAccountInfo() {
             if (!currentAccountId) return;
             try {
