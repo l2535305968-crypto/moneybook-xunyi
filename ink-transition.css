@@ -1,0 +1,231 @@
+/* 水墨风格页面过渡动画 */
+
+/* 页面加载遮罩层 */
+.ink-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f8f7f5;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ink-transition-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* 水墨扩散动画容器 */
+.ink-splash-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+/* 水墨扩散效果 */
+.ink-splash {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(51, 51, 51, 0.8) 0%, rgba(51, 51, 51, 0.4) 50%, transparent 70%);
+    animation: inkSpread 1.2s ease-out forwards;
+}
+
+.ink-splash:nth-child(1) {
+    width: 0;
+    height: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 0s;
+}
+
+.ink-splash:nth-child(2) {
+    width: 0;
+    height: 0;
+    top: 30%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+    animation-delay: 0.15s;
+}
+
+.ink-splash:nth-child(3) {
+    width: 0;
+    height: 0;
+    top: 70%;
+    left: 70%;
+    transform: translate(-50%, -50%);
+    animation-delay: 0.3s;
+}
+
+@keyframes inkSpread {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+    }
+}
+
+/* 水墨logo */
+.ink-logo {
+    font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+    font-size: 48px;
+    color: #333;
+    letter-spacing: 20px;
+    position: relative;
+    z-index: 10;
+    animation: inkFadeIn 0.8s ease-out 0.3s both;
+}
+
+@keyframes inkFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+/* 页面内容淡入动画 */
+.ink-page-content {
+    opacity: 0;
+    animation: pageFadeIn 0.6s ease-out 0.4s both;
+}
+
+@keyframes pageFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* 导航链接点击效果 */
+.ink-tab-item,
+.header-links a,
+.back-btn,
+.ink-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.ink-tab-item::before,
+.header-links a::before,
+.back-btn::before,
+.ink-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(51, 51, 51, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.ink-tab-item:active::before,
+.header-links a:active::before,
+.back-btn:active::before,
+.ink-btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* 页面加载时的水墨滴落效果 */
+.ink-drip {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, rgba(51, 51, 51, 0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    animation: inkDrip 1.5s ease-out forwards;
+}
+
+@keyframes inkDrip {
+    0% {
+        transform: translateY(-100px) scale(0.5);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* 按钮水墨波纹效果 */
+.ink-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ink-ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(51, 51, 51, 0.3) 0%, transparent 70%);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* 卡片悬停水墨效果 */
+.ink-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ink-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* 平滑滚动 */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 选择文字水墨效果 */
+::selection {
+    background: rgba(51, 51, 51, 0.15);
+    color: #333;
+}
+
+::-moz-selection {
+    background: rgba(51, 51, 51, 0.15);
+    color: #333;
+}
