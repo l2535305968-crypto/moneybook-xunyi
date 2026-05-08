@@ -303,6 +303,13 @@
             return `${date.getFullYear()}年${date.getMonth() + 1}月`;
         }
 
+        function formatCategoryName(cat) {
+            if (cat.modernName && cat.modernName !== cat.name) {
+                return `${cat.name} (${cat.modernName})`;
+            }
+            return cat.name;
+        }
+
         async function loadAccount() {
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
@@ -398,7 +405,7 @@
                 card.innerHTML = `
                     <div class="budget-icon" style="background: ${cat.color}20;">${cat.icon}</div>
                     <div class="budget-info">
-                        <div class="budget-name">${cat.name}</div>
+                        <div class="budget-name">${formatCategoryName(cat)}</div>
                         <div class="budget-progress">
                             <div class="budget-progress-bar" style="width: ${percent}%; background: ${isOver ? '#c62828' : cat.color};"></div>
                         </div>
@@ -418,7 +425,7 @@
 
             const expenseCategories = accountData.categories.filter(c => c.type === 'expense');
             expenseCategories.forEach(cat => {
-                select.innerHTML += `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`;
+                select.innerHTML += `<option value="${cat.id}">${cat.icon} ${formatCategoryName(cat)}</option>`;
             });
         }
 

@@ -609,8 +609,12 @@
             <div class="modal-body">
                 <div style="margin-bottom: 25px; padding: 20px; background: #fafafa; border-radius: 18px; border: 1px solid #f0f0f0;">
                     <div class="form-group">
-                        <label>分类名称</label>
+                        <label>分类名称（古风名）</label>
                         <input type="text" id="newCategoryName" placeholder="输入分类名称" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>现代解释（可选）</label>
+                        <input type="text" id="newCategoryModernName" placeholder="输入现代解释" maxlength="10">
                     </div>
                     <div class="form-group">
                         <label>类型</label>
@@ -654,16 +658,16 @@
         let isCreator = false;
 
         const defaultCategories = [
-            { id: 'cat_food', name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense' },
-            { id: 'cat_trans', name: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense' },
-            { id: 'cat_shop', name: '购物', icon: '🛒', color: '#45B7D1', type: 'expense' },
-            { id: 'cat_entertain', name: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense' },
-            { id: 'cat_living', name: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense' },
-            { id: 'cat_medical', name: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense' },
-            { id: 'cat_edu', name: '教育', icon: '📚', color: '#87CEEB', type: 'expense' },
-            { id: 'cat_salary', name: '工资', icon: '💰', color: '#90EE90', type: 'income' },
-            { id: 'cat_invest', name: '理财', icon: '📈', color: '#FFD700', type: 'income' },
-            { id: 'cat_other', name: '其他', icon: '📦', color: '#D3D3D3', type: 'expense' }
+            { id: 'cat_food', name: '烟火食事', modernName: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense' },
+            { id: 'cat_trans', name: '车马之费', modernName: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense' },
+            { id: 'cat_shop', name: '采买之需', modernName: '购物', icon: '🛒', color: '#45B7D1', type: 'expense' },
+            { id: 'cat_entertain', name: '闲情雅趣', modernName: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense' },
+            { id: 'cat_living', name: '屋舍之费', modernName: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense' },
+            { id: 'cat_medical', name: '药石之费', modernName: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense' },
+            { id: 'cat_edu', name: '诗书之资', modernName: '教育', icon: '📚', color: '#87CEEB', type: 'expense' },
+            { id: 'cat_salary', name: '俸禄之入', modernName: '工资', icon: '💰', color: '#90EE90', type: 'income' },
+            { id: 'cat_invest', name: '生息之利', modernName: '理财', icon: '📈', color: '#FFD700', type: 'income' },
+            { id: 'cat_other', name: '杂项支用', modernName: '其他', icon: '📦', color: '#D3D3D3', type: 'expense' }
         ];
 
         const icons = ['🍜', '🚗', '🛒', '🎮', '🏠', '💊', '📚', '💰', '📈', '📦', '👕', '✈️', '☕', '🎁', '💄', '🎵', '📱', '🏋️', '🛠️', '🌐', '🐱', '🐶', '👶', '🎓', '💪', '🌙', '☀️', '🌸', '🍕', '🍺', '🎬', '📷'];
@@ -685,6 +689,13 @@
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             return result;
+        }
+
+        function formatCategoryName(cat) {
+            if (cat.modernName && cat.modernName !== cat.name) {
+                return `${cat.icon} ${cat.name} (${cat.modernName})`;
+            }
+            return `${cat.icon} ${cat.name}`;
         }
 
         function setType(type) {
@@ -830,7 +841,7 @@
             const categories = getCategories();
             const filtered = categories.filter(c => c.type === currentType);
             select.innerHTML = filtered.map(c => 
-                `<option value="${c.id}">${c.icon} ${c.name}</option>`
+                `<option value="${c.id}">${formatCategoryName(c)}</option>`
             ).join('');
         }
 
@@ -846,11 +857,12 @@
 
             container.innerHTML = records.slice().reverse().map(r => {
                 const cat = categories.find(c => c.id === r.categoryId) || { name: '其他', icon: '📦' };
+                const displayName = cat.modernName && cat.modernName !== cat.name ? `${cat.name} (${cat.modernName})` : cat.name;
                 return `
                     <div class="record-item">
                         <div class="record-icon">${cat.icon}</div>
                         <div class="record-info">
-                            <div class="record-category">${cat.name}</div>
+                            <div class="record-category">${displayName}</div>
                             <div class="record-remark">${r.remark || ''} · ${r.memberName || ''}</div>
                         </div>
                         <div>
@@ -950,6 +962,7 @@
 
         async function addCategory() {
             const name = document.getElementById('newCategoryName').value.trim();
+            const modernName = document.getElementById('newCategoryModernName').value.trim();
             const type = document.getElementById('newCategoryType').value;
 
             if (!name) {
@@ -960,12 +973,14 @@
             try {
                 await api.post(`/api/groups/${groupId}/categories`, {
                     name,
+                    modernName,
                     icon: selectedIcon,
                     color: selectedColor,
                     type
                 });
                 showToast('添加成功！');
                 document.getElementById('newCategoryName').value = '';
+                document.getElementById('newCategoryModernName').value = '';
                 loadGroup();
                 renderCategoryList();
             } catch (err) {
@@ -996,18 +1011,20 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(c => `
+            container.innerHTML = filtered.map(c => {
+                const displayName = c.modernName && c.modernName !== c.name ? `${c.name} (${c.modernName})` : c.name;
+                return `
                 <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid #f8f7f5;">
                     <div style="display:flex; align-items:center; gap:14px;">
                         <div style="width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; background:${c.color || '#fafafa'}">${c.icon || '📦'}</div>
                         <div>
-                            <div style="font-weight:500; color:#333;">${c.name}</div>
+                            <div style="font-weight:500; color:#333;">${displayName}</div>
                             <div style="font-size:12px; color:#999;">${c.type === 'expense' ? '支出' : '收入'}${c.custom ? ' · 自定义' : ''}</div>
                         </div>
                     </div>
                     ${c.custom ? `<button class="ink-btn ink-btn-secondary ink-btn-small" onclick="deleteCategory('${c.id}')">删除</button>` : ''}
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         async function removeMember(memberAccountId) {

@@ -233,8 +233,12 @@
             </div>
             <form id="addCategoryForm">
                 <div class="form-group">
-                    <label>分类名称</label>
-                    <input type="text" id="newCategoryName" placeholder="例如：早餐" required>
+                    <label>分类名称（古风名）</label>
+                    <input type="text" id="newCategoryName" placeholder="例如：烟火食事" required>
+                </div>
+                <div class="form-group">
+                    <label>现代解释（可选）</label>
+                    <input type="text" id="newCategoryModernName" placeholder="例如：餐饮">
                 </div>
                 <div class="form-group">
                     <label>类型</label>
@@ -268,8 +272,12 @@
             <form id="editCategoryForm">
                 <input type="hidden" id="editCategoryId">
                 <div class="form-group">
-                    <label>分类名称</label>
+                    <label>分类名称（古风名）</label>
                     <input type="text" id="editCategoryName" required>
+                </div>
+                <div class="form-group">
+                    <label>现代解释（可选）</label>
+                    <input type="text" id="editCategoryModernName">
                 </div>
                 <div class="form-group">
                     <label>图标</label>
@@ -322,6 +330,13 @@
 
         const colors = ['#666', '#999', '#333', '#555', '#777', '#444', '#888', '#aaa'];
 
+        function formatCategoryName(cat) {
+            if (cat.modernName && cat.modernName !== cat.name) {
+                return `<span>${cat.name}<span style="font-size: 0.85em; opacity: 0.65; margin-left: 6px; font-family: system-ui;">(${cat.modernName})</span></span>`;
+            }
+            return cat.name;
+        }
+
         async function loadAccount() {
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
@@ -354,7 +369,7 @@
                 item.onclick = () => openEditModal(cat.id);
                 item.innerHTML = `
                     <div class="category-icon" style="background: ${cat.color}25;">${cat.icon}</div>
-                    <span class="category-name">${cat.name}</span>
+                    <span class="category-name">${formatCategoryName(cat)}</span>
                     <span class="category-badge ${cat.custom ? 'custom' : 'system'}">${cat.custom ? '自定义' : '系统'}</span>
                 `;
                 listEl.appendChild(item);
@@ -435,6 +450,7 @@
             document.getElementById('editModal').classList.add('show');
             document.getElementById('editCategoryId').value = id;
             document.getElementById('editCategoryName').value = cat.name;
+            document.getElementById('editCategoryModernName').value = cat.modernName || '';
             window.editIconValue = cat.icon;
             window.editColorValue = cat.color;
 
@@ -461,6 +477,7 @@
 
             const category = {
                 name: document.getElementById('newCategoryName').value,
+                modernName: document.getElementById('newCategoryModernName').value,
                 icon: selectedIconEl ? selectedIconEl.textContent : '📦',
                 color: selectedColorEl ? selectedColorEl.style.background : '#666',
                 type: document.getElementById('newCategoryType').value
@@ -485,6 +502,7 @@
 
             const category = {
                 name: document.getElementById('editCategoryName').value,
+                modernName: document.getElementById('editCategoryModernName').value,
                 icon: selectedIconEl ? selectedIconEl.textContent : '📦',
                 color: selectedColorEl ? selectedColorEl.style.background : '#666'
             };

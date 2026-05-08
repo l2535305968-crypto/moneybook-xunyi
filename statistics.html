@@ -377,6 +377,13 @@
             document.getElementById('netBalance').textContent = `¥${statistics.netIncome.toFixed(2)}`;
         }
 
+        function formatCategoryName(cat) {
+            if (cat.modernName && cat.modernName !== cat.name) {
+                return `${cat.name} (${cat.modernName})`;
+            }
+            return cat.name;
+        }
+
         function renderCharts() {
             renderExpensePieChart();
             renderTrendLineChart();
@@ -400,7 +407,7 @@
                 if (data.expense > 0) {
                     const cat = categoryMap[catId] || { name: '未知', icon: '📦', color: '#D3D3D3' };
                     expenseByCategory.push({
-                        name: cat.name,
+                        name: formatCategoryName(cat),
                         icon: cat.icon,
                         value: data.expense,
                         color: cat.color
@@ -556,7 +563,7 @@
                         <td>
                             <div class="category-name">
                                 <div class="category-dot" style="background: ${cat.color};"></div>
-                                ${cat.icon} ${cat.name}
+                                ${cat.icon} ${formatCategoryName(cat)}
                             </div>
                         </td>
                         <td style="color: #333;">¥${cat.expense.toFixed(2)}</td>

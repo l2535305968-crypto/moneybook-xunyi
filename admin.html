@@ -372,6 +372,13 @@
         let requests = [];
         let currentDetailAccount = null;
 
+        function formatCategoryName(cat) {
+            if (cat.modernName && cat.modernName !== cat.name) {
+                return `${cat.name} (${cat.modernName})`;
+            }
+            return cat.name;
+        }
+
         function adminLogin() {
             const key = document.getElementById('adminKey').value;
             if (key === 'moneybook_admin_2026_secure_key') {
@@ -629,7 +636,7 @@
                     const cat = categoryMap[r.categoryId] || { name: '未知', icon: '📦' };
                     return `
                         <div class="record-row">
-                            <span>${cat.icon} ${cat.name}</span>
+                            <span>${cat.icon} ${formatCategoryName(cat)}</span>
                             <span style="color: ${r.type === 'income' ? '#2e7d32' : '#c62828'};">
                                 ${r.type === 'income' ? '+' : '-'}${parseFloat(r.amount).toFixed(2)}
                             </span>

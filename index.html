@@ -690,6 +690,13 @@
             return result;
         }
 
+        function formatCategoryName(cat) {
+            if (cat.modernName && cat.modernName !== cat.name) {
+                return `${cat.icon} ${cat.name} <span style="font-size: 0.85em; opacity: 0.65; margin-left: 4px; font-family: system-ui;">(${cat.modernName})</span>`;
+            }
+            return `${cat.icon} ${cat.name}`;
+        }
+
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -852,7 +859,7 @@
             filtered.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat.id;
-                option.textContent = `${cat.icon} ${cat.name}`;
+                option.innerHTML = formatCategoryName(cat);
                 select.appendChild(option);
             });
         }
@@ -967,7 +974,7 @@
                     item.innerHTML = `
                         <div class="record-icon">${cat.icon}</div>
                         <div class="record-info">
-                            <div class="record-category">${cat.name}</div>
+                            <div class="record-category">${cat.modernName && cat.modernName !== cat.name ? `${cat.name} <span style="font-size: 0.85em; opacity: 0.65;">(${cat.modernName})</span>` : cat.name}</div>
                             <div class="record-remark">${record.remark || ''} · ${timeStr}</div>
                         </div>
                         <div>

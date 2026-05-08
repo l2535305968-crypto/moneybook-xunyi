@@ -34,16 +34,16 @@ app.post('/api/account', (req, res) => {
             { id: 'acc_' + Math.random().toString(36).substr(2, 8), name: '支付宝', type: 'alipay', balance: 0, createTime: new Date().toISOString(), status: 'active' }
         ],
         categories: [
-            { id: 'cat_food', name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense', custom: false },
-            { id: 'cat_trans', name: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense', custom: false },
-            { id: 'cat_shop', name: '购物', icon: '🛒', color: '#45B7D1', type: 'expense', custom: false },
-            { id: 'cat_entertain', name: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense', custom: false },
-            { id: 'cat_living', name: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense', custom: false },
-            { id: 'cat_medical', name: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense', custom: false },
-            { id: 'cat_edu', name: '教育', icon: '📚', color: '#87CEEB', type: 'expense', custom: false },
-            { id: 'cat_salary', name: '工资', icon: '💰', color: '#90EE90', type: 'income', custom: false },
-            { id: 'cat_invest', name: '理财', icon: '📈', color: '#FFD700', type: 'income', custom: false },
-            { id: 'cat_other', name: '其他', icon: '📦', color: '#D3D3D3', type: 'expense', custom: false }
+            { id: 'cat_food', name: '烟火食事', modernName: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense', custom: false },
+            { id: 'cat_trans', name: '车马之费', modernName: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense', custom: false },
+            { id: 'cat_shop', name: '采买之需', modernName: '购物', icon: '🛒', color: '#45B7D1', type: 'expense', custom: false },
+            { id: 'cat_entertain', name: '闲情雅趣', modernName: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense', custom: false },
+            { id: 'cat_living', name: '屋舍之费', modernName: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense', custom: false },
+            { id: 'cat_medical', name: '药石之费', modernName: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense', custom: false },
+            { id: 'cat_edu', name: '诗书之资', modernName: '教育', icon: '📚', color: '#87CEEB', type: 'expense', custom: false },
+            { id: 'cat_salary', name: '俸禄之入', modernName: '工资', icon: '💰', color: '#90EE90', type: 'income', custom: false },
+            { id: 'cat_invest', name: '生息之利', modernName: '理财', icon: '📈', color: '#FFD700', type: 'income', custom: false },
+            { id: 'cat_other', name: '杂项支用', modernName: '其他', icon: '📦', color: '#D3D3D3', type: 'expense', custom: false }
         ],
         records: [],
         budgets: [],
@@ -269,16 +269,16 @@ app.post('/api/groups/create', (req, res) => {
             balance: 0
         }],
         categories: [
-            { id: 'cat_food', name: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense', custom: false },
-            { id: 'cat_trans', name: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense', custom: false },
-            { id: 'cat_shop', name: '购物', icon: '🛒', color: '#45B7D1', type: 'expense', custom: false },
-            { id: 'cat_entertain', name: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense', custom: false },
-            { id: 'cat_living', name: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense', custom: false },
-            { id: 'cat_medical', name: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense', custom: false },
-            { id: 'cat_edu', name: '教育', icon: '📚', color: '#87CEEB', type: 'expense', custom: false },
-            { id: 'cat_salary', name: '工资', icon: '💰', color: '#90EE90', type: 'income', custom: false },
-            { id: 'cat_invest', name: '理财', icon: '📈', color: '#FFD700', type: 'income', custom: false },
-            { id: 'cat_other', name: '其他', icon: '📦', color: '#D3D3D3', type: 'expense', custom: false }
+            { id: 'cat_food', name: '烟火食事', modernName: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense', custom: false },
+            { id: 'cat_trans', name: '车马之费', modernName: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense', custom: false },
+            { id: 'cat_shop', name: '采买之需', modernName: '购物', icon: '🛒', color: '#45B7D1', type: 'expense', custom: false },
+            { id: 'cat_entertain', name: '闲情雅趣', modernName: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense', custom: false },
+            { id: 'cat_living', name: '屋舍之费', modernName: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense', custom: false },
+            { id: 'cat_medical', name: '药石之费', modernName: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense', custom: false },
+            { id: 'cat_edu', name: '诗书之资', modernName: '教育', icon: '📚', color: '#87CEEB', type: 'expense', custom: false },
+            { id: 'cat_salary', name: '俸禄之入', modernName: '工资', icon: '💰', color: '#90EE90', type: 'income', custom: false },
+            { id: 'cat_invest', name: '生息之利', modernName: '理财', icon: '📈', color: '#FFD700', type: 'income', custom: false },
+            { id: 'cat_other', name: '杂项支用', modernName: '其他', icon: '📦', color: '#D3D3D3', type: 'expense', custom: false }
         ],
         records: [],
         createTime: new Date().toISOString()
@@ -298,6 +298,7 @@ app.post('/api/groups/:groupId/categories', (req, res) => {
     const category = {
         id: 'gcat_' + Math.random().toString(36).substr(2, 8),
         name: req.body.name,
+        modernName: req.body.modernName,
         icon: req.body.icon || '📦',
         color: req.body.color || '#FF6B6B',
         type: req.body.type || 'expense',
