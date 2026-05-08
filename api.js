@@ -21,6 +21,7 @@ function getApiBaseUrl() {
 function getApiUrl(path) {
     const baseUrl = getApiBaseUrl();
     console.log('Path:', path);
+    console.log('Base URL:', baseUrl);
     
     if (path.startsWith('http')) return path;
     
@@ -34,10 +35,7 @@ function getApiUrl(path) {
         result = baseUrl + '/api/' + path;
     }
     
-    if (result.includes('/api/api/')) {
-        console.warn('Found duplicate /api/api/, fixing...');
-        result = result.replace(/\/api\/api\//g, '/api/');
-    }
+    result = result.replace(/\/api\/api/g, '/api');
     
     console.log('Final API URL:', result);
     return result;
