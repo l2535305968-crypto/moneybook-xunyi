@@ -3,203 +3,525 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💰 记账本</title>
+    <title>墨记 · 记账本</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif; 
+            background: #f8f7f5; 
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        /* 水墨风格的配色 */
+        .ink-header { 
+            background: #fff; 
+            color: #333; 
+            padding: 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid #eee;
+        }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 20px; }
-        .account-selector { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
-        .header-links { display: flex; gap: 15px; margin-top: 10px; }
-        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
-        .header-links a:hover { opacity: 1; }
+        .header-title { 
+            font-size: 24px; 
+            font-weight: 500; 
+            letter-spacing: 4px;
+        }
+        .account-selector { 
+            background: #f5f5f5; 
+            border: none; 
+            color: #333; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            font-size: 14px; 
+            cursor: pointer;
+        }
+        .header-links { 
+            display: flex; 
+            gap: 20px; 
+            margin-top: 15px; 
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .header-links a { 
+            color: #666; 
+            text-decoration: none; 
+            font-size: 13px; 
+        }
+        .header-links a:hover { color: #333; }
 
-        .main-content { max-width: 800px; margin: 0 auto; padding: 15px; }
+        .main-content { 
+            max-width: 700px; 
+            margin: 0 auto; 
+            padding: 20px;
+        }
 
-        .balance-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .balance-label { font-size: 13px; color: #666; margin-bottom: 5px; }
-        .balance-amount { font-size: 32px; font-weight: bold; color: #333; }
-        .balance-amount.positive { color: #4CAF50; }
-        .balance-amount.negative { color: #f44336; }
-        .account-balances { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .account-badge { background: #f0f0f0; padding: 8px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+        /* 水墨风格卡片 */
+        .ink-card { 
+            background: #fff; 
+            border-radius: 24px; 
+            padding: 30px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title { 
+            font-size: 14px; 
+            color: #999; 
+            margin-bottom: 10px; 
+            letter-spacing: 2px;
+        }
+        .ink-balance { 
+            font-size: 48px; 
+            font-weight: 300; 
+            color: #333; 
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+        .ink-balance.positive { color: #333; }
+        .ink-balance.negative { color: #666; }
+        .ink-balance::before { content: '¥ '; font-size: 24px; opacity: 0.6; }
 
-        .quick-add { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .quick-add-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: #333; }
-        .type-toggle { display: flex; background: #f5f5f5; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
-        .type-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
-        .type-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .type-btn.expense.active { color: #f44336; }
-        .type-btn.income.active { color: #4CAF50; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
-        .form-group { flex: 1; }
-        .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
-        .amount-input { font-size: 20px !important; font-weight: bold; text-align: center; }
-        .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .submit-btn:hover { opacity: 0.9; }
+        .account-chips { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 25px; 
+            flex-wrap: wrap; 
+        }
+        .ink-chip { 
+            background: #f8f7f5; 
+            padding: 10px 18px; 
+            border-radius: 50px; 
+            font-size: 13px; 
+            color: #666;
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
 
-        .calendar-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .calendar-nav { display: flex; gap: 10px; align-items: center; }
-        .calendar-nav button { background: #f5f5f5; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
-        .calendar-title { font-size: 16px; font-weight: 600; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .calendar-day-header { text-align: center; font-size: 12px; color: #999; padding: 5px; }
-        .calendar-day { text-align: center; padding: 10px 5px; border-radius: 8px; cursor: pointer; font-size: 14px; position: relative; min-height: 45px; }
-        .calendar-day:hover { background: #f5f5f5; }
-        .calendar-day.today { background: #667eea; color: white; }
-        .calendar-day.selected { background: #764ba2; color: white; }
-        .calendar-day.other-month { color: #ccc; }
-        .day-expense { font-size: 10px; color: #f44336; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); }
-        .day-income { font-size: 10px; color: #4CAF50; position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); }
+        /* 快速记账区域 */
+        .quick-add-section {
+            margin-bottom: 20px;
+        }
+        .type-toggle { 
+            display: flex; 
+            background: #f5f5f5; 
+            border-radius: 16px; 
+            padding: 6px; 
+            margin-bottom: 25px;
+        }
+        .type-btn { 
+            flex: 1; 
+            padding: 14px; 
+            text-align: center; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            color: #999;
+            transition: all 0.3s ease;
+        }
+        .type-btn.active { 
+            background: #fff; 
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            color: #999; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 14px 18px; 
+            border: 1px solid #eee; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            background: #fafafa;
+            color: #333;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; 
+            border-color: #ddd; 
+            background: #fff;
+        }
+        .form-row { 
+            display: flex; 
+            gap: 12px; 
+        }
+        .form-row .form-group { flex: 1; }
+        .amount-input { 
+            font-size: 28px !important; 
+            font-weight: 300; 
+            text-align: center; 
+            padding: 18px !important;
+            letter-spacing: 2px;
+        }
+        .ink-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: #333; 
+            color: #fff; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            margin-top: 8px;
+            letter-spacing: 2px;
+            transition: all 0.2s ease;
+        }
+        .ink-btn:hover { background: #444; }
+        .ink-btn.secondary { 
+            background: #f0f0f0; 
+            color: #333;
+        }
 
-        .records-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
-        .record-list { max-height: 400px; overflow-y: auto; }
-        .record-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+        /* 日历区域 */
+        .calendar-section {
+            background: #fff;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .calendar-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+        }
+        .calendar-nav { display: flex; gap: 8px; align-items: center; }
+        .calendar-nav button { 
+            background: #f5f5f5; 
+            border: none; 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            color: #666;
+        }
+        .calendar-title { 
+            font-size: 16px; 
+            font-weight: 400; 
+            letter-spacing: 2px;
+        }
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 5px; 
+        }
+        .calendar-day-header { 
+            text-align: center; 
+            font-size: 12px; 
+            color: #ccc; 
+            padding: 8px; 
+            letter-spacing: 1px;
+        }
+        .calendar-day { 
+            text-align: center; 
+            padding: 12px 5px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            position: relative; 
+            min-height: 55px; 
+            color: #666;
+            transition: all 0.2s ease;
+        }
+        .calendar-day:hover { background: #f8f7f5; }
+        .calendar-day.today { 
+            background: #333; 
+            color: #fff; 
+        }
+        .calendar-day.selected { 
+            background: #555; 
+            color: #fff; 
+        }
+        .calendar-day.other-month { color: #ddd; }
+        .day-expense { 
+            font-size: 10px; 
+            color: #666; 
+            position: absolute; 
+            bottom: 5px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+        }
+        .day-income { 
+            font-size: 10px; 
+            color: #333; 
+            position: absolute; 
+            bottom: 18px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+        }
+
+        /* 记录列表 */
+        .records-section {
+            background: #fff;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .section-header { 
+            font-size: 15px; 
+            margin-bottom: 20px; 
+            color: #333; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            letter-spacing: 2px;
+        }
+        .record-list { max-height: 500px; overflow-y: auto; }
+        .record-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 16px 0; 
+            border-bottom: 1px solid #f8f7f5; 
+            gap: 16px; 
+        }
         .record-item:last-child { border-bottom: none; }
-        .record-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .record-icon { 
+            width: 46px; 
+            height: 46px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 22px; 
+            background: #f8f7f5;
+        }
         .record-info { flex: 1; }
-        .record-category { font-size: 14px; font-weight: 500; color: #333; }
-        .record-remark { font-size: 12px; color: #999; margin-top: 2px; }
-        .record-amount { font-size: 15px; font-weight: 600; }
-        .record-amount.expense { color: #f44336; }
-        .record-amount.income { color: #4CAF50; }
-        .record-date { font-size: 11px; color: #999; }
-        .record-delete { background: none; border: none; color: #999; cursor: pointer; padding: 5px; font-size: 16px; }
-        .record-delete:hover { color: #f44336; }
+        .record-category { font-size: 15px; color: #333; }
+        .record-remark { font-size: 12px; color: #999; margin-top: 3px; }
+        .record-amount { 
+            font-size: 16px; 
+            font-weight: 400; 
+            letter-spacing: 1px;
+        }
+        .record-amount.expense { color: #333; }
+        .record-amount.income { color: #666; }
+        .record-amount::before { content: '¥ '; font-size: 12px; opacity: 0.5; }
+        .record-date { font-size: 12px; color: #ccc; }
+        .record-delete { 
+            background: none; 
+            border: none; 
+            color: #ddd; 
+            cursor: pointer; 
+            padding: 5px; 
+            font-size: 18px; 
+        }
+        .record-delete:hover { color: #999; }
 
-        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
-        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
+        .empty-state { text-align: center; padding: 50px 20px; color: #ccc; }
+        .empty-state-icon { font-size: 52px; margin-bottom: 12px; opacity: 0.6; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .modal-close:hover { color: #333; }
-
-        .bill-parse { background: #f8f8ff; border-radius: 12px; padding: 15px; margin-top: 15px; }
-        .bill-parse-title { font-size: 13px; color: #666; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
-        .bill-parse textarea { width: 100%; height: 80px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-size: 13px; resize: none; }
-        .bill-source-btns { display: flex; gap: 10px; margin-top: 10px; }
-        .bill-source-btn { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; }
-        .bill-source-btn.active { background: #667eea; color: white; border-color: #667eea; }
-        .parse-result { margin-top: 10px; padding: 10px; background: white; border-radius: 8px; font-size: 13px; }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
-        .toast.show { opacity: 1; }
-
-        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 800px; margin: 0 auto; }
-
-        .login-section { display: none; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center; }
+        /* 登录界面 - 水墨风格 */
+        .login-section { 
+            display: none; 
+            min-height: 100vh; 
+            background: linear-gradient(180deg, #f8f7f5 0%, #f0f0f0 100%); 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+        }
         .login-section.show { display: flex; }
-        .login-card { background: white; border-radius: 20px; padding: 40px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .login-card h2 { font-size: 28px; margin-bottom: 10px; color: #333; }
-        .login-card p { color: #666; margin-bottom: 30px; }
-        .login-input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; margin-bottom: 20px; transition: border-color 0.3s; }
-        .login-input:focus { outline: none; border-color: #667eea; }
-        .login-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .login-btn:hover { opacity: 0.9; }
-        .login-hint { margin-top: 20px; font-size: 12px; color: #999; }
-        .recent-accounts { margin-top: 20px; text-align: left; }
-        .recent-accounts-title { font-size: 14px; color: #666; margin-bottom: 10px; }
-        .account-item { padding: 12px 15px; background: #f8f8ff; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
-        .account-item:hover { background: #f0f0ff; }
-        .account-item-name { font-weight: 500; color: #333; }
-        .account-item-delete { color: #999; font-size: 18px; cursor: pointer; }
-        .account-item-delete:hover { color: #f44336; }
-        .divider { margin: 20px 0; height: 1px; background: #eee; }
-        .switch-account-btn { background: #f0f0f0; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; color: #666; }
-        .switch-account-btn:hover { background: #e0e0e0; }
-        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tab-item.active { color: #667eea; }
-        .tab-item-icon { font-size: 20px; }
+        .ink-login-card { 
+            background: #fff; 
+            border-radius: 28px; 
+            padding: 50px 40px; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 420px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+        }
+        .ink-login-logo { 
+            font-size: 36px; 
+            margin-bottom: 10px; 
+            letter-spacing: 8px;
+            font-weight: 300;
+        }
+        .ink-login-subtitle { 
+            color: #999; 
+            margin-bottom: 40px; 
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        .ink-input { 
+            width: 100%; 
+            padding: 16px 20px; 
+            border: 1px solid #eee; 
+            border-radius: 14px; 
+            font-size: 15px; 
+            margin-bottom: 18px; 
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+        .ink-input:focus { 
+            outline: none; 
+            border-color: #ddd; 
+            background: #fff;
+        }
+        .ink-login-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: #333; 
+            color: #fff; 
+            border: none; 
+            border-radius: 14px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            letter-spacing: 3px;
+            margin-top: 8px;
+        }
+        .ink-login-btn:hover { background: #444; }
+        .ink-login-btn.alt { 
+            background: #f5f5f5; 
+            color: #333;
+        }
+        .login-hint { 
+            margin-top: 25px; 
+            font-size: 12px; 
+            color: #ccc; 
+        }
+        .divider { 
+            margin: 30px 0; 
+            height: 1px; 
+            background: #f5f5f5; 
+            position: relative;
+        }
+        .divider::before {
+            content: '或';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 0 15px;
+            color: #ccc;
+            font-size: 12px;
+        }
+
+        /* 底栏 */
+        .ink-tab-bar { 
+            display: flex; 
+            background: #fff; 
+            border-top: 1px solid #f5f5f5; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            max-width: 700px; 
+            margin: 0 auto; 
+            padding: 8px 0 25px;
+        }
+        .ink-tab-item { 
+            flex: 1; 
+            padding: 10px; 
+            text-align: center; 
+            text-decoration: none; 
+            color: #ccc; 
+            font-size: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px;
+            transition: color 0.3s ease;
+        }
+        .ink-tab-item.active { color: #333; }
+        .ink-tab-icon { font-size: 22px; opacity: 0.9; }
+
+        .toast { 
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #333; 
+            color: #fff; 
+            padding: 14px 28px; 
+            border-radius: 50px; 
+            font-size: 14px; 
+            z-index: 2000; 
+            opacity: 0; 
+            transition: opacity 0.3s;
+        }
+        .toast.show { opacity: 1; }
 
         @media (min-width: 768px) {
             body { padding-bottom: 0; }
-            .tab-bar { position: static; border-top: none; background: transparent; }
-            .main-content { padding-bottom: 80px; }
+            .ink-tab-bar { position: static; border-top: none; padding-bottom: 8px; }
+            .main-content { padding-bottom: 40px; }
         }
     </style>
 </head>
 <body>
     <div class="login-section show" id="loginSection">
-        <div class="login-card">
-            <h2>💰 记账本</h2>
-            <p>选择登录方式</p>
-            
-            <div class="recent-accounts" id="recentAccounts" style="display: none;">
-                <div class="recent-accounts-title">最近登录的账户</div>
-                <div id="recentAccountsList"></div>
-            </div>
-            
-            <div class="divider" id="loginDivider" style="display: none;"></div>
+        <div class="ink-login-card">
+            <div class="ink-login-logo">墨记</div>
+            <div class="ink-login-subtitle">静心记账 · 了然于心</div>
             
             <!-- 已有账户登录 -->
             <div style="margin-bottom: 15px;">
-                <h3 style="font-size: 15px; margin-bottom: 8px; color: #333;">已有账户</h3>
-                <input type="text" id="accountIdInput" class="login-input" placeholder="输入账户ID（如：acc_xxx）或账户名称">
-                <button class="login-btn" onclick="loginWithAccountId()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">使用账户登录</button>
+                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">已有账户</div>
+                <input type="text" id="accountIdInput" class="ink-input" placeholder="输入账户ID或账户名称">
+                <button class="ink-login-btn" onclick="loginWithAccountId()">登录</button>
             </div>
             
-            <div class="divider" style="margin: 20px 0;"></div>
+            <div class="divider"></div>
             
             <!-- 申请新账户 -->
             <div>
-                <h3 style="font-size: 15px; margin-bottom: 8px; color: #333;">申请新账户</h3>
-                <input type="text" id="accountNameInput" class="login-input" placeholder="输入您的姓名申请账户" maxlength="20">
-                <button class="login-btn" onclick="requestAccount()">申请账户</button>
-                <div class="login-hint">提示：账户需要管理员审批，审批通过后会收到通知</div>
+                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">开立新账户</div>
+                <input type="text" id="accountNameInput" class="ink-input" placeholder="请告知您的姓名" maxlength="20">
+                <button class="ink-login-btn alt" onclick="requestAccount()">申请</button>
+                <div class="login-hint">账户需经审批后启用</div>
             </div>
         </div>
     </div>
 
-    <div class="header" id="mainHeader" style="display: none;">
+    <div class="ink-header" id="mainHeader" style="display: none;">
         <div class="header-top">
-            <h1>💰 记账本</h1>
+            <div class="header-title">墨记</div>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <select class="account-selector" id="accountSelector">
                     <option value="">加载中...</option>
                 </select>
-                <button class="switch-account-btn" onclick="switchAccount()">切换账户</button>
             </div>
         </div>
         <div class="header-links">
-            <a href="accounts.html">🏦 账户</a>
-            <a href="categories.html">📂 分类</a>
-            <a href="budget.html">📊 预算</a>
-            <a href="statistics.html">📈 统计</a>
-            <a href="export.html">📤 导出</a>
-            <a href="admin.html">🔐 管理</a>
+            <a href="accounts.html">账户</a>
+            <a href="categories.html">分类</a>
+            <a href="statistics.html">统计</a>
+            <a href="groups.html">群组</a>
+            <a href="admin.html">管理</a>
         </div>
     </div>
 
     <div class="main-content" id="mainContent" style="display: none;">
-        <div class="balance-card">
-            <div class="balance-label">总资产</div>
-            <div class="balance-amount positive" id="totalBalance">¥0.00</div>
-            <div class="account-balances" id="accountBalances"></div>
+        <div class="ink-card">
+            <div class="ink-title">总资产</div>
+            <div class="ink-balance positive" id="totalBalance">0.00</div>
+            <div class="account-chips" id="accountBalances"></div>
         </div>
 
-        <div class="quick-add">
-            <div class="quick-add-title">📝 快速记账</div>
+        <div class="ink-card quick-add-section">
+            <div class="ink-title">记一笔</div>
+            
             <div class="type-toggle">
-                <div class="type-btn expense active" data-type="expense">💸 支出</div>
-                <div class="type-btn income" data-type="income">💰 收入</div>
+                <div class="type-btn expense active" data-type="expense">支出</div>
+                <div class="type-btn income" data-type="income">收入</div>
             </div>
+            
             <form id="recordForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>金额</label>
-                        <input type="number" id="amountInput" class="amount-input" placeholder="0.00" step="0.01" min="0" required>
-                    </div>
+                <div class="form-group">
+                    <label>金额</label>
+                    <input type="number" id="amountInput" class="amount-input" placeholder="0.00" step="0.01" min="0" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -221,22 +543,12 @@
                         <input type="time" id="timeInput" required>
                     </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 12px;">
+                <div class="form-group">
                     <label>备注</label>
-                    <input type="text" id="remarkInput" placeholder="可选">
+                    <input type="text" id="remarkInput" placeholder="可留空">
                 </div>
-                <button type="submit" class="submit-btn">保存记录</button>
+                <button type="submit" class="ink-btn">保存</button>
             </form>
-            <div class="bill-parse">
-                <div class="bill-parse-title">📋 账单识别</div>
-                <textarea id="billText" placeholder="粘贴微信/支付宝账单文本，自动识别金额、日期..."></textarea>
-                <div class="bill-source-btns">
-                    <button class="bill-source-btn active" data-source="wechat">微信</button>
-                    <button class="bill-source-btn" data-source="alipay">支付宝</button>
-                </div>
-                <button class="submit-btn" style="margin-top: 10px; padding: 10px;" onclick="parseBill()">识别账单</button>
-                <div class="parse-result" id="parseResult" style="display: none;"></div>
-            </div>
         </div>
 
         <div class="calendar-section">
@@ -246,40 +558,40 @@
                     <span class="calendar-title" id="calendarTitle">2026年4月</span>
                     <button onclick="changeMonth(1)">▶</button>
                 </div>
-                <button onclick="goToToday()" style="background: #f5f5f5; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">今天</button>
+                <button onclick="goToToday()" style="background: #f5f5f5; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; cursor: pointer; color: #666;">今天</button>
             </div>
             <div class="calendar-grid" id="calendarGrid"></div>
         </div>
 
         <div class="records-section">
-            <div class="section-title">
-                <span>📜 记账记录</span>
-                <span id="recordsCount" style="font-size: 12px; color: #999; font-weight: normal;"></span>
+            <div class="section-header">
+                <span>记录</span>
+                <span id="recordsCount" style="font-size: 12px; color: #ccc; font-weight: normal;"></span>
             </div>
             <div class="record-list" id="recordList"></div>
         </div>
     </div>
 
-    <div class="tab-bar">
-        <a href="index.html" class="tab-item active">
-            <span class="tab-item-icon">🏠</span>
+    <div class="ink-tab-bar">
+        <a href="index.html" class="ink-tab-item active">
+            <span class="ink-tab-icon">🏠</span>
             <span>首页</span>
         </a>
-        <a href="groups.html" class="tab-item">
-            <span class="tab-item-icon">👥</span>
-            <span>群</span>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
         </a>
-        <a href="add.html" class="tab-item">
-            <span class="tab-item-icon">➕</span>
-            <span>记账</span>
-        </a>
-        <a href="statistics.html" class="tab-item">
-            <span class="tab-item-icon">📊</span>
+        <a href="statistics.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="tab-item">
-            <span class="tab-item-icon">📤</span>
-            <span>导出</span>
+        <a href="categories.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
+        </a>
+        <a href="admin.html" class="ink-tab-item">
+            <span class="ink-tab-icon">⚙️</span>
+            <span>管理</span>
         </a>
     </div>
 
@@ -312,56 +624,10 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        function getRecentAccounts() {
-            const saved = localStorage.getItem('recentAccounts');
-            return saved ? JSON.parse(saved) : [];
-        }
-
-        function saveRecentAccount(accountId, accountName) {
-            let recentAccounts = getRecentAccounts();
-            recentAccounts = recentAccounts.filter(a => a.id !== accountId);
-            recentAccounts.unshift({ id: accountId, name: accountName });
-            if (recentAccounts.length > 10) {
-                recentAccounts = recentAccounts.slice(0, 10);
-            }
-            localStorage.setItem('recentAccounts', JSON.stringify(recentAccounts));
-        }
-
-        function removeRecentAccount(accountId) {
-            let recentAccounts = getRecentAccounts();
-            recentAccounts = recentAccounts.filter(a => a.id !== accountId);
-            localStorage.setItem('recentAccounts', JSON.stringify(recentAccounts));
-            renderRecentAccounts();
-        }
-
-        function renderRecentAccounts() {
-            const recentAccounts = getRecentAccounts();
-            const container = document.getElementById('recentAccounts');
-            const list = document.getElementById('recentAccountsList');
-            const divider = document.getElementById('loginDivider');
-
-            if (recentAccounts.length === 0) {
-                container.style.display = 'none';
-                divider.style.display = 'none';
-                return;
-            }
-
-            container.style.display = 'block';
-            divider.style.display = 'block';
-
-            list.innerHTML = recentAccounts.map(account => `
-                <div class="account-item" onclick="selectAccount('${account.id}')">
-                    <span class="account-item-name">${account.name}</span>
-                    <span class="account-item-delete" onclick="event.stopPropagation(); removeRecentAccount('${account.id}')">×</span>
-                </div>
-            `).join('');
-        }
-
         function showLogin() {
             document.getElementById('loginSection').classList.add('show');
             document.getElementById('mainHeader').style.display = 'none';
             document.getElementById('mainContent').style.display = 'none';
-            renderRecentAccounts();
         }
 
         function showMain() {
@@ -370,23 +636,11 @@
             document.getElementById('mainContent').style.display = 'block';
         }
 
-        function switchAccount() {
-            currentAccountId = null;
-            localStorage.removeItem('accountId');
-            showLogin();
-        }
-
-        async function selectAccount(accountId) {
-            currentAccountId = accountId;
-            localStorage.setItem('accountId', currentAccountId);
-            await loadAccount();
-        }
-
         async function loginWithAccountId() {
             const accountInput = document.getElementById('accountIdInput').value.trim();
             
             if (!accountInput) {
-                showToast('请输入账户ID或账户名称');
+                showToast('请输入账户ID或名称');
                 return;
             }
 
@@ -405,9 +659,9 @@
                 localStorage.setItem('accountId', currentAccountId);
                 
                 await loadAccount();
-                showToast('登录成功！');
+                showToast('登录成功');
             } catch (err) {
-                showToast('账户不存在或加载失败，请检查账户ID或名称');
+                showToast('账户不存在，请检查');
                 currentAccountId = null;
                 localStorage.removeItem('accountId');
                 localStorage.removeItem('accountName');
@@ -418,7 +672,7 @@
             const accountName = document.getElementById('accountNameInput').value.trim();
             
             if (!accountName) {
-                showToast('请输入您的姓名');
+                showToast('请告知您的姓名');
                 return;
             }
 
@@ -440,18 +694,10 @@
                 pendingRequests.push(requestData);
                 localStorage.setItem('pendingRequests', JSON.stringify(pendingRequests));
 
-                showToast('申请已提交，请联系管理员审批！');
+                showToast('申请已提交，请联系管理员');
                 
-                setTimeout(() => {
-                    const existingRequests = JSON.parse(localStorage.getItem('pendingRequests') || '[]');
-                    const myRequest = existingRequests.find(r => r.name === accountName && r.status === 'pending');
-                    if (myRequest) {
-                        showToast(`您的申请（${accountName}）正在等待审批，请稍后再试`);
-                    }
-                }, 2000);
-
             } catch (err) {
-                showToast('提交申请失败，请稍后再试');
+                showToast('提交失败，请稍后再试');
             }
         }
 
@@ -469,17 +715,12 @@
                 return;
             }
 
-            document.title = '💰 记账本 - ' + currentAccountId;
-
-            console.log('尝试加载账户:', currentAccountId);
-            console.log('API URL:', getApiBaseUrl() + '/api/account/' + currentAccountId);
+            document.title = '墨记 · 记账本';
 
             try {
                 accountData = await api.get('/account/' + currentAccountId);
-                console.log('账户数据加载成功:', accountData);
                 
                 if (accountData.name) {
-                    saveRecentAccount(currentAccountId, accountData.name);
                     localStorage.setItem('accountName', accountData.name);
                 }
                 
@@ -507,7 +748,7 @@
             accountData.accounts.forEach(acc => {
                 const option = document.createElement('option');
                 option.value = acc.id;
-                option.textContent = `${acc.name} (¥${acc.balance.toFixed(2)})`;
+                option.textContent = `${acc.name} ¥${acc.balance.toFixed(2)}`;
                 if (acc.id === currentAccountId) {
                     option.selected = true;
                 }
@@ -518,14 +759,14 @@
         function updateBalance() {
             const total = accountData.accounts.reduce((sum, acc) => sum + acc.balance, 0);
             const balanceEl = document.getElementById('totalBalance');
-            balanceEl.textContent = `¥${total.toFixed(2)}`;
-            balanceEl.className = `balance-amount ${total >= 0 ? 'positive' : 'negative'}`;
+            balanceEl.textContent = total.toFixed(2);
+            balanceEl.className = `ink-balance ${total >= 0 ? 'positive' : 'negative'}`;
 
             const badgesEl = document.getElementById('accountBalances');
             badgesEl.innerHTML = '';
             accountData.accounts.forEach(acc => {
                 const badge = document.createElement('div');
-                badge.className = 'account-badge';
+                badge.className = 'ink-chip';
                 badge.innerHTML = `<span>${acc.name}</span><span>¥${acc.balance.toFixed(2)}</span>`;
                 badgesEl.appendChild(badge);
             });
@@ -574,66 +815,12 @@
             });
         });
 
-        document.querySelectorAll('.bill-source-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.bill-source-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        async function parseBill() {
-            const text = document.getElementById('billText').value.trim();
-            if (!text) {
-                showToast('请输入账单文本');
-                return;
-            }
-            const source = document.querySelector('.bill-source-btn.active').dataset.source;
-
-            try {
-                const result = await api.post('/parse-bill', { text, source });
-
-                if (result.amount) {
-                    document.getElementById('amountInput').value = result.amount;
-                    document.getElementById('remarkInput').value = result.remark || '';
-
-                    const dateStr = result.date.split('T')[0];
-                    document.getElementById('dateInput')._flatpickr.setDate(dateStr);
-
-                    if (result.type === 'income') {
-                        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-                        document.querySelector('.type-btn.income').classList.add('active');
-                        currentType = 'income';
-                        updateCategorySelect();
-                    }
-
-                    if (result.categorySuggestions && result.categorySuggestions.length > 0) {
-                        document.getElementById('categorySelect').value = result.categorySuggestions[0];
-                    }
-
-                    const parseResultEl = document.getElementById('parseResult');
-                    parseResultEl.style.display = 'block';
-                    parseResultEl.innerHTML = `
-                        <div style="color: #4CAF50;">✅ 识别成功</div>
-                        <div>金额: ¥${result.amount}</div>
-                        <div>类型: ${result.type === 'income' ? '收入' : '支出'}</div>
-                        ${result.remark ? `<div>备注: ${result.remark}</div>` : ''}
-                    `;
-
-                    showToast('账单识别成功');
-                } else {
-                    showToast('无法识别账单，请手动输入');
-                }
-            } catch (err) {
-                showToast('识别失败');
-            }
-        }
-
         document.getElementById('recordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const amount = parseFloat(document.getElementById('amountInput').value);
             if (!amount || amount <= 0) {
-                showToast('请输入有效金额');
+                showToast('请输入金额');
                 return;
             }
 
@@ -653,7 +840,7 @@
 
             try {
                 await api.post('/records', { accountId: currentAccountId, record });
-                showToast('记录已保存');
+                showToast('已保存');
                 document.getElementById('recordForm').reset();
                 initDatePicker();
 
@@ -687,7 +874,7 @@
                     listEl.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">📝</div>
-                            <div>暂无记账记录</div>
+                            <div>暂无记录</div>
                         </div>
                     `;
                     return;
@@ -705,10 +892,10 @@
                     const item = document.createElement('div');
                     item.className = 'record-item';
                     item.innerHTML = `
-                        <div class="record-icon" style="background: ${cat.color || '#f0f0f0'}20;">${cat.icon}</div>
+                        <div class="record-icon">${cat.icon}</div>
                         <div class="record-info">
                             <div class="record-category">${cat.name}</div>
-                            <div class="record-remark">${record.remark || '无备注'} · ${timeStr}</div>
+                            <div class="record-remark">${record.remark || ''} · ${timeStr}</div>
                         </div>
                         <div>
                             <div class="record-amount ${record.type}">${record.type === 'income' ? '+' : '-'}${parseFloat(record.amount).toFixed(2)}</div>
@@ -724,7 +911,7 @@
         }
 
         async function deleteRecord(id) {
-            if (!confirm('确定删除这条记录？')) return;
+            if (!confirm('确定删除？')) return;
 
             try {
                 await api.delete(`/records/${id}`, { accountId: currentAccountId });
@@ -800,54 +987,6 @@
         function selectDate(dateStr) {
             selectedDate = dateStr;
             updateCalendar();
-            loadRecordsForDate(dateStr);
-        }
-
-        async function loadRecordsForDate(dateStr) {
-            try {
-                const startDate = dateStr + 'T00:00:00.000Z';
-                const endDate = dateStr + 'T23:59:59.999Z';
-                const records = await api.get(`/records/${currentAccountId}?startDate=${startDate}&endDate=${endDate}`);
-
-                const listEl = document.getElementById('recordList');
-                listEl.innerHTML = '';
-
-                const categoryMap = {};
-                accountData.categories.forEach(c => categoryMap[c.id] = c);
-
-                if (records.length === 0) {
-                    listEl.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📅</div>
-                            <div>${dateStr} 暂无记录</div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                records.forEach(record => {
-                    const cat = categoryMap[record.categoryId] || { icon: '📦', name: '未知' };
-                    const date = new Date(record.date);
-                    const timeStr = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-                    const item = document.createElement('div');
-                    item.className = 'record-item';
-                    item.innerHTML = `
-                        <div class="record-icon" style="background: ${cat.color || '#f0f0f0'}20;">${cat.icon}</div>
-                        <div class="record-info">
-                            <div class="record-category">${cat.name}</div>
-                            <div class="record-remark">${record.remark || '无备注'} · ${timeStr}</div>
-                        </div>
-                        <div>
-                            <div class="record-amount ${record.type}">${record.type === 'income' ? '+' : '-'}${parseFloat(record.amount).toFixed(2)}</div>
-                        </div>
-                        <button class="record-delete" onclick="deleteRecord('${record.id}')">×</button>
-                    `;
-                    listEl.appendChild(item);
-                });
-            } catch (err) {
-                console.error('加载记录失败:', err);
-            }
         }
 
         function changeMonth(delta) {
