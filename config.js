@@ -16,4 +16,6 @@ window.APP_CONFIG = {
     if (apiUrl) {
         window.APP_CONFIG.apiBaseUrl = apiUrl;
     }
+    
+    console.log('APP_CONFIG.apiBaseUrl:', window.APP_CONFIG.apiBaseUrl);
 })();
