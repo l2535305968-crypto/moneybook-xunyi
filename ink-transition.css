@@ -229,3 +229,204 @@ html {
     background: rgba(51, 51, 51, 0.15);
     color: #333;
 }
+
+/* ===== 水墨风格装饰元素 ===== */
+
+/* 水墨背景装饰 */
+.ink-decoration-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+/* 水墨墨迹装饰 */
+.ink-blob {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.03;
+    filter: blur(40px);
+}
+
+.ink-blob-1 {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    right: -5%;
+    background: radial-gradient(circle, #333 0%, transparent 70%);
+    animation: floatSlow 20s ease-in-out infinite;
+}
+
+.ink-blob-2 {
+    width: 400px;
+    height: 400px;
+    bottom: 5%;
+    left: -10%;
+    background: radial-gradient(circle, #555 0%, transparent 60%);
+    animation: floatSlow 25s ease-in-out infinite reverse;
+}
+
+.ink-blob-3 {
+    width: 250px;
+    height: 250px;
+    top: 40%;
+    right: 15%;
+    background: radial-gradient(circle, #444 0%, transparent 65%);
+    animation: floatSlow 18s ease-in-out infinite;
+}
+
+@keyframes floatSlow {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(30px, -20px) scale(1.05);
+    }
+    50% {
+        transform: translate(-20px, 30px) scale(0.95);
+    }
+    75% {
+        transform: translate(10px, 10px) scale(1.02);
+    }
+}
+
+/* 水墨晕染效果 */
+.ink-wash {
+    position: relative;
+}
+
+.ink-wash::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(ellipse at center, rgba(51, 51, 51, 0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 古风边框装饰 */
+.ink-border {
+    position: relative;
+    border: 1px solid rgba(51, 51, 51, 0.1);
+}
+
+.ink-border::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    border: 1px solid rgba(51, 51, 51, 0.08);
+    pointer-events: none;
+}
+
+/* 竹节分割线 */
+.ink-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(51, 51, 51, 0.15), rgba(51, 51, 51, 0.3), rgba(51, 51, 51, 0.15), transparent);
+    position: relative;
+    margin: 20px 0;
+}
+
+.ink-divider::before {
+    content: '◆';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(51, 51, 51, 0.25);
+    font-size: 10px;
+    background: #f8f7f5;
+    padding: 0 8px;
+}
+
+/* 古风按钮阴影 */
+.ink-shadow {
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        0 4px 16px rgba(0, 0, 0, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* 卡片古风内阴影 */
+.ink-card-inner {
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* 输入框水墨聚焦效果 */
+.ink-input:focus {
+    box-shadow: 
+        0 0 0 2px rgba(77, 77, 77, 0.1),
+        0 4px 20px rgba(0, 0, 0, 0.06);
+    border-color: rgba(51, 51, 51, 0.3);
+}
+
+/* 古风标签样式 */
+.ink-tag {
+    background: linear-gradient(135deg, rgba(77, 77, 77, 0.06), rgba(102, 102, 102, 0.04));
+    border: 1px solid rgba(51, 51, 51, 0.12);
+    color: #4D4D4D;
+}
+
+/* 古风提示气泡 */
+.ink-tooltip {
+    background: #f5f4f2;
+    border: 1px solid rgba(51, 51, 51, 0.12);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* 字体古风增强 */
+.ink-text {
+    font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', serif;
+    letter-spacing: 0.05em;
+}
+
+/* 数字显示样式 */
+.ink-number {
+    font-family: 'Georgia', 'Noto Serif SC', serif;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* 水墨强调色 */
+.ink-accent {
+    color: #4D4D4D;
+}
+
+.ink-accent-bg {
+    background-color: rgba(77, 77, 77, 0.06);
+}
+
+/* 侧边栏墨迹装饰 */
+.ink-sidebar-decor {
+    position: absolute;
+    right: 0;
+    top: 10%;
+    width: 30px;
+    height: 80%;
+    background: linear-gradient(180deg, transparent, rgba(51, 51, 51, 0.02), transparent);
+    pointer-events: none;
+}
+
+/* 页脚墨迹装饰 */
+.ink-footer-decor {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: radial-gradient(ellipse at center bottom, rgba(51, 51, 51, 0.02) 0%, transparent 70%);
+    pointer-events: none;
+}

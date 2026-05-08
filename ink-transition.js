@@ -10,6 +10,9 @@ class InkTransition {
         // 创建过渡遮罩层
         this.createOverlay();
         
+        // 创建水墨背景装饰
+        this.createInkDecoration();
+        
         // 为所有导航链接添加点击事件
         this.setupNavigation();
         
@@ -35,6 +38,18 @@ class InkTransition {
             </div>
         `;
         document.body.appendChild(this.overlay);
+    }
+
+    createInkDecoration() {
+        // 创建水墨背景装饰
+        const decorationBg = document.createElement('div');
+        decorationBg.className = 'ink-decoration-bg';
+        decorationBg.innerHTML = `
+            <div class="ink-blob ink-blob-1"></div>
+            <div class="ink-blob ink-blob-2"></div>
+            <div class="ink-blob ink-blob-3"></div>
+        `;
+        document.body.insertBefore(decorationBg, document.body.firstChild);
     }
 
     setupNavigation() {

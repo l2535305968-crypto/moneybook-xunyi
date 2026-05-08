@@ -658,22 +658,22 @@
         let isCreator = false;
 
         const defaultCategories = [
-            { id: 'cat_food', name: '烟火食事', modernName: '餐饮', icon: '🍜', color: '#FF6B6B', type: 'expense' },
-            { id: 'cat_trans', name: '车马之费', modernName: '交通', icon: '🚗', color: '#4ECDC4', type: 'expense' },
-            { id: 'cat_shop', name: '采买之需', modernName: '购物', icon: '🛒', color: '#45B7D1', type: 'expense' },
-            { id: 'cat_entertain', name: '闲情雅趣', modernName: '娱乐', icon: '🎮', color: '#96CEB4', type: 'expense' },
-            { id: 'cat_living', name: '屋舍之费', modernName: '居住', icon: '🏠', color: '#DDA0DD', type: 'expense' },
-            { id: 'cat_medical', name: '药石之费', modernName: '医疗', icon: '💊', color: '#FFB6C1', type: 'expense' },
-            { id: 'cat_edu', name: '诗书之资', modernName: '教育', icon: '📚', color: '#87CEEB', type: 'expense' },
-            { id: 'cat_salary', name: '俸禄之入', modernName: '工资', icon: '💰', color: '#90EE90', type: 'income' },
-            { id: 'cat_invest', name: '生息之利', modernName: '理财', icon: '📈', color: '#FFD700', type: 'income' },
-            { id: 'cat_other', name: '杂项支用', modernName: '其他', icon: '📦', color: '#D3D3D3', type: 'expense' }
+            { id: 'cat_food', name: '烟火食事', modernName: '餐饮', icon: '🍵', color: '#4A4A4A', type: 'expense' },
+            { id: 'cat_trans', name: '车马之费', modernName: '交通', icon: '🏮', color: '#6B5B4F', type: 'expense' },
+            { id: 'cat_shop', name: '采买之需', modernName: '购物', icon: '🏷️', color: '#5D5149', type: 'expense' },
+            { id: 'cat_entertain', name: '闲情雅趣', modernName: '娱乐', icon: '🎭', color: '#3D3D3D', type: 'expense' },
+            { id: 'cat_living', name: '屋舍之费', modernName: '居住', icon: '🏯', color: '#7A6B5D', type: 'expense' },
+            { id: 'cat_medical', name: '药石之费', modernName: '医疗', icon: '💚', color: '#5E6B5D', type: 'expense' },
+            { id: 'cat_edu', name: '诗书之资', modernName: '教育', icon: '📜', color: '#4C5866', type: 'expense' },
+            { id: 'cat_salary', name: '俸禄之入', modernName: '工资', icon: '🥇', color: '#8B7355', type: 'income' },
+            { id: 'cat_invest', name: '生息之利', modernName: '理财', icon: '📊', color: '#6E6357', type: 'income' },
+            { id: 'cat_other', name: '杂项支用', modernName: '其他', icon: '🎋', color: '#4D4D4D', type: 'expense' }
         ];
 
-        const icons = ['🍜', '🚗', '🛒', '🎮', '🏠', '💊', '📚', '💰', '📈', '📦', '👕', '✈️', '☕', '🎁', '💄', '🎵', '📱', '🏋️', '🛠️', '🌐', '🐱', '🐶', '👶', '🎓', '💪', '🌙', '☀️', '🌸', '🍕', '🍺', '🎬', '📷'];
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#DDA0DD', '#FFB6C1', '#87CEEB', '#D3D3D3', '#FFD700', '#90EE90', '#FFA07A', '#BA55D3', '#00CED1', '#FF69B4', '#8FBC8F', '#F0E68C'];
-        let selectedIcon = '📦';
-        let selectedColor = '#FF6B6B';
+        const icons = ['🍵', '🏮', '🏷️', '🎭', '🏯', '💚', '📜', '🥇', '📊', '🎋', '🎋', '🎴', '🎐', '🎑', '🎎', '🎏', '🎐', '🎏', '🎐', '🎎', '🎋', '🎐', '🎑', '🎏', '🎎', '🎐', '🎑', '🎏', '🎎', '🎋', '🎐', '🎑'];
+        const colors = ['#4A4A4A', '#6B5B4F', '#5D5149', '#3D3D3D', '#7A6B5D', '#5E6B5D', '#4C5866', '#8B7355', '#6E6357', '#4D4D4D', '#5A4F45', '#6B5B4F', '#7A6B5D', '#5B4F45', '#6A5E54', '#796E63'];
+        let selectedIcon = '🎋';
+        let selectedColor = '#4D4D4D';
 
         function showToast(message) {
             const toast = document.getElementById('toast');
