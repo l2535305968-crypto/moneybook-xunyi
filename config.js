@@ -1,5 +1,8 @@
 window.APP_CONFIG = {
     apiBaseUrl: 'https://159.75.91.40:3443'
+};
+
+(function() {
     const params = new URLSearchParams(window.location.search);
 
     const server = params.get('server');
