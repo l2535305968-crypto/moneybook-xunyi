@@ -877,6 +877,8 @@
         loadAccount();
     </script>
     <script>
+        let deferredPrompt;
+        
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -887,6 +889,28 @@
                         console.log('SW registration failed:', error);
                     });
             });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+
+        function showInstallButton() {
+            const installBtn = document.createElement('button');
+            installBtn.textContent = '📱 安装到桌面';
+            installBtn.style.cssText = 'position:fixed;bottom:80px;right:15px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:12px 20px;border-radius:25px;font-size:14px;cursor:pointer;z-index:1000;box-shadow:0 4px 15px rgba(102,126,234,0.4);';
+            installBtn.onclick = installPWA;
+            document.body.appendChild(installBtn);
+        }
+
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
         }
     </script>
 </body>
