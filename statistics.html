@@ -3,53 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📈 统计分析 - 记账本</title>
+    <title>墨记 · 统计分析</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
-        .header h1 { font-size: 20px; }
-        .header-links { display: flex; gap: 15px; margin-top: 10px; }
-        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
-        .main-content { max-width: 800px; margin: 0 auto; padding: 15px; }
-        .filter-bar { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .filter-btn { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 13px; }
-        .filter-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent; }
-        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
-        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .summary-card { text-align: center; padding: 15px; border-radius: 12px; }
-        .summary-card.income { background: #e8f5e9; }
-        .summary-card.expense { background: #ffebee; }
-        .summary-card.balance { background: #e3f2fd; }
-        .summary-label { font-size: 12px; color: #666; }
-        .summary-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
-        .summary-card.income .summary-value { color: #4CAF50; }
-        .summary-card.expense .summary-value { color: #f44336; }
-        .summary-card.balance .summary-value { color: #2196F3; }
-        .chart-container { position: relative; height: 250px; margin-bottom: 20px; }
-        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: #f8f7f5;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ink-header {
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+        .header-title {
+            font-size: 32px;
+            font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+            letter-spacing: 12px;
+            position: relative;
+        }
+        .header-title::after {
+            content: '●';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.3;
+        }
+        .header-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .header-links a {
+            color: #999;
+            text-decoration: none;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .header-links a:hover { color: #333; }
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+        .filter-bar {
+            background: #fff;
+            border-radius: 24px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .filter-btn {
+            padding: 10px 18px;
+            border: 1px solid #eee;
+            border-radius: 50px;
+            background: #fafafa;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active {
+            background: #333;
+            color: #fff;
+            border-color: #333;
+        }
+        .ink-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title {
+            font-size: 16px;
+            color: #999;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .summary-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 18px;
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+        }
+        .summary-label {
+            font-size: 13px;
+            color: #999;
+            letter-spacing: 1px;
+        }
+        .summary-value {
+            font-size: 24px;
+            font-weight: 500;
+            margin-top: 8px;
+            color: #333;
+        }
+        .summary-card.income .summary-value { color: #666; }
+        .summary-card.expense .summary-value { color: #333; }
+        .summary-card.balance .summary-value { color: #333; }
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-bottom: 25px;
+        }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
         @media (max-width: 600px) {
             .chart-row { grid-template-columns: 1fr; }
+            .summary-cards { grid-template-columns: 1fr; }
         }
-        .category-table { width: 100%; border-collapse: collapse; }
-        .category-table th, .category-table td { padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0; }
-        .category-table th { font-size: 12px; color: #999; font-weight: normal; }
-        .category-table td { font-size: 14px; }
-        .category-name { display: flex; align-items: center; gap: 8px; }
-        .category-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 800px; margin: 0 auto; }
-        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tab-item.active { color: #667eea; }
-        .tab-item-icon { font-size: 20px; }
+        .category-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .category-table th, .category-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f8f7f5;
+        }
+        .category-table th {
+            font-size: 12px;
+            color: #999;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+        .category-table td {
+            font-size: 14px;
+            color: #333;
+        }
+        .category-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .category-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .ink-tab-bar {
+            display: flex;
+            background: #fff;
+            border-top: 1px solid #f5f5f5;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8px 0 25px;
+        }
+        .ink-tab-item {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            color: #ccc;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s ease;
+        }
+        .ink-tab-item.active { color: #333; }
+        .ink-tab-icon { font-size: 20px; opacity: 0.9; }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #ccc;
+        }
+        .empty-state-icon {
+            font-size: 52px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📈 统计分析</h1>
+    <div class="ink-header">
+        <div class="header-title">统计分析</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
             <a href="accounts.html">🏦 账户</a>
@@ -66,7 +251,7 @@
             <button class="filter-btn" data-range="all" onclick="setTimeRange('all')">全部</button>
         </div>
 
-        <div class="section">
+        <div class="ink-card">
             <div class="summary-cards">
                 <div class="summary-card income">
                     <div class="summary-label">总收入</div>
@@ -82,46 +267,46 @@
                 </div>
             </div>
 
-            <div class="section-title">💸 支出构成</div>
+            <div class="ink-title">💸 支出构成</div>
             <div class="chart-container">
                 <canvas id="expensePieChart"></canvas>
             </div>
 
-            <div class="section-title">📅 每月趋势</div>
+            <div class="ink-title">📅 每月趋势</div>
             <div class="chart-container">
                 <canvas id="trendLineChart"></canvas>
             </div>
 
             <div class="chart-row">
                 <div>
-                    <div class="section-title">📊 收支对比</div>
+                    <div class="ink-title">📊 收支对比</div>
                     <div class="chart-container" style="height: 200px;">
                         <canvas id="comparisonBarChart"></canvas>
                     </div>
                 </div>
                 <div>
-                    <div class="section-title">🏷️ 分类明细</div>
+                    <div class="ink-title">🏷️ 分类明细</div>
                     <div id="categoryTable" style="max-height: 200px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="tab-bar">
-        <a href="index.html" class="tab-item">
-            <span class="tab-item-icon">🏠</span>
+    <div class="ink-tab-bar">
+        <a href="index.html" class="ink-tab-item">
+            <span class="ink-tab-icon">🏠</span>
             <span>首页</span>
         </a>
-        <a href="add.html" class="tab-item">
-            <span class="tab-item-icon">➕</span>
+        <a href="add.html" class="ink-tab-item">
+            <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
-        <a href="statistics.html" class="tab-item active">
-            <span class="tab-item-icon">📊</span>
+        <a href="statistics.html" class="ink-tab-item active">
+            <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="tab-item">
-            <span class="tab-item-icon">📤</span>
+        <a href="export.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📤</span>
             <span>导出</span>
         </a>
     </div>
@@ -239,7 +424,7 @@
                     plugins: {
                         legend: {
                             position: 'right',
-                            labels: { boxWidth: 12, padding: 10, font: { size: 11 } }
+                            labels: { boxWidth: 12, padding: 10, font: { size: 11 }, color: '#666' }
                         }
                     }
                 }
@@ -265,16 +450,16 @@
                         {
                             label: '收入',
                             data: incomeData,
-                            borderColor: '#4CAF50',
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            borderColor: '#666',
+                            backgroundColor: 'rgba(102, 102, 102, 0.1)',
                             fill: true,
                             tension: 0.4
                         },
                         {
                             label: '支出',
                             data: expenseData,
-                            borderColor: '#f44336',
-                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            borderColor: '#333',
+                            backgroundColor: 'rgba(51, 51, 51, 0.1)',
                             fill: true,
                             tension: 0.4
                         }
@@ -284,10 +469,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: { position: 'top', labels: { color: '#666' } }
                     },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { beginAtZero: true, ticks: { color: '#999' }, grid: { color: '#f0f0f0' } },
+                        x: { ticks: { color: '#999' }, grid: { color: '#f0f0f0' } }
                     }
                 }
             });
@@ -312,12 +498,12 @@
                         {
                             label: '收入',
                             data: incomeData,
-                            backgroundColor: '#4CAF50'
+                            backgroundColor: '#666'
                         },
                         {
                             label: '支出',
                             data: expenseData,
-                            backgroundColor: '#f44336'
+                            backgroundColor: '#333'
                         }
                     ]
                 },
@@ -328,7 +514,8 @@
                         legend: { display: false }
                     },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { beginAtZero: true, ticks: { color: '#999' }, grid: { color: '#f0f0f0' } },
+                        x: { ticks: { color: '#999' }, grid: { color: '#f0f0f0' } }
                     }
                 }
             });
@@ -356,7 +543,7 @@
             categoryData.sort((a, b) => (b.expense + b.income) - (a.expense + a.income));
 
             if (categoryData.length === 0) {
-                tableEl.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">暂无数据</div>';
+                tableEl.innerHTML = '<div class="empty-state" style="padding:30px;"><div class="empty-state-icon">📦</div><p>暂无数据</p></div>';
                 return;
             }
 
@@ -370,8 +557,8 @@
                                 ${cat.icon} ${cat.name}
                             </div>
                         </td>
-                        <td style="color: #f44336;">¥${cat.expense.toFixed(2)}</td>
-                        <td style="color: #4CAF50;">¥${cat.income.toFixed(2)}</td>
+                        <td style="color: #333;">¥${cat.expense.toFixed(2)}</td>
+                        <td style="color: #666;">¥${cat.income.toFixed(2)}</td>
                     </tr>
                 `;
             });

@@ -3,98 +3,503 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 群详情</title>
+    <title>墨记 · 群详情</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 20px; }
-        .back-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-        .main-content { max-width: 800px; margin: 0 auto; padding: 15px; padding-bottom: 80px; }
-
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-secondary { background: #f5f5f5; color: #333; }
-        .btn-small { padding: 8px 15px; font-size: 14px; }
-
-        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
-
-        .balance-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-        .balance-label { font-size: 14px; color: #666; margin-bottom: 10px; }
-        .balance-amount { font-size: 40px; font-weight: bold; color: #4CAF50; }
-        .account-list { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
-        .account-badge { background: #f0f0f0; padding: 10px 15px; border-radius: 20px; font-size: 13px; }
-        .account-badge span { color: #4CAF50; font-weight: bold; }
-
-        .quick-add { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .quick-add-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: #333; }
-        .type-toggle { display: flex; background: #f5f5f5; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
-        .type-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
-        .type-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .type-btn.expense.active { color: #f44336; }
-        .type-btn.income.active { color: #4CAF50; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
-        .form-group { flex: 1; }
-        .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
-        .amount-input { font-size: 20px !important; font-weight: bold; text-align: center; }
-        .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-
-        .record-list { max-height: 300px; overflow-y: auto; }
-        .record-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: #f8f7f5;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ink-header {
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title {
+            font-size: 32px;
+            font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+            letter-spacing: 12px;
+            position: relative;
+        }
+        .header-title::after {
+            content: '●';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.3;
+        }
+        .back-btn {
+            background: #f5f5f5;
+            border: none;
+            color: #666;
+            padding: 10px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover { background: #eee; color: #333; }
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+        .ink-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title {
+            font-size: 16px;
+            color: #999;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .balance-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+            text-align: center;
+        }
+        .balance-label {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 300;
+            color: #333;
+            letter-spacing: -1px;
+        }
+        .balance-amount::before { content: '¥ '; font-size: 24px; opacity: 0.6; }
+        .account-list {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .account-badge {
+            background: #fafafa;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            border: 1px solid #f0f0f0;
+            color: #666;
+        }
+        .account-badge span {
+            color: #333;
+            font-weight: 500;
+        }
+        .group-id-box {
+            margin-top: 15px;
+            padding: 14px 16px;
+            background: #fafafa;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f0f0f0;
+        }
+        .group-id-label {
+            font-size: 13px;
+            color: #999;
+            letter-spacing: 1px;
+        }
+        .group-id-value {
+            font-size: 13px;
+            color: #333;
+            font-family: monospace;
+        }
+        .copy-btn {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        .copy-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .type-toggle {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 6px;
+            margin-bottom: 20px;
+        }
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #999;
+            transition: all 0.3s ease;
+        }
+        .type-btn.active {
+            background: #fff;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #eee;
+            border-radius: 14px;
+            font-size: 14px;
+            background: #fafafa;
+            color: #333;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #ddd;
+            background: #fff;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .form-row .form-group { flex: 1; }
+        .amount-input {
+            font-size: 24px !important;
+            font-weight: 300;
+            text-align: center;
+            padding: 16px !important;
+            letter-spacing: 2px;
+        }
+        .ink-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        .ink-btn-primary {
+            background: #333;
+            color: #fff;
+        }
+        .ink-btn-primary:hover { background: #444; }
+        .ink-btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .ink-btn-secondary:hover { background: #eee; }
+        .ink-btn-small {
+            padding: 8px 14px;
+            font-size: 12px;
+            width: auto;
+        }
+        .ink-btn-danger {
+            background: #fafafa;
+            color: #666;
+        }
+        .ink-btn-danger:hover { background: #f5f5f5; color: #444; }
+        .record-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .record-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f8f7f5;
+            gap: 14px;
+        }
         .record-item:last-child { border-bottom: none; }
-        .record-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #f5f5f5; }
+        .record-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: #fafafa;
+        }
         .record-info { flex: 1; }
-        .record-category { font-size: 14px; font-weight: 500; color: #333; }
-        .record-remark { font-size: 12px; color: #999; margin-top: 2px; }
-        .record-amount { font-size: 15px; font-weight: 600; }
-        .record-amount.expense { color: #f44336; }
-        .record-amount.income { color: #4CAF50; }
-        .record-meta { font-size: 11px; color: #999; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
-        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
-
-        .member-list { display: flex; flex-direction: column; gap: 10px; }
-        .copy-btn { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-        .copy-btn:hover { background: #f0f0f0; }
-        .member-badge { background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
-        
-        .member-card { background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #eee; }
-        .member-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .member-name { font-size: 15px; font-weight: 600; color: #333; }
-        .creator-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .member-account { background: #f9f9f9; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        .account-label { font-size: 12px; color: #666; }
-        .account-id { font-size: 12px; color: #333; font-family: monospace; }
-        .member-stats { display: flex; gap: 15px; flex-wrap: wrap; }
-        .stat-item { display: flex; align-items: center; gap: 5px; background: #f9f9f9; padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+        .record-category {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        .record-remark {
+            font-size: 12px;
+            color: #999;
+            margin-top: 3px;
+        }
+        .record-amount {
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .record-amount.expense { color: #333; }
+        .record-amount.income { color: #666; }
+        .record-amount::before { content: '¥ '; font-size: 12px; opacity: 0.5; }
+        .record-meta {
+            font-size: 11px;
+            color: #ccc;
+        }
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .member-card {
+            background: #fafafa;
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid #f0f0f0;
+        }
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .member-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        .creator-badge {
+            background: #333;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .member-account {
+            background: #fff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #f0f0f0;
+        }
+        .account-label {
+            font-size: 12px;
+            color: #999;
+        }
+        .account-id {
+            font-size: 12px;
+            color: #333;
+            font-family: monospace;
+        }
+        .member-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            border: 1px solid #f0f0f0;
+        }
         .stat-icon { font-size: 14px; }
         .stat-value { color: #666; }
-        .stat-value.expense { color: #f44336; font-weight: 600; }
-        .stat-value.income { color: #4CAF50; font-weight: 600; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .stat-value.expense { color: #333; font-weight: 500; }
+        .stat-value.income { color: #666; font-weight: 500; }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #ccc;
+        }
+        .empty-state-icon {
+            font-size: 52px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
         .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 16px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-title { font-size: 16px; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .modal-body { padding: 20px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-group .btn { flex: 1; }
-
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .modal-content {
+            background: #fff;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            color: #333;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+        .modal-body { padding: 25px; }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-group .ink-btn { flex: 1; }
+        .icon-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .icon-option {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        .icon-option:hover { background: #f5f5f5; }
+        .icon-option.selected {
+            background: #fff;
+            border-color: #ddd;
+        }
+        .color-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .color-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .color-option.selected {
+            border-color: #333;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 50px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="ink-header">
         <div class="header-top">
             <button class="back-btn" onclick="location.href='groups.html'">◀ 返回</button>
-            <h1 id="groupName">群详情</h1>
+            <div class="header-title" id="groupName">群详情</div>
             <div style="width: 60px;"></div>
         </div>
     </div>
@@ -108,26 +513,24 @@
         <div id="detailContent" style="display: none;">
             <div class="balance-card">
                 <div class="balance-label">群总资金</div>
-                <div class="balance-amount" id="groupBalance">¥0.00</div>
+                <div class="balance-amount" id="groupBalance">0.00</div>
                 <div class="account-list" id="groupAccounts"></div>
-                <div style="margin-top:15px;padding:12px;background:#fff;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
-                    <div style="font-size:13px;color:#666;">
-                        <span style="color:#333;font-weight:600;">群ID:</span>
-                        <span id="groupIdDisplay" style="font-family:monospace;">-</span>
+                <div class="group-id-box">
+                    <div>
+                        <span class="group-id-label">群ID：</span>
+                        <span class="group-id-value" id="groupIdDisplay">-</span>
                     </div>
-                    <button class="copy-btn" onclick="copyGroupId()" style="padding:6px 12px;font-size:12px;">复制</button>
+                    <button class="copy-btn" onclick="copyGroupId()">复制</button>
                 </div>
             </div>
 
-            <div class="section">
-                <div class="section-title">
-                    <span>👥 群成员</span>
-                </div>
+            <div class="ink-card">
+                <div class="ink-title">👥 群成员</div>
                 <div class="member-list" id="memberList"></div>
             </div>
 
-            <div class="quick-add">
-                <div class="quick-add-title">📝 在群中记账</div>
+            <div class="ink-card">
+                <div class="ink-title">📝 在群中记账</div>
                 <div class="type-toggle">
                     <div class="type-btn expense active" onclick="setType('expense')">💸 支出</div>
                     <div class="type-btn income" onclick="setType('income')">💰 收入</div>
@@ -139,7 +542,7 @@
                             <select id="accountSelect" required></select>
                         </div>
                         <div class="form-group">
-                            <label>分类 <button type="button" onclick="openCategoryModal()" class="btn btn-small btn-secondary" style="padding:4px 8px;font-size:12px;">⚙️</button></label>
+                            <label>分类 <button type="button" onclick="openCategoryModal()" class="ink-btn ink-btn-secondary ink-btn-small">⚙️</button></label>
                             <select id="categorySelect" required></select>
                         </div>
                     </div>
@@ -157,14 +560,12 @@
                         <label>备注</label>
                         <input type="text" id="remarkInput" placeholder="可选">
                     </div>
-                    <button type="submit" class="submit-btn">保存记录</button>
+                    <button type="submit" class="ink-btn ink-btn-primary">保存记录</button>
                 </form>
             </div>
 
-            <div class="section">
-                <div class="section-title">
-                    <span>📜 群记账记录</span>
-                </div>
+            <div class="ink-card">
+                <div class="ink-title">📜 群记账记录</div>
                 <div class="record-list" id="recordList"></div>
             </div>
         </div>
@@ -191,8 +592,8 @@
                     </select>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="closeAddAccountModal()">取消</button>
-                    <button class="btn btn-primary" onclick="addAccount()">添加</button>
+                    <button class="ink-btn ink-btn-secondary" onclick="closeAddAccountModal()">取消</button>
+                    <button class="ink-btn ink-btn-primary" onclick="addAccount()">添加</button>
                 </div>
             </div>
         </div>
@@ -205,7 +606,7 @@
                 <button class="modal-close" onclick="closeCategoryModal()">×</button>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom:20px;padding:15px;background:#f9f9f9;border-radius:10px;">
+                <div style="margin-bottom: 25px; padding: 20px; background: #fafafa; border-radius: 18px; border: 1px solid #f0f0f0;">
                     <div class="form-group">
                         <label>分类名称</label>
                         <input type="text" id="newCategoryName" placeholder="输入分类名称" maxlength="10">
@@ -219,18 +620,18 @@
                     </div>
                     <div class="form-group">
                         <label>图标</label>
-                        <div id="iconSelect" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;"></div>
+                        <div class="icon-grid" id="iconSelect"></div>
                     </div>
                     <div class="form-group">
                         <label>颜色</label>
-                        <div id="colorSelect" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;"></div>
+                        <div class="color-grid" id="colorSelect"></div>
                     </div>
-                    <button class="btn btn-primary" onclick="addCategory()">➕ 添加分类</button>
+                    <button class="ink-btn ink-btn-primary" onclick="addCategory()">➕ 添加分类</button>
                 </div>
                 <div>
-                    <div style="display:flex;gap:10px;margin-bottom:15px;">
-                        <button class="btn btn-small" onclick="showCategoryType('expense')" id="expenseTypeBtn">支出</button>
-                        <button class="btn btn-small btn-secondary" onclick="showCategoryType('income')" id="incomeTypeBtn">收入</button>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button class="ink-btn ink-btn-primary ink-btn-small" onclick="showCategoryType('expense')" id="expenseTypeBtn">支出</button>
+                        <button class="ink-btn ink-btn-secondary ink-btn-small" onclick="showCategoryType('income')" id="incomeTypeBtn">收入</button>
                     </div>
                     <div id="categoryList"></div>
                 </div>
@@ -330,7 +731,7 @@
 
         function renderGroup() {
             const totalBalance = groupData.accounts ? groupData.accounts.reduce((sum, a) => sum + a.balance, 0) : 0;
-            document.getElementById('groupBalance').textContent = `¥${totalBalance.toFixed(2)}`;
+            document.getElementById('groupBalance').textContent = totalBalance.toFixed(2);
 
             const accountsHtml = groupData.accounts ? groupData.accounts.map(a => 
                 `<div class="account-badge">${a.name} <span>¥${a.balance.toFixed(2)}</span></div>`
@@ -367,7 +768,7 @@
                         </div>
                         ${isCreator ? `
                             <div class="member-account">
-                                <span class="account-label">账户ID:</span>
+                                <span class="account-label">账户ID：</span>
                                 <span class="account-id">${m.accountId}</span>
                             </div>
                         ` : ''}
@@ -390,8 +791,8 @@
                             </div>
                         </div>
                         ${canRemove ? `
-                            <div style="margin-top:10px;text-align:right;">
-                                <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;background:#ffebee;color:#c62828;" onclick="removeMember('${m.accountId}')">🚪 移出群</button>
+                            <div style="margin-top: 12px; text-align: right;">
+                                <button class="ink-btn ink-btn-danger ink-btn-small" onclick="removeMember('${m.accountId}')">🚪 移出群</button>
                             </div>
                         ` : ''}
                     </div>
@@ -459,8 +860,8 @@
             }).join('');
         }
 
-        async function submitRecord(e) {
-            e.preventDefault();
+        async function submitRecord(event) {
+            event.preventDefault();
 
             if (!groupData.accounts || groupData.accounts.length === 0) {
                 showToast('请先添加群账户');
@@ -515,8 +916,8 @@
 
         function showCategoryType(type) {
             categoryModalType = type;
-            document.getElementById('expenseTypeBtn').className = type === 'expense' ? 'btn btn-small' : 'btn btn-small btn-secondary';
-            document.getElementById('incomeTypeBtn').className = type === 'income' ? 'btn btn-small' : 'btn btn-small btn-secondary';
+            document.getElementById('expenseTypeBtn').className = type === 'expense' ? 'ink-btn ink-btn-primary ink-btn-small' : 'ink-btn ink-btn-secondary ink-btn-small';
+            document.getElementById('incomeTypeBtn').className = type === 'income' ? 'ink-btn ink-btn-primary ink-btn-small' : 'ink-btn ink-btn-secondary ink-btn-small';
             document.getElementById('newCategoryType').value = type;
             renderCategoryList();
         }
@@ -524,14 +925,14 @@
         function renderIconSelect() {
             const container = document.getElementById('iconSelect');
             container.innerHTML = icons.map(icon => 
-                `<div onclick="selectIcon('${icon}')" style="cursor:pointer;padding:6px;border-radius:6px;font-size:20px;${selectedIcon === icon ? 'background:#e0e0e0;border:2px solid #667eea' : ''}" title="${icon}">${icon}</div>`
+                `<div class="icon-option ${selectedIcon === icon ? 'selected' : ''}" onclick="selectIcon('${icon}')" title="${icon}">${icon}</div>`
             ).join('');
         }
 
         function renderColorSelect() {
             const container = document.getElementById('colorSelect');
             container.innerHTML = colors.map(color => 
-                `<div onclick="selectColor('${color}')" style="cursor:pointer;width:28px;height:28px;border-radius:50%;background:${color};${selectedColor === color ? 'border:2px solid #000' : 'border:1px solid #ddd'}" title="${color}"></div>`
+                `<div class="color-option ${selectedColor === color ? 'selected' : ''}" onclick="selectColor('${color}')" style="background:${color}" title="${color}"></div>`
             ).join('');
         }
 
@@ -594,15 +995,15 @@
             }
 
             container.innerHTML = filtered.map(c => `
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid #eee;">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:${c.color || '#e0e0e0'}">${c.icon || '📦'}</div>
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid #f8f7f5;">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; background:${c.color || '#fafafa'}">${c.icon || '📦'}</div>
                         <div>
-                            <div style="font-weight:600;">${c.name}</div>
-                            <div style="font-size:12px;color:#999;">${c.type === 'expense' ? '支出' : '收入'}${c.custom ? ' · 自定义' : ''}</div>
+                            <div style="font-weight:500; color:#333;">${c.name}</div>
+                            <div style="font-size:12px; color:#999;">${c.type === 'expense' ? '支出' : '收入'}${c.custom ? ' · 自定义' : ''}</div>
                         </div>
                     </div>
-                    ${c.custom ? `<button class="btn btn-small btn-secondary" onclick="deleteCategory('${c.id}')" style="padding:6px 12px;font-size:12px;">删除</button>` : ''}
+                    ${c.custom ? `<button class="ink-btn ink-btn-secondary ink-btn-small" onclick="deleteCategory('${c.id}')">删除</button>` : ''}
                 </div>
             `).join('');
         }

@@ -3,59 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📂 分类管理 - 记账本</title>
+    <title>墨记 · 分类管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
-        .header h1 { font-size: 20px; }
-        .header-links { display: flex; gap: 15px; margin-top: 10px; }
-        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
-        .main-content { max-width: 600px; margin: 0 auto; padding: 15px; }
-        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
-        .type-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .type-tab { flex: 1; padding: 12px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 14px; background: #f5f5f5; color: #666; }
-        .type-tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .category-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .category-item { display: flex; align-items: center; padding: 12px; border-radius: 12px; gap: 10px; cursor: pointer; transition: transform 0.2s; }
-        .category-item:hover { transform: scale(1.02); }
-        .category-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .category-name { font-size: 14px; font-weight: 500; color: #333; flex: 1; }
-        .category-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: white; }
-        .category-badge.system { background: #667eea; }
-        .category-badge.custom { background: #764ba2; }
-        .add-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; margin-top: 15px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif; 
+            background: #f8f7f5; 
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ink-header { 
+            background: #fff; 
+            color: #333; 
+            padding: 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid #eee;
+        }
+        .header-title { 
+            font-size: 32px; 
+            font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+            letter-spacing: 12px;
+            position: relative;
+        }
+        .header-title::after {
+            content: '●';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.3;
+        }
+        .header-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 10px;
+        }
+        .header-links a { 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 13px; 
+            opacity: 0.9; 
+        }
+        .header-links a:hover { color: #333; }
+        .main-content { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 15px;
+            padding-bottom: 100px;
+        }
+        .ink-card { 
+            background: #fff; 
+            border-radius: 24px; 
+            padding: 25px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title { 
+            font-size: 16px; 
+            color: #999; 
+            margin-bottom: 15px; 
+            letter-spacing: 4px;
+        }
+        .type-tabs { display: flex; gap: 12px; margin-bottom: 20px; }
+        .type-tab { flex: 1; padding: 14px; text-align: center; border-radius: 14px; cursor: pointer; font-size: 15px; background: #f5f5f5; color: #666; transition: all 0.3s; }
+        .type-tab.active { background: #333; color: #fff; }
+        .category-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .category-item { display: flex; align-items: center; padding: 16px; border-radius: 16px; gap: 12px; cursor: pointer; transition: transform 0.2s; background: #fafafa; border: 1px solid #f0f0f0; }
+        .category-item:hover { transform: scale(1.02); background: #f5f5f5; }
+        .category-icon { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .category-name { font-size: 15px; font-weight: 500; color: #333; flex: 1; }
+        .category-badge { font-size: 11px; padding: 4px 10px; border-radius: 10px; color: #fff; letter-spacing: 1px; }
+        .category-badge.system { background: #666; }
+        .category-badge.custom { background: #333; }
+        .ink-btn { 
+            padding: 10px 18px; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 14px; 
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        .ink-btn-primary { 
+            background: #333; 
+            color: #fff; 
+            width: 100%; 
+            padding: 16px;
+            margin-top: 15px;
+        }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .icon-picker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
-        .icon-option { width: 40px; height: 40px; border: 2px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
-        .icon-option.selected { border-color: #667eea; background: #f0f0ff; }
-        .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
-        .color-option { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            color: #999; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid #eee; 
+            border-radius: 14px; 
+            font-size: 14px; 
+            background: #fafafa;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; 
+            border-color: #ddd; 
+            background: #fff;
+        }
+        .icon-picker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+        .icon-option { width: 44px; height: 44px; border: 2px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: all 0.2s; }
+        .icon-option:hover { border-color: #333; background: #fafafa; }
+        .icon-option.selected { border-color: #333; background: #f5f5f5; }
+        .color-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+        .color-option { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; }
+        .color-option:hover { transform: scale(1.1); }
         .color-option.selected { border-color: #333; }
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-secondary { background: #f0f0f0; color: #333; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .btn-group .ink-btn { flex: 1; }
+        .ink-btn-secondary { background: #f5f5f5; color: #333; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
         .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .modal-title { font-size: 18px; font-weight: 500; letter-spacing: 2px; color: #333; }
+        .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #ccc; line-height: 1; }
+        .toast { 
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #333; 
+            color: #fff; 
+            padding: 14px 24px; 
+            border-radius: 50px; 
+            font-size: 14px; 
+            z-index: 2000; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
         .toast.show { opacity: 1; }
-        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; }
-        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tab-item.active { color: #667eea; }
-        .tab-item-icon { font-size: 20px; }
+        .ink-tab-bar { 
+            display: flex; 
+            background: #fff; 
+            border-top: 1px solid #f5f5f5; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 8px 0 25px;
+        }
+        .ink-tab-item { 
+            flex: 1; 
+            padding: 10px; 
+            text-align: center; 
+            text-decoration: none; 
+            color: #ccc; 
+            font-size: 11px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+            transition: color 0.3s ease;
+        }
+        .ink-tab-item.active { color: #333; }
+        .ink-tab-icon { font-size: 20px; opacity: 0.9; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📂 分类管理</h1>
+    <div class="ink-header">
+        <div class="header-title">分类管理</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
             <a href="accounts.html">🏦 账户</a>
@@ -65,13 +215,13 @@
     </div>
 
     <div class="main-content">
-        <div class="section">
+        <div class="ink-card">
             <div class="type-tabs">
                 <div class="type-tab active" data-type="expense" onclick="switchType('expense')">💸 支出分类</div>
                 <div class="type-tab" data-type="income" onclick="switchType('income')">💰 收入分类</div>
             </div>
             <div class="category-list" id="categoryList"></div>
-            <button class="add-btn" onclick="openAddModal()">➕ 添加分类</button>
+            <button class="ink-btn ink-btn-primary" onclick="openAddModal()">➕ 添加分类</button>
         </div>
     </div>
 
@@ -102,8 +252,8 @@
                     <div class="color-picker" id="colorPicker"></div>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="ink-btn ink-btn-secondary" onclick="closeAddModal()">取消</button>
+                    <button type="submit" class="ink-btn ink-btn-primary">保存</button>
                 </div>
             </form>
         </div>
@@ -130,8 +280,8 @@
                     <div class="color-picker" id="editColorPicker"></div>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="ink-btn ink-btn-secondary" onclick="closeEditModal()">取消</button>
+                    <button type="submit" class="ink-btn ink-btn-primary">保存</button>
                 </div>
             </form>
         </div>
@@ -139,21 +289,21 @@
 
     <div class="toast" id="toast"></div>
 
-    <div class="tab-bar">
-        <a href="index.html" class="tab-item">
-            <span class="tab-item-icon">🏠</span>
+    <div class="ink-tab-bar">
+        <a href="index.html" class="ink-tab-item">
+            <span class="ink-tab-icon">🏠</span>
             <span>首页</span>
         </a>
-        <a href="add.html" class="tab-item">
-            <span class="tab-item-icon">➕</span>
+        <a href="add.html" class="ink-tab-item">
+            <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
-        <a href="statistics.html" class="tab-item">
-            <span class="tab-item-icon">📊</span>
+        <a href="statistics.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="tab-item">
-            <span class="tab-item-icon">📤</span>
+        <a href="export.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📤</span>
             <span>导出</span>
         </a>
     </div>
@@ -165,11 +315,11 @@
         let accountData = null;
         let currentType = 'expense';
         let selectedIcon = '📦';
-        let selectedColor = '#FF6B6B';
+        let selectedColor = '#666';
 
         const icons = ['🍜', '🚗', '🛒', '🎮', '🏠', '💊', '📚', '💰', '📈', '📦', '👕', '✈️', '☕', '🎁', '💄', '🎵', '📱', '🏋️', '🛠️', '🌐', '🐱', '🐶', '👶', '🎓', '💪', '🌙', '☀️', '🌸', '🍕', '🍺', '🎬', '📷'];
 
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#DDA0DD', '#FFB6C1', '#87CEEB', '#D3D3D3', '#FFD700', '#90EE90', '#FFA07A', '#BA55D3', '#00CED1', '#FF69B4', '#8FBC8F', '#F0E68C'];
+        const colors = ['#666', '#999', '#333', '#555', '#777', '#444', '#888', '#aaa'];
 
         async function loadAccount() {
             try {
@@ -202,7 +352,7 @@
                 item.style.background = cat.color + '15';
                 item.onclick = () => openEditModal(cat.id);
                 item.innerHTML = `
-                    <div class="category-icon" style="background: ${cat.color}30;">${cat.icon}</div>
+                    <div class="category-icon" style="background: ${cat.color}25;">${cat.icon}</div>
                     <span class="category-name">${cat.name}</span>
                     <span class="category-badge ${cat.custom ? 'custom' : 'system'}">${cat.custom ? '自定义' : '系统'}</span>
                 `;
@@ -245,7 +395,7 @@
             if (pickerId === 'iconPicker') {
                 selectedIcon = icon;
             } else {
-                document.getElementById('editIconValue').value = icon;
+                document.getElementById('editIconValue')?.value || (window.editIconValue = icon);
             }
         }
 
@@ -256,7 +406,7 @@
             if (pickerId === 'colorPicker') {
                 selectedColor = color;
             } else {
-                document.getElementById('editColorValue').value = color;
+                document.getElementById('editColorValue')?.value || (window.editColorValue = color);
             }
         }
 
@@ -265,7 +415,7 @@
             document.getElementById('addCategoryForm').reset();
             document.getElementById('newCategoryType').value = currentType;
             selectedIcon = '📦';
-            selectedColor = '#FF6B6B';
+            selectedColor = '#666';
 
             const firstIcon = document.querySelector('#iconPicker .icon-option');
             const firstColor = document.querySelector('#colorPicker .color-option');
@@ -284,8 +434,8 @@
             document.getElementById('editModal').classList.add('show');
             document.getElementById('editCategoryId').value = id;
             document.getElementById('editCategoryName').value = cat.name;
-            document.getElementById('editIconValue').value = cat.icon;
-            document.getElementById('editColorValue').value = cat.color;
+            window.editIconValue = cat.icon;
+            window.editColorValue = cat.color;
 
             const iconPicker = document.getElementById('editIconPicker');
             iconPicker.querySelectorAll('.icon-option').forEach(opt => {
@@ -311,7 +461,7 @@
             const category = {
                 name: document.getElementById('newCategoryName').value,
                 icon: selectedIconEl ? selectedIconEl.textContent : '📦',
-                color: selectedColorEl ? selectedColorEl.style.background : '#FF6B6B',
+                color: selectedColorEl ? selectedColorEl.style.background : '#666',
                 type: document.getElementById('newCategoryType').value
             };
 
@@ -335,7 +485,7 @@
             const category = {
                 name: document.getElementById('editCategoryName').value,
                 icon: selectedIconEl ? selectedIconEl.textContent : '📦',
-                color: selectedColorEl ? selectedColorEl.style.background : '#FF6B6B'
+                color: selectedColorEl ? selectedColorEl.style.background : '#666'
             };
 
             try {

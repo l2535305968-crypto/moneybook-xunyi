@@ -3,65 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 管理后台 - 记账本</title>
+    <title>墨记 · 管理后台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
-        .header h1 { font-size: 20px; }
-        .header-links { display: flex; gap: 15px; margin-top: 10px; }
-        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
-        .main-content { max-width: 1000px; margin: 0 auto; padding: 15px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif; 
+            background: #f8f7f5; 
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ink-header { 
+            background: #fff; 
+            color: #333; 
+            padding: 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid #eee;
+        }
+        .header-title { 
+            font-size: 32px; 
+            font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+            letter-spacing: 12px;
+            position: relative;
+        }
+        .header-title::after {
+            content: '●';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.3;
+        }
+        .header-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 10px;
+        }
+        .header-links a { 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 13px; 
+            opacity: 0.9; 
+        }
+        .header-links a:hover { color: #333; }
+        .main-content { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 15px;
+        }
         .login-section { max-width: 400px; margin: 100px auto; text-align: center; }
-        .login-box { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
-        .login-box h2 { margin-bottom: 20px; font-size: 24px; }
-        .login-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 15px; }
-        .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
-        .login-btn:hover { opacity: 0.9; }
-        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; display: flex; justify-content: space-between; align-items: center; }
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: #f8f8ff; padding: 15px; border-radius: 12px; text-align: center; }
-        .stat-value { font-size: 24px; font-weight: bold; color: #667eea; }
-        .stat-label { font-size: 12px; color: #999; margin-top: 5px; }
+        .login-box { background: #fff; border-radius: 24px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
+        .login-box h2 { margin-bottom: 20px; font-size: 22px; color: #333; letter-spacing: 2px; }
+        .login-box input { width: 100%; padding: 14px 16px; border: 1px solid #eee; border-radius: 14px; font-size: 14px; margin-bottom: 15px; background: #fafafa; }
+        .ink-btn { 
+            padding: 10px 18px; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 14px; 
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        .ink-btn-primary { 
+            background: #333; 
+            color: #fff; 
+            width: 100%; 
+            padding: 16px;
+        }
+        .ink-card { 
+            background: #fff; 
+            border-radius: 24px; 
+            padding: 25px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title { 
+            font-size: 16px; 
+            color: #999; 
+            margin-bottom: 15px; 
+            letter-spacing: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: #fafafa; padding: 18px; border-radius: 18px; text-align: center; border: 1px solid #f0f0f0; }
+        .stat-value { font-size: 28px; font-weight: 500; color: #333; }
+        .stat-label { font-size: 12px; color: #999; margin-top: 5px; letter-spacing: 1px; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-        th { font-weight: 500; color: #999; font-size: 12px; }
+        th, td { padding: 14px 10px; text-align: left; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
+        th { font-weight: 500; color: #999; font-size: 12px; letter-spacing: 1px; }
         td { color: #333; }
         .account-cell { display: flex; align-items: center; gap: 8px; }
-        .account-id { font-family: monospace; font-size: 11px; color: #667eea; background: #f0f0ff; padding: 2px 6px; border-radius: 4px; }
-        .action-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 5px; }
-        .action-btn.view { background: #e3f2fd; color: #2196F3; }
-        .action-btn.adjust { background: #fff3e0; color: #FF9800; }
-        .action-btn.delete { background: #ffebee; color: #f44336; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .account-id { font-family: monospace; font-size: 11px; color: #666; background: #f5f5f5; padding: 4px 8px; border-radius: 8px; }
+        .action-btn { padding: 8px 14px; border: none; border-radius: 12px; cursor: pointer; font-size: 12px; margin-right: 6px; background: #f5f5f5; color: #666; }
+        .action-btn:hover { background: #eee; color: #333; }
+        .action-btn.approve { background: #e8f5e9; color: #2e7d32; }
+        .action-btn.reject { background: #ffebee; color: #c62828; }
+        .action-btn.export { background: #e3f2fd; color: #1565c0; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
         .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .detail-item { background: #f8f8ff; padding: 12px; border-radius: 8px; }
-        .detail-label { font-size: 11px; color: #999; margin-bottom: 3px; }
+        .modal-title { font-size: 18px; font-weight: 500; letter-spacing: 2px; color: #333; }
+        .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #ccc; line-height: 1; }
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .detail-item { background: #fafafa; padding: 14px; border-radius: 14px; border: 1px solid #f0f0f0; }
+        .detail-label { font-size: 11px; color: #999; margin-bottom: 5px; letter-spacing: 1px; }
         .detail-value { font-size: 14px; font-weight: 500; color: #333; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            color: #999; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid #eee; 
+            border-radius: 14px; 
+            font-size: 14px; 
+            background: #fafafa;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; 
+            border-color: #ddd; 
+            background: #fff;
+        }
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-secondary { background: #f0f0f0; color: #333; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .btn-group .ink-btn { flex: 1; }
+        .ink-btn-secondary { background: #f5f5f5; color: #333; }
+        .toast { 
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #333; 
+            color: #fff; 
+            padding: 14px 24px; 
+            border-radius: 50px; 
+            font-size: 14px; 
+            z-index: 2000; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
         .toast.show { opacity: 1; }
         .hidden { display: none !important; }
         .records-list { max-height: 300px; overflow-y: auto; }
-        .record-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .record-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
         .record-row:last-child { border-bottom: none; }
-        .no-data { text-align: center; padding: 30px; color: #999; }
-        .action-btn.approve { background: #e8f5e9; color: #4CAF50; }
-        .action-btn.reject { background: #ffebee; color: #f44336; }
-        .action-btn.export { background: #e3f2fd; color: #2196F3; }
-        .pending-badge { background: #fff3e0; color: #FF9800; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+        .no-data { text-align: center; padding: 40px; color: #ccc; }
+        .pending-badge { background: #fff3e0; color: #e65100; padding: 4px 10px; border-radius: 8px; font-size: 11px; }
         @media (max-width: 600px) {
             .stats-row { grid-template-columns: repeat(2, 1fr); }
             .detail-grid { grid-template-columns: 1fr; }
@@ -69,8 +192,8 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🔐 管理后台</h1>
+    <div class="ink-header">
+        <div class="header-title">管理后台</div>
         <div class="header-links">
             <a href="index.html">🏠 返回首页</a>
         </div>
@@ -81,7 +204,7 @@
             <div class="login-box">
                 <h2>🔑 管理员登录</h2>
                 <input type="password" id="adminKey" placeholder="请输入管理员密钥">
-                <button class="login-btn" onclick="adminLogin()">登录</button>
+                <button class="ink-btn ink-btn-primary" onclick="adminLogin()">登录</button>
             </div>
         </div>
 
@@ -105,8 +228,8 @@
                 </div>
             </div>
 
-            <div class="section">
-                <div class="section-title">
+            <div class="ink-card">
+                <div class="ink-title">
                     <span>➕ 直接创建账户</span>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: flex-end;">
@@ -114,14 +237,14 @@
                         <label>账户名称</label>
                         <input type="text" id="newAccountName" placeholder="输入账户名称" maxlength="20">
                     </div>
-                    <button class="btn btn-primary" onclick="createAccount()" style="white-space: nowrap;">创建账户</button>
+                    <button class="ink-btn ink-btn-primary" onclick="createAccount()" style="white-space: nowrap;">创建账户</button>
                 </div>
             </div>
 
-            <div class="section">
-                <div class="section-title">
+            <div class="ink-card">
+                <div class="ink-title">
                     <span>📝 账户申请列表</span>
-                    <button class="action-btn view" onclick="refreshRequests()">🔄 刷新</button>
+                    <button class="action-btn" onclick="refreshRequests()">🔄 刷新</button>
                 </div>
                 <div style="overflow-x: auto;">
                     <table>
@@ -139,10 +262,10 @@
                 </div>
             </div>
 
-            <div class="section">
-                <div class="section-title">
+            <div class="ink-card">
+                <div class="ink-title">
                     <span>📋 账户列表</span>
-                    <button class="action-btn view" onclick="refreshAccounts()">🔄 刷新</button>
+                    <button class="action-btn" onclick="refreshAccounts()">🔄 刷新</button>
                 </div>
                 <div style="overflow-x: auto;">
                     <table>
@@ -172,18 +295,18 @@
             </div>
             <div class="detail-grid" id="accountDetails"></div>
 
-            <div class="section" style="margin-top: 20px;">
-                <div class="section-title">💰 账户余额</div>
+            <div class="ink-card" style="margin-top: 20px; padding: 20px;">
+                <div class="ink-title" style="margin-bottom: 12px;">💰 账户余额</div>
                 <div id="accountBalances"></div>
             </div>
 
-            <div class="section">
-                <div class="section-title">📜 最近记账记录</div>
+            <div class="ink-card" style="padding: 20px;">
+                <div class="ink-title" style="margin-bottom: 12px;">📜 最近记账记录</div>
                 <div class="records-list" id="accountRecords"></div>
             </div>
 
-            <div class="section" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px;">
-                <div class="section-title" style="color: #856404;">
+            <div class="ink-card" style="background: #fff8e1; border-color: #ffe0b2; padding: 20px;">
+                <div class="ink-title" style="color: #e65100; margin-bottom: 12px;">
                     <span>⚙️ 调整账户余额</span>
                 </div>
                 <div class="form-group" style="margin-bottom: 10px;">
@@ -192,10 +315,10 @@
                         <input type="number" id="adjustAmount" placeholder="输入金额（正数增加，负数减少）" style="flex: 2;">
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="adjustBalance()">确认调整</button>
+                <button class="ink-btn ink-btn-primary" onclick="adjustBalance()">确认调整</button>
             </div>
             <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeDetailModal()">关闭</button>
+                <button class="ink-btn ink-btn-secondary" onclick="closeDetailModal()">关闭</button>
             </div>
         </div>
     </div>
@@ -215,8 +338,8 @@
                 <input type="text" id="editAccountName" placeholder="输入账户名称" maxlength="20">
             </div>
             <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
-                <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+                <button class="ink-btn ink-btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="ink-btn ink-btn-primary" onclick="saveEdit()">保存</button>
             </div>
         </div>
     </div>
@@ -227,13 +350,13 @@
                 <span class="modal-title">⚠️ 确认删除</span>
                 <button class="modal-close" onclick="closeDeleteModal()">×</button>
             </div>
-            <div style="text-align: center; padding: 20px;">
-                <p style="font-size: 16px; margin-bottom: 10px;">确定要删除这个账户吗？</p>
-                <p style="color: #f44336; font-weight: bold;">此操作不可恢复！</p>
+            <div style="text-align: center; padding: 30px;">
+                <p style="font-size: 16px; margin-bottom: 10px; color: #333;">确定要删除这个账户吗？</p>
+                <p style="color: #c62828; font-weight: 500;">此操作不可恢复！</p>
             </div>
             <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
-                <button class="btn btn-primary" style="background: #f44336;" onclick="deleteAccount()">确认删除</button>
+                <button class="ink-btn ink-btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="ink-btn ink-btn-primary" style="background: #c62828;" onclick="deleteAccount()">确认删除</button>
             </div>
         </div>
     </div>
@@ -316,7 +439,7 @@
             const pendingRequests = requests.filter(r => r.status === 'pending');
 
             if (pendingRequests.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">暂无申请</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ccc;">暂无申请</td></tr>';
                 return;
             }
 
@@ -418,7 +541,7 @@
             tbody.innerHTML = '';
 
             if (accounts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">暂无数据</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ccc;">暂无数据</td></tr>';
                 return;
             }
 
@@ -429,14 +552,14 @@
                     <td>${acc.name}</td>
                     <td>${acc.accountCount}</td>
                     <td>${acc.recordCount}</td>
-                    <td style="color: ${acc.totalBalance >= 0 ? '#4CAF50' : '#f44336'};">¥${acc.totalBalance.toFixed(2)}</td>
+                    <td style="color: ${acc.totalBalance >= 0 ? '#2e7d32' : '#c62828'};">¥${acc.totalBalance.toFixed(2)}</td>
                     <td>${new Date(acc.createTime).toLocaleDateString('zh-CN')}</td>
                     <td>
-                        <button class="action-btn view" onclick="viewAccount('${acc.id}')">查看</button>
-                        <button class="action-btn edit" onclick="openEditModal('${acc.id}', '${acc.name}')">编辑</button>
+                        <button class="action-btn" onclick="viewAccount('${acc.id}')">查看</button>
+                        <button class="action-btn" onclick="openEditModal('${acc.id}', '${acc.name}')">编辑</button>
                         <button class="action-btn export" onclick="exportAccount('${acc.id}', '${acc.name}')">导出</button>
-                        <button class="action-btn" style="background:#ff9800;" onclick="resetAccount('${acc.id}', '${acc.name}')">重置</button>
-                        <button class="action-btn delete" onclick="confirmDelete('${acc.id}')">删除</button>
+                        <button class="action-btn" style="background: #fff3e0; color: #e65100;" onclick="resetAccount('${acc.id}', '${acc.name}')">重置</button>
+                        <button class="action-btn" style="background: #ffebee; color: #c62828;" onclick="confirmDelete('${acc.id}')">删除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -489,7 +612,7 @@
             const balancesHtml = acc.accounts.map(a => `
                 <div class="detail-item">
                     <div class="detail-label">${a.name} (${a.type})</div>
-                    <div class="detail-value" style="color: ${a.balance >= 0 ? '#4CAF50' : '#f44336'};">¥${a.balance.toFixed(2)}</div>
+                    <div class="detail-value" style="color: ${a.balance >= 0 ? '#2e7d32' : '#c62828'};">¥${a.balance.toFixed(2)}</div>
                 </div>
             `).join('');
             document.getElementById('accountBalances').innerHTML = balancesHtml;
@@ -506,7 +629,7 @@
                     return `
                         <div class="record-row">
                             <span>${cat.icon} ${cat.name}</span>
-                            <span style="color: ${r.type === 'income' ? '#4CAF50' : '#f44336'};">
+                            <span style="color: ${r.type === 'income' ? '#2e7d32' : '#c62828'};">
                                 ${r.type === 'income' ? '+' : '-'}${parseFloat(r.amount).toFixed(2)}
                             </span>
                             <span style="color: #999;">${new Date(r.date).toLocaleDateString('zh-CN')}</span>

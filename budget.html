@@ -3,62 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 预算管理 - 记账本</title>
+    <title>墨记 · 预算管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
-        .header h1 { font-size: 20px; }
-        .header-links { display: flex; gap: 15px; margin-top: 10px; }
-        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
-        .main-content { max-width: 600px; margin: 0 auto; padding: 15px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif; 
+            background: #f8f7f5; 
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ink-header { 
+            background: #fff; 
+            color: #333; 
+            padding: 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid #eee;
+        }
+        .header-title { 
+            font-size: 32px; 
+            font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+            letter-spacing: 12px;
+            position: relative;
+        }
+        .header-title::after {
+            content: '●';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.3;
+        }
+        .header-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 10px;
+        }
+        .header-links a { 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 13px; 
+            opacity: 0.9; 
+        }
+        .header-links a:hover { color: #333; }
+        .main-content { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 15px;
+            padding-bottom: 100px;
+        }
         .month-selector { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px; }
-        .month-nav { background: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        .month-display { font-size: 18px; font-weight: 600; color: #333; }
-        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
-        .total-budget { text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px; }
-        .total-budget-label { font-size: 13px; opacity: 0.9; }
-        .total-budget-amount { font-size: 32px; font-weight: bold; margin: 5px 0; }
-        .total-budget-progress { height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 10px; }
-        .total-budget-progress-bar { height: 100%; background: white; border-radius: 4px; transition: width 0.3s; }
-        .budget-card { display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; gap: 12px; }
-        .budget-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .month-nav { background: #fff; border: 1px solid #eee; padding: 10px 16px; border-radius: 14px; cursor: pointer; font-size: 16px; color: #666; }
+        .month-display { font-size: 18px; font-weight: 500; color: #333; }
+        .ink-card { 
+            background: #fff; 
+            border-radius: 24px; 
+            padding: 25px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title { 
+            font-size: 16px; 
+            color: #999; 
+            margin-bottom: 15px; 
+            letter-spacing: 4px;
+        }
+        .total-budget { text-align: center; padding: 25px; background: linear-gradient(135deg, #333 0%, #555 100%); border-radius: 18px; color: #fff; margin-bottom: 20px; }
+        .total-budget-label { font-size: 13px; opacity: 0.9; letter-spacing: 1px; }
+        .total-budget-amount { font-size: 36px; font-weight: 500; margin: 10px 0; }
+        .total-budget-progress { height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 15px; }
+        .total-budget-progress-bar { height: 100%; background: #fff; border-radius: 4px; transition: width 0.3s; }
+        .budget-card { display: flex; align-items: center; padding: 16px; border-radius: 16px; margin-bottom: 12px; gap: 14px; background: #fafafa; border: 1px solid #f0f0f0; }
+        .budget-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .budget-info { flex: 1; }
-        .budget-name { font-size: 14px; font-weight: 500; color: #333; }
-        .budget-progress { height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 6px; }
+        .budget-name { font-size: 15px; font-weight: 500; color: #333; }
+        .budget-progress { height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 8px; }
         .budget-progress-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
         .budget-stats { text-align: right; }
-        .budget-spent { font-size: 14px; font-weight: 600; color: #333; }
-        .budget-remaining { font-size: 11px; color: #999; }
-        .budget-over { color: #f44336; }
-        .add-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; margin-top: 15px; }
+        .budget-spent { font-size: 16px; font-weight: 500; color: #333; }
+        .budget-remaining { font-size: 12px; color: #999; margin-top: 4px; }
+        .budget-over { color: #c62828; }
+        .ink-btn { 
+            padding: 10px 18px; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 14px; 
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        .ink-btn-primary { 
+            background: #333; 
+            color: #fff; 
+            width: 100%; 
+            padding: 16px;
+            margin-top: 15px;
+        }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            color: #999; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid #eee; 
+            border-radius: 14px; 
+            font-size: 14px; 
+            background: #fafafa;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; 
+            border-color: #ddd; 
+            background: #fff;
+        }
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-secondary { background: #f0f0f0; color: #333; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .btn-group .ink-btn { flex: 1; }
+        .ink-btn-secondary { background: #f5f5f5; color: #333; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
         .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 450px; }
+        .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .empty-state { text-align: center; padding: 40px; color: #999; }
-        .empty-state-icon { font-size: 48px; margin-bottom: 10px; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .modal-title { font-size: 18px; font-weight: 500; letter-spacing: 2px; color: #333; }
+        .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #ccc; line-height: 1; }
+        .empty-state { text-align: center; padding: 50px 20px; color: #ccc; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
+        .toast { 
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #333; 
+            color: #fff; 
+            padding: 14px 24px; 
+            border-radius: 50px; 
+            font-size: 14px; 
+            z-index: 2000; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
         .toast.show { opacity: 1; }
-        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; }
-        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tab-item.active { color: #667eea; }
-        .tab-item-icon { font-size: 20px; }
+        .ink-tab-bar { 
+            display: flex; 
+            background: #fff; 
+            border-top: 1px solid #f5f5f5; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 8px 0 25px;
+        }
+        .ink-tab-item { 
+            flex: 1; 
+            padding: 10px; 
+            text-align: center; 
+            text-decoration: none; 
+            color: #ccc; 
+            font-size: 11px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+            transition: color 0.3s ease;
+        }
+        .ink-tab-item.active { color: #333; }
+        .ink-tab-icon { font-size: 20px; opacity: 0.9; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📊 预算管理</h1>
+    <div class="ink-header">
+        <div class="header-title">预算管理</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
             <a href="accounts.html">🏦 账户</a>
@@ -74,11 +222,11 @@
             <button class="month-nav" onclick="changeMonth(1)">▶</button>
         </div>
 
-        <div class="section">
+        <div class="ink-card">
             <div class="total-budget">
                 <div class="total-budget-label">本月总预算</div>
                 <div class="total-budget-amount" id="totalBudgetAmount">¥0.00</div>
-                <div style="font-size: 12px; opacity: 0.9;">
+                <div style="font-size: 13px; opacity: 0.9;">
                     <span id="totalSpent">已花费 ¥0.00</span> / <span id="totalBudgetDisplay">预算 ¥0.00</span>
                 </div>
                 <div class="total-budget-progress">
@@ -86,9 +234,9 @@
                 </div>
             </div>
 
-            <div class="section-title">📋 分类预算</div>
+            <div class="ink-title">📋 分类预算</div>
             <div id="budgetList"></div>
-            <button class="add-btn" onclick="openAddModal()">➕ 添加预算</button>
+            <button class="ink-btn ink-btn-primary" onclick="openAddModal()">➕ 添加预算</button>
         </div>
     </div>
 
@@ -110,8 +258,8 @@
                     <input type="number" id="newBudgetAmount" placeholder="0.00" step="0.01" min="0" required>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="ink-btn ink-btn-secondary" onclick="closeAddModal()">取消</button>
+                    <button type="submit" class="ink-btn ink-btn-primary">保存</button>
                 </div>
             </form>
         </div>
@@ -119,21 +267,21 @@
 
     <div class="toast" id="toast"></div>
 
-    <div class="tab-bar">
-        <a href="index.html" class="tab-item">
-            <span class="tab-item-icon">🏠</span>
+    <div class="ink-tab-bar">
+        <a href="index.html" class="ink-tab-item">
+            <span class="ink-tab-icon">🏠</span>
             <span>首页</span>
         </a>
-        <a href="add.html" class="tab-item">
-            <span class="tab-item-icon">➕</span>
+        <a href="add.html" class="ink-tab-item">
+            <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
-        <a href="statistics.html" class="tab-item">
-            <span class="tab-item-icon">📊</span>
+        <a href="statistics.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="tab-item">
-            <span class="tab-item-icon">📤</span>
+        <a href="export.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📤</span>
             <span>导出</span>
         </a>
     </div>
@@ -215,9 +363,9 @@
             document.getElementById('totalProgressBar').style.width = `${totalPercent}%`;
 
             if (totalSpent > totalBudgetAmount && totalBudgetAmount > 0) {
-                document.getElementById('totalProgressBar').style.background = '#f44336';
+                document.getElementById('totalProgressBar').style.background = '#c62828';
             } else {
-                document.getElementById('totalProgressBar').style.background = 'white';
+                document.getElementById('totalProgressBar').style.background = '#fff';
             }
 
             const listEl = document.getElementById('budgetList');
@@ -238,7 +386,7 @@
             accountData.categories.forEach(c => categoryMap[c.id] = c);
 
             categoryBudgets.forEach(budget => {
-                const cat = categoryMap[budget.categoryId] || { icon: '📦', name: '未知', color: '#D3D3D3' };
+                const cat = categoryMap[budget.categoryId] || { icon: '📦', name: '未知', color: '#999' };
                 const spent = expensesByCategory[budget.categoryId] || 0;
                 const percent = budget.amount > 0 ? Math.min((spent / budget.amount) * 100, 100) : 0;
                 const remaining = budget.amount - spent;
@@ -247,11 +395,11 @@
                 const card = document.createElement('div');
                 card.className = 'budget-card';
                 card.innerHTML = `
-                    <div class="budget-icon" style="background: ${cat.color}30;">${cat.icon}</div>
+                    <div class="budget-icon" style="background: ${cat.color}20;">${cat.icon}</div>
                     <div class="budget-info">
                         <div class="budget-name">${cat.name}</div>
                         <div class="budget-progress">
-                            <div class="budget-progress-bar" style="width: ${percent}%; background: ${isOver ? '#f44336' : cat.color};"></div>
+                            <div class="budget-progress-bar" style="width: ${percent}%; background: ${isOver ? '#c62828' : cat.color};"></div>
                         </div>
                     </div>
                     <div class="budget-stats">

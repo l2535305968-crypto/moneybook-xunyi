@@ -3,61 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>➕ 记账 - 记账本</title>
+    <title>墨记 · 记账</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; }
-        .header h1 { font-size: 20px; }
-        .header-links { display: flex; gap: 15px; margin-top: 10px; }
-        .header-links a { color: white; text-decoration: none; font-size: 13px; opacity: 0.9; }
-        .main-content { max-width: 600px; margin: 0 auto; padding: 15px; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
-        .type-toggle { display: flex; background: #f5f5f5; border-radius: 12px; padding: 5px; margin-bottom: 20px; }
-        .type-btn { flex: 1; padding: 12px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 15px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .type-btn.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .type-btn.expense.active { color: #f44336; }
-        .type-btn.income.active { color: #4CAF50; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif; 
+            background: #f8f7f5; 
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ink-header { 
+            background: #fff; 
+            color: #333; 
+            padding: 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid #eee;
+        }
+        .header-title { 
+            font-size: 32px; 
+            font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
+            letter-spacing: 12px;
+            position: relative;
+        }
+        .header-title::after {
+            content: '●';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.3;
+        }
+        .header-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 10px;
+        }
+        .header-links a { 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 13px; 
+            opacity: 0.9; 
+        }
+        .header-links a:hover { color: #333; }
+        .main-content { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 15px;
+            padding-bottom: 100px;
+        }
+        .ink-card { 
+            background: #fff; 
+            border-radius: 24px; 
+            padding: 25px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0f0f0;
+        }
+        .ink-title { 
+            font-size: 16px; 
+            color: #999; 
+            margin-bottom: 15px; 
+            letter-spacing: 4px;
+        }
+        .type-toggle { display: flex; background: #f5f5f5; border-radius: 16px; padding: 6px; margin-bottom: 20px; }
+        .type-btn { flex: 1; padding: 14px; text-align: center; border-radius: 12px; cursor: pointer; font-size: 15px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; color: #666; }
+        .type-btn.active { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: #333; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 14px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
-        .amount-input { font-size: 28px !important; font-weight: bold; text-align: center; }
-        .form-row { display: flex; gap: 10px; }
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            color: #999; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid #eee; 
+            border-radius: 14px; 
+            font-size: 14px; 
+            background: #fafafa;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; 
+            border-color: #ddd; 
+            background: #fff;
+        }
+        .amount-input { font-size: 32px !important; font-weight: 500; text-align: center; color: #333; }
+        .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
         .category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px; }
-        .category-item { padding: 12px 8px; text-align: center; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
-        .category-item:hover { transform: scale(1.05); }
-        .category-item.selected { border-color: #667eea; background: #f0f0ff; }
+        .category-item { padding: 12px 8px; text-align: center; border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; background: #fafafa; }
+        .category-item:hover { transform: scale(1.05); background: #f5f5f5; }
+        .category-item.selected { border-color: #333; background: #f5f5f5; }
         .category-icon { font-size: 24px; margin-bottom: 5px; }
-        .category-name { font-size: 11px; color: #666; }
-        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .submit-btn:hover { opacity: 0.9; }
-        .bill-section { background: #f8f8ff; border-radius: 12px; padding: 15px; margin-top: 20px; }
+        .category-name { font-size: 11px; color: #999; }
+        .ink-btn { 
+            padding: 10px 18px; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 14px; 
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        .ink-btn-primary { 
+            background: #333; 
+            color: #fff; 
+            width: 100%; 
+            padding: 16px;
+        }
+        .bill-section { background: #fafafa; border-radius: 18px; padding: 18px; margin-top: 20px; }
         .bill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; }
-        .bill-title { font-size: 14px; color: #666; display: flex; align-items: center; gap: 5px; }
-        .bill-toggle { font-size: 12px; color: #999; }
+        .bill-title { font-size: 14px; color: #999; display: flex; align-items: center; gap: 5px; letter-spacing: 1px; }
+        .bill-toggle { font-size: 12px; color: #ccc; }
         .bill-content { display: none; }
         .bill-content.show { display: block; }
         .bill-source-btns { display: flex; gap: 10px; margin: 10px 0; }
-        .bill-source-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; text-align: center; }
-        .bill-source-btn.active { background: #667eea; color: white; border-color: #667eea; }
-        .bill-textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 10px; padding: 12px; font-size: 14px; resize: none; }
-        .parse-result { margin-top: 10px; padding: 12px; background: white; border-radius: 10px; font-size: 14px; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .bill-source-btn { flex: 1; padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #fff; cursor: pointer; font-size: 14px; text-align: center; color: #666; }
+        .bill-source-btn.active { background: #333; color: #fff; border-color: #333; }
+        .bill-textarea { width: 100%; height: 100px; border: 1px solid #eee; border-radius: 14px; padding: 14px; font-size: 14px; resize: none; background: #fafafa; }
+        .parse-result { margin-top: 10px; padding: 14px; background: #fff; border-radius: 14px; font-size: 14px; border: 1px solid #eee; }
+        .toast { 
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #333; 
+            color: #fff; 
+            padding: 14px 24px; 
+            border-radius: 50px; 
+            font-size: 14px; 
+            z-index: 2000; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
         .toast.show { opacity: 1; }
-        .tab-bar { display: flex; background: white; border-top: 1px solid #eee; position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; }
-        .tab-item { flex: 1; padding: 10px; text-align: center; text-decoration: none; color: #999; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tab-item.active { color: #667eea; }
-        .tab-item-icon { font-size: 20px; }
+        .ink-tab-bar { 
+            display: flex; 
+            background: #fff; 
+            border-top: 1px solid #f5f5f5; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 8px 0 25px;
+        }
+        .ink-tab-item { 
+            flex: 1; 
+            padding: 10px; 
+            text-align: center; 
+            text-decoration: none; 
+            color: #ccc; 
+            font-size: 11px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+            transition: color 0.3s ease;
+        }
+        .ink-tab-item.active { color: #333; }
+        .ink-tab-icon { font-size: 20px; opacity: 0.9; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>➕ 记账</h1>
+    <div class="ink-header">
+        <div class="header-title">记账</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
             <a href="accounts.html">🏦 账户</a>
@@ -66,8 +209,8 @@
     </div>
 
     <div class="main-content">
-        <div class="card">
-            <div class="card-title">💰 记账金额</div>
+        <div class="ink-card">
+            <div class="ink-title">💰 记账金额</div>
             <div class="type-toggle">
                 <div class="type-btn expense active" data-type="expense" onclick="switchType('expense')">
                     <span>💸</span> 支出
@@ -110,7 +253,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">保存记录</button>
+                <button type="submit" class="ink-btn ink-btn-primary">保存记录</button>
             </form>
 
             <div class="bill-section">
@@ -124,7 +267,7 @@
                         <div class="bill-source-btn" data-source="alipay" onclick="selectBillSource('alipay')">支付宝</div>
                     </div>
                     <textarea class="bill-textarea" id="billText" placeholder="粘贴账单文本，自动识别金额、日期..."></textarea>
-                    <button class="submit-btn" style="margin-top: 10px; padding: 12px;" onclick="parseBill()">识别账单</button>
+                    <button class="ink-btn ink-btn-primary" style="margin-top: 10px; padding: 12px;" onclick="parseBill()">识别账单</button>
                     <div class="parse-result" id="parseResult" style="display: none;"></div>
                 </div>
             </div>
@@ -133,21 +276,21 @@
 
     <div class="toast" id="toast"></div>
 
-    <div class="tab-bar">
-        <a href="index.html" class="tab-item">
-            <span class="tab-item-icon">🏠</span>
+    <div class="ink-tab-bar">
+        <a href="index.html" class="ink-tab-item">
+            <span class="ink-tab-icon">🏠</span>
             <span>首页</span>
         </a>
-        <a href="add.html" class="tab-item active">
-            <span class="tab-item-icon">➕</span>
+        <a href="add.html" class="ink-tab-item active">
+            <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
-        <a href="statistics.html" class="tab-item">
-            <span class="tab-item-icon">📊</span>
+        <a href="statistics.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="tab-item">
-            <span class="tab-item-icon">📤</span>
+        <a href="export.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📤</span>
             <span>导出</span>
         </a>
     </div>
@@ -218,7 +361,7 @@
                     <div class="category-icon">${cat.icon}</div>
                     <div class="category-name">${cat.name}</div>
                 `;
-                item.addEventListener('click', () => selectCategory(cat.id));
+                item.onclick = () => selectCategory(cat.id);
                 grid.appendChild(item);
             });
         }
@@ -277,7 +420,7 @@
                     const parseResultEl = document.getElementById('parseResult');
                     parseResultEl.style.display = 'block';
                     parseResultEl.innerHTML = `
-                        <div style="color: #4CAF50; margin-bottom: 5px;">✅ 识别成功</div>
+                        <div style="color: #333; margin-bottom: 5px;">✅ 识别成功</div>
                         <div>金额: <strong>¥${result.amount}</strong></div>
                         <div>类型: ${result.type === 'income' ? '收入' : '支出'}</div>
                         ${result.remark ? `<div>备注: ${result.remark}</div>` : ''}
