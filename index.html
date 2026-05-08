@@ -894,7 +894,11 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            showInstallButton();
+        });
+
+        // 页面加载完成后就显示按钮！
+        window.addEventListener('load', () => {
+            setTimeout(showInstallButton, 1000);
         });
 
         function showInstallButton() {
@@ -907,9 +911,13 @@
 
         async function installPWA() {
             if (deferredPrompt) {
+                // 如果有原生安装提示，使用它
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 deferredPrompt = null;
+            } else {
+                // 如果没有，显示手动安装说明
+                alert('📱 请手动添加到桌面：\n\n✅ iPhone: 点击分享按钮 → 添加到主屏幕\n✅ Android: 点击菜单 → 安装应用');
             }
         }
     </script>
