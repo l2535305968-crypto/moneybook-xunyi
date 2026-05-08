@@ -9,31 +9,171 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif; 
-            background: #f8f7f5; 
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f1e 100%);
             min-height: 100vh;
-            color: #333;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* 登录界面 */
+        .login-section { 
+            display: none; 
+            min-height: 100vh; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+            position: relative;
+        }
+        .login-section.show { display: flex; }
+        
+        .login-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 0;
         }
         
-        /* 水墨风格的配色 */
+        .login-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(120, 180, 255, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(200, 150, 255, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 50%, rgba(100, 200, 150, 0.04) 0%, transparent 60%);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10px, -10px); }
+            50% { transform: translate(-10px, 10px); }
+            75% { transform: translate(10px, 10px); }
+        }
+        
+        .ink-login-card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px; 
+            padding: 50px 40px; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 420px; 
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+        .ink-login-logo { 
+            font-size: 42px; 
+            margin-bottom: 10px; 
+            letter-spacing: 12px;
+            font-weight: 300;
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ink-login-subtitle { 
+            color: rgba(255, 255, 255, 0.6); 
+            margin-bottom: 40px; 
+            font-size: 14px;
+            letter-spacing: 4px;
+        }
+        .ink-input { 
+            width: 100%; 
+            padding: 16px 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 14px; 
+            font-size: 15px; 
+            margin-bottom: 18px; 
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .ink-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+        .ink-input:focus { 
+            outline: none; 
+            border-color: rgba(255, 255, 255, 0.3); 
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .ink-login-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(135deg, #3a3a5c 0%, #2a2a4c 100%); 
+            color: #fff; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 14px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            letter-spacing: 3px;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
+        .ink-login-btn:hover { 
+            background: linear-gradient(135deg, #4a4a6c 0%, #3a3a5c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .ink-login-btn.alt { 
+            background: rgba(255, 255, 255, 0.05); 
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .login-hint { 
+            margin-top: 25px; 
+            font-size: 12px; 
+            color: rgba(255, 255, 255, 0.4); 
+        }
+        .divider { 
+            margin: 30px 0; 
+            height: 1px; 
+            background: rgba(255, 255, 255, 0.1); 
+            position: relative;
+        }
+        .divider::before {
+            content: '或';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 46, 0.95);
+            padding: 0 15px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+        }
+
+        /* 主界面 */
         .ink-header { 
-            background: #fff; 
-            color: #333; 
+            background: rgba(15, 15, 30, 0.8); 
+            backdrop-filter: blur(20px);
+            color: #fff; 
             padding: 20px; 
             position: sticky; 
             top: 0; 
             z-index: 100; 
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
         .header-title { 
             font-size: 24px; 
-            font-weight: 500; 
-            letter-spacing: 4px;
+            font-weight: 300; 
+            letter-spacing: 6px;
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .account-selector { 
-            background: #f5f5f5; 
-            border: none; 
-            color: #333; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: #fff; 
             padding: 10px 16px; 
             border-radius: 20px; 
             font-size: 14px; 
@@ -44,46 +184,143 @@
             gap: 20px; 
             margin-top: 15px; 
             padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
         .header-links a { 
-            color: #666; 
+            color: rgba(255, 255, 255, 0.6); 
             text-decoration: none; 
             font-size: 13px; 
+            transition: color 0.3s ease;
         }
-        .header-links a:hover { color: #333; }
+        .header-links a:hover { color: #fff; }
 
         .main-content { 
             max-width: 700px; 
             margin: 0 auto; 
-            padding: 20px;
+            padding: 20px 20px 100px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 水墨风格卡片 */
+        /* 星图区域 */
+        .star-map {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+        
+        .connection-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(150, 200, 255, 0.3), transparent);
+            transform-origin: left center;
+        }
+        
+        .star-node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        
+        .star-node:hover {
+            transform: scale(1.1);
+        }
+        
+        .star-glow {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 180, 255, 0.2) 0%, transparent 70%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        .star-body {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+            z-index: 1;
+        }
+        
+        .star-label {
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        .star-name {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+        
+        .star-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* 位置安排 */
+        .star-node:nth-child(1) { top: 10%; left: 50%; transform: translateX(-50%); }
+        .star-node:nth-child(2) { top: 30%; left: 15%; }
+        .star-node:nth-child(3) { top: 30%; right: 15%; }
+        .star-node:nth-child(4) { top: 60%; left: 25%; }
+        .star-node:nth-child(5) { top: 60%; right: 25%; }
+        .star-node:nth-child(6) { top: 85%; left: 50%; transform: translateX(-50%); }
+
+        /* 水墨卡片 */
         .ink-card { 
-            background: #fff; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px; 
             padding: 30px; 
             margin-bottom: 20px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            border: 1px solid #f0f0f0;
+            backdrop-filter: blur(10px);
         }
         .ink-title { 
-            font-size: 14px; 
-            color: #999; 
+            font-size: 13px; 
+            color: rgba(255, 255, 255, 0.5); 
             margin-bottom: 10px; 
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
         .ink-balance { 
             font-size: 48px; 
             font-weight: 300; 
-            color: #333; 
+            color: #fff; 
             line-height: 1.2;
             letter-spacing: -1px;
         }
-        .ink-balance.positive { color: #333; }
-        .ink-balance.negative { color: #666; }
-        .ink-balance::before { content: '¥ '; font-size: 24px; opacity: 0.6; }
+        .ink-balance.positive { color: #9effc0; }
+        .ink-balance.negative { color: #ff9e9e; }
+        .ink-balance::before { 
+            content: '¥ '; 
+            font-size: 24px; 
+            opacity: 0.5; 
+            color: #fff;
+        }
 
         .account-chips { 
             display: flex; 
@@ -92,11 +329,12 @@
             flex-wrap: wrap; 
         }
         .ink-chip { 
-            background: #f8f7f5; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 10px 18px; 
             border-radius: 50px; 
             font-size: 13px; 
-            color: #666;
+            color: rgba(255, 255, 255, 0.7);
             display: flex; 
             align-items: center; 
             gap: 8px;
@@ -108,7 +346,8 @@
         }
         .type-toggle { 
             display: flex; 
-            background: #f5f5f5; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px; 
             padding: 6px; 
             margin-bottom: 25px;
@@ -120,35 +359,36 @@
             border-radius: 12px; 
             cursor: pointer; 
             font-size: 15px; 
-            color: #999;
+            color: rgba(255, 255, 255, 0.5);
             transition: all 0.3s ease;
         }
         .type-btn.active { 
-            background: #fff; 
-            color: #333;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fff;
         }
         .form-group { margin-bottom: 18px; }
         .form-group label { 
             display: block; 
             font-size: 13px; 
-            color: #999; 
+            color: rgba(255, 255, 255, 0.5); 
             margin-bottom: 8px; 
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
         .form-group input, .form-group select { 
             width: 100%; 
             padding: 14px 18px; 
-            border: 1px solid #eee; 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
             border-radius: 12px; 
             font-size: 15px; 
-            background: #fafafa;
-            color: #333;
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
         }
+        .form-group input::placeholder { color: rgba(255, 255, 255, 0.3); }
+        .form-group select option { background: #1a1a2e; color: #fff; }
         .form-group input:focus, .form-group select:focus { 
             outline: none; 
-            border-color: #ddd; 
-            background: #fff;
+            border-color: rgba(255, 255, 255, 0.3); 
+            background: rgba(255, 255, 255, 0.06);
         }
         .form-row { 
             display: flex; 
@@ -165,125 +405,49 @@
         .ink-btn { 
             width: 100%; 
             padding: 16px; 
-            background: #333; 
+            background: linear-gradient(135deg, #3a3a5c 0%, #2a2a4c 100%); 
             color: #fff; 
-            border: none; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 16px; 
             font-size: 15px; 
             cursor: pointer; 
             margin-top: 8px;
-            letter-spacing: 2px;
-            transition: all 0.2s ease;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
         }
-        .ink-btn:hover { background: #444; }
+        .ink-btn:hover { 
+            background: linear-gradient(135deg, #4a4a6c 0%, #3a3a5c 100%);
+            transform: translateY(-2px);
+        }
         .ink-btn.secondary { 
-            background: #f0f0f0; 
-            color: #333;
-        }
-
-        /* 日历区域 */
-        .calendar-section {
-            background: #fff;
-            border-radius: 24px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            border: 1px solid #f0f0f0;
-        }
-        .calendar-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 25px; 
-        }
-        .calendar-nav { display: flex; gap: 8px; align-items: center; }
-        .calendar-nav button { 
-            background: #f5f5f5; 
-            border: none; 
-            padding: 10px 14px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            color: #666;
-        }
-        .calendar-title { 
-            font-size: 16px; 
-            font-weight: 400; 
-            letter-spacing: 2px;
-        }
-        .calendar-grid { 
-            display: grid; 
-            grid-template-columns: repeat(7, 1fr); 
-            gap: 5px; 
-        }
-        .calendar-day-header { 
-            text-align: center; 
-            font-size: 12px; 
-            color: #ccc; 
-            padding: 8px; 
-            letter-spacing: 1px;
-        }
-        .calendar-day { 
-            text-align: center; 
-            padding: 12px 5px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            position: relative; 
-            min-height: 55px; 
-            color: #666;
-            transition: all 0.2s ease;
-        }
-        .calendar-day:hover { background: #f8f7f5; }
-        .calendar-day.today { 
-            background: #333; 
-            color: #fff; 
-        }
-        .calendar-day.selected { 
-            background: #555; 
-            color: #fff; 
-        }
-        .calendar-day.other-month { color: #ddd; }
-        .day-expense { 
-            font-size: 10px; 
-            color: #666; 
-            position: absolute; 
-            bottom: 5px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-        }
-        .day-income { 
-            font-size: 10px; 
-            color: #333; 
-            position: absolute; 
-            bottom: 18px; 
-            left: 50%; 
-            transform: translateX(-50%); 
+            background: rgba(255, 255, 255, 0.05); 
+            color: rgba(255, 255, 255, 0.8);
         }
 
         /* 记录列表 */
         .records-section {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            border: 1px solid #f0f0f0;
+            backdrop-filter: blur(10px);
         }
         .section-header { 
             font-size: 15px; 
             margin-bottom: 20px; 
-            color: #333; 
+            color: rgba(255, 255, 255, 0.9); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
         .record-list { max-height: 500px; overflow-y: auto; }
         .record-item { 
             display: flex; 
             align-items: center; 
             padding: 16px 0; 
-            border-bottom: 1px solid #f8f7f5; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
             gap: 16px; 
         }
         .record-item:last-child { border-bottom: none; }
@@ -295,124 +459,40 @@
             align-items: center; 
             justify-content: center; 
             font-size: 22px; 
-            background: #f8f7f5;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .record-info { flex: 1; }
-        .record-category { font-size: 15px; color: #333; }
-        .record-remark { font-size: 12px; color: #999; margin-top: 3px; }
+        .record-category { font-size: 15px; color: #fff; }
+        .record-remark { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 3px; }
         .record-amount { 
             font-size: 16px; 
             font-weight: 400; 
             letter-spacing: 1px;
         }
-        .record-amount.expense { color: #333; }
-        .record-amount.income { color: #666; }
+        .record-amount.expense { color: #ff9e9e; }
+        .record-amount.income { color: #9effc0; }
         .record-amount::before { content: '¥ '; font-size: 12px; opacity: 0.5; }
-        .record-date { font-size: 12px; color: #ccc; }
+        .record-date { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
         .record-delete { 
             background: none; 
             border: none; 
-            color: #ddd; 
+            color: rgba(255, 255, 255, 0.3); 
             cursor: pointer; 
             padding: 5px; 
             font-size: 18px; 
         }
-        .record-delete:hover { color: #999; }
+        .record-delete:hover { color: rgba(255, 255, 255, 0.6); }
 
-        .empty-state { text-align: center; padding: 50px 20px; color: #ccc; }
+        .empty-state { text-align: center; padding: 50px 20px; color: rgba(255, 255, 255, 0.4); }
         .empty-state-icon { font-size: 52px; margin-bottom: 12px; opacity: 0.6; }
-
-        /* 登录界面 - 水墨风格 */
-        .login-section { 
-            display: none; 
-            min-height: 100vh; 
-            background: linear-gradient(180deg, #f8f7f5 0%, #f0f0f0 100%); 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px;
-        }
-        .login-section.show { display: flex; }
-        .ink-login-card { 
-            background: #fff; 
-            border-radius: 28px; 
-            padding: 50px 40px; 
-            text-align: center; 
-            width: 100%; 
-            max-width: 420px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
-        }
-        .ink-login-logo { 
-            font-size: 36px; 
-            margin-bottom: 10px; 
-            letter-spacing: 8px;
-            font-weight: 300;
-        }
-        .ink-login-subtitle { 
-            color: #999; 
-            margin-bottom: 40px; 
-            font-size: 14px;
-            letter-spacing: 2px;
-        }
-        .ink-input { 
-            width: 100%; 
-            padding: 16px 20px; 
-            border: 1px solid #eee; 
-            border-radius: 14px; 
-            font-size: 15px; 
-            margin-bottom: 18px; 
-            background: #fafafa;
-            transition: all 0.3s ease;
-        }
-        .ink-input:focus { 
-            outline: none; 
-            border-color: #ddd; 
-            background: #fff;
-        }
-        .ink-login-btn { 
-            width: 100%; 
-            padding: 16px; 
-            background: #333; 
-            color: #fff; 
-            border: none; 
-            border-radius: 14px; 
-            font-size: 15px; 
-            cursor: pointer; 
-            letter-spacing: 3px;
-            margin-top: 8px;
-        }
-        .ink-login-btn:hover { background: #444; }
-        .ink-login-btn.alt { 
-            background: #f5f5f5; 
-            color: #333;
-        }
-        .login-hint { 
-            margin-top: 25px; 
-            font-size: 12px; 
-            color: #ccc; 
-        }
-        .divider { 
-            margin: 30px 0; 
-            height: 1px; 
-            background: #f5f5f5; 
-            position: relative;
-        }
-        .divider::before {
-            content: '或';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 0 15px;
-            color: #ccc;
-            font-size: 12px;
-        }
 
         /* 底栏 */
         .ink-tab-bar { 
             display: flex; 
-            background: #fff; 
-            border-top: 1px solid #f5f5f5; 
+            background: rgba(15, 15, 30, 0.95); 
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
             position: fixed; 
             bottom: 0; 
             left: 0; 
@@ -420,13 +500,14 @@
             max-width: 700px; 
             margin: 0 auto; 
             padding: 8px 0 25px;
+            z-index: 200;
         }
         .ink-tab-item { 
             flex: 1; 
             padding: 10px; 
             text-align: center; 
             text-decoration: none; 
-            color: #ccc; 
+            color: rgba(255, 255, 255, 0.4); 
             font-size: 12px; 
             display: flex; 
             flex-direction: column; 
@@ -434,15 +515,21 @@
             gap: 4px;
             transition: color 0.3s ease;
         }
-        .ink-tab-item.active { color: #333; }
-        .ink-tab-icon { font-size: 22px; opacity: 0.9; }
+        .ink-tab-item.active { 
+            color: #fff; 
+        }
+        .ink-tab-icon { 
+            font-size: 22px; 
+            opacity: 0.9; 
+        }
 
         .toast { 
             position: fixed; 
             bottom: 100px; 
             left: 50%; 
             transform: translateX(-50%); 
-            background: #333; 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(20px);
             color: #fff; 
             padding: 14px 28px; 
             border-radius: 50px; 
@@ -450,6 +537,7 @@
             z-index: 2000; 
             opacity: 0; 
             transition: opacity 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .toast.show { opacity: 1; }
 
@@ -462,22 +550,21 @@
 </head>
 <body>
     <div class="login-section show" id="loginSection">
+        <div class="login-bg"></div>
         <div class="ink-login-card">
             <div class="ink-login-logo">墨记</div>
             <div class="ink-login-subtitle">静心记账 · 了然于心</div>
             
-            <!-- 已有账户登录 -->
             <div style="margin-bottom: 15px;">
-                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">已有账户</div>
+                <div style="font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.5); text-align: left; letter-spacing: 2px;">已有账户</div>
                 <input type="text" id="accountIdInput" class="ink-input" placeholder="输入账户ID或账户名称">
                 <button class="ink-login-btn" onclick="loginWithAccountId()">登录</button>
             </div>
             
             <div class="divider"></div>
             
-            <!-- 申请新账户 -->
             <div>
-                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">开立新账户</div>
+                <div style="font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.5); text-align: left; letter-spacing: 2px;">开立新账户</div>
                 <input type="text" id="accountNameInput" class="ink-input" placeholder="请告知您的姓名" maxlength="20">
                 <button class="ink-login-btn alt" onclick="requestAccount()">申请</button>
                 <div class="login-hint">账户需经审批后启用</div>
@@ -510,7 +597,72 @@
             <div class="account-chips" id="accountBalances"></div>
         </div>
 
-        <div class="ink-card quick-add-section">
+        <div class="star-map">
+            <svg class="connection-lines">
+                <line class="connection-line" x1="50%" y1="15%" x2="20%" y2="35%" stroke="rgba(150,200,255,0.2)" stroke-width="2"/>
+                <line class="connection-line" x1="50%" y1="15%" x2="80%" y2="35%" stroke="rgba(150,200,255,0.2)" stroke-width="2"/>
+                <line class="connection-line" x1="20%" y1="35%" x2="30%" y2="65%" stroke="rgba(150,200,255,0.2)" stroke-width="2"/>
+                <line class="connection-line" x1="80%" y1="35%" x2="70%" y2="65%" stroke="rgba(150,200,255,0.2)" stroke-width="2"/>
+                <line class="connection-line" x1="30%" y1="65%" x2="50%" y2="90%" stroke="rgba(150,200,255,0.2)" stroke-width="2"/>
+                <line class="connection-line" x1="70%" y1="65%" x2="50%" y2="90%" stroke="rgba(150,200,255,0.2)" stroke-width="2"/>
+            </svg>
+            
+            <div class="star-node" onclick="showQuickAdd()">
+                <div class="star-glow"></div>
+                <div class="star-body">✨</div>
+                <div class="star-label">
+                    <div class="star-name">天枢</div>
+                    <div class="star-desc">记一笔</div>
+                </div>
+            </div>
+            
+            <div class="star-node" onclick="window.location.href='statistics.html'">
+                <div class="star-glow"></div>
+                <div class="star-body">📊</div>
+                <div class="star-label">
+                    <div class="star-name">天璇</div>
+                    <div class="star-desc">统计</div>
+                </div>
+            </div>
+            
+            <div class="star-node" onclick="window.location.href='groups.html'">
+                <div class="star-glow"></div>
+                <div class="star-body">👥</div>
+                <div class="star-label">
+                    <div class="star-name">天玑</div>
+                    <div class="star-desc">群组</div>
+                </div>
+            </div>
+            
+            <div class="star-node" onclick="window.location.href='categories.html'">
+                <div class="star-glow"></div>
+                <div class="star-body">📂</div>
+                <div class="star-label">
+                    <div class="star-name">天权</div>
+                    <div class="star-desc">分类</div>
+                </div>
+            </div>
+            
+            <div class="star-node" onclick="window.location.href='accounts.html'">
+                <div class="star-glow"></div>
+                <div class="star-body">💰</div>
+                <div class="star-label">
+                    <div class="star-name">玉衡</div>
+                    <div class="star-desc">账户</div>
+                </div>
+            </div>
+            
+            <div class="star-node" onclick="window.location.href='admin.html'">
+                <div class="star-glow"></div>
+                <div class="star-body">⚙️</div>
+                <div class="star-label">
+                    <div class="star-name">开阳</div>
+                    <div class="star-desc">管理</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ink-card quick-add-section" id="quickAddSection" style="display: none;">
             <div class="ink-title">记一笔</div>
             
             <div class="type-toggle">
@@ -551,22 +703,10 @@
             </form>
         </div>
 
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <div class="calendar-nav">
-                    <button onclick="changeMonth(-1)">◀</button>
-                    <span class="calendar-title" id="calendarTitle">2026年4月</span>
-                    <button onclick="changeMonth(1)">▶</button>
-                </div>
-                <button onclick="goToToday()" style="background: #f5f5f5; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; cursor: pointer; color: #666;">今天</button>
-            </div>
-            <div class="calendar-grid" id="calendarGrid"></div>
-        </div>
-
         <div class="records-section">
             <div class="section-header">
                 <span>记录</span>
-                <span id="recordsCount" style="font-size: 12px; color: #ccc; font-weight: normal;"></span>
+                <span id="recordsCount" style="font-size: 12px; color: rgba(255,255,255,0.4); font-weight: normal;"></span>
             </div>
             <div class="record-list" id="recordList"></div>
         </div>
@@ -634,6 +774,14 @@
             document.getElementById('loginSection').classList.remove('show');
             document.getElementById('mainHeader').style.display = 'block';
             document.getElementById('mainContent').style.display = 'block';
+        }
+
+        function showQuickAdd() {
+            const section = document.getElementById('quickAddSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            if (section.style.display === 'block') {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         async function loginWithAccountId() {
@@ -737,7 +885,6 @@
             updateBalance();
             updateCategorySelect();
             updateAccountSelect();
-            updateCalendar();
             loadRecords();
             initDatePicker();
         }
@@ -801,7 +948,8 @@
                 locale: 'zh',
                 dateFormat: 'Y-m-d',
                 defaultDate: now,
-                allowInput: true
+                allowInput: true,
+                theme: 'dark'
             });
             document.getElementById('timeInput').value = now.toTimeString().substring(0, 5);
         }
@@ -843,10 +991,10 @@
                 showToast('已保存');
                 document.getElementById('recordForm').reset();
                 initDatePicker();
+                document.getElementById('quickAddSection').style.display = 'none';
 
                 accountData = await api.get(`/account/${currentAccountId}`);
                 updateBalance();
-                updateCalendar();
                 loadRecords();
             } catch (err) {
                 showToast('保存失败');
@@ -918,88 +1066,10 @@
                 showToast('已删除');
                 accountData = await api.get(`/account/${currentAccountId}`);
                 updateBalance();
-                updateCalendar();
                 loadRecords();
             } catch (err) {
                 showToast('删除失败');
             }
-        }
-
-        function updateCalendar() {
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth();
-            document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
-
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-
-            const days = ['日', '一', '二', '三', '四', '五', '六'];
-            days.forEach(d => {
-                const header = document.createElement('div');
-                header.className = 'calendar-day-header';
-                header.textContent = d;
-                grid.appendChild(header);
-            });
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-
-            const recordsByDate = {};
-            accountData.records.forEach(r => {
-                const d = r.date.split('T')[0];
-                if (!recordsByDate[d]) recordsByDate[d] = { income: 0, expense: 0 };
-                recordsByDate[d][r.type] += parseFloat(r.amount);
-            });
-
-            for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'calendar-day other-month';
-                grid.appendChild(empty);
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayEl = document.createElement('div');
-                dayEl.className = 'calendar-day';
-
-                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-                if (isToday) dayEl.classList.add('today');
-
-                if (selectedDate === dateStr) dayEl.classList.add('selected');
-
-                dayEl.innerHTML = `<span>${day}</span>`;
-
-                if (recordsByDate[dateStr]) {
-                    if (recordsByDate[dateStr].expense > 0) {
-                        dayEl.innerHTML += `<div class="day-expense">-${recordsByDate[dateStr].expense.toFixed(0)}</div>`;
-                    }
-                    if (recordsByDate[dateStr].income > 0) {
-                        dayEl.innerHTML += `<div class="day-income">+${recordsByDate[dateStr].income.toFixed(0)}</div>`;
-                    }
-                }
-
-                dayEl.addEventListener('click', () => selectDate(dateStr));
-                grid.appendChild(dayEl);
-            }
-        }
-
-        function selectDate(dateStr) {
-            selectedDate = dateStr;
-            updateCalendar();
-        }
-
-        function changeMonth(delta) {
-            currentMonth.setMonth(currentMonth.getMonth() + delta);
-            updateCalendar();
-            loadRecords();
-        }
-
-        function goToToday() {
-            currentMonth = new Date();
-            selectedDate = null;
-            updateCalendar();
-            loadRecords();
         }
 
         document.getElementById('accountSelector').addEventListener('change', (e) => {
