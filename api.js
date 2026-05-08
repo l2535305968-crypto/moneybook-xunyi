@@ -17,8 +17,15 @@ function getApiBaseUrl() {
 }
 
 function getApiUrl(path) {
-    const baseUrl = getApiBaseUrl();
+    let baseUrl = getApiBaseUrl();
     if (path.startsWith('http')) return path;
+    
+    if (baseUrl.endsWith('/api')) {
+        baseUrl = baseUrl.slice(0, -4);
+    } else if (baseUrl.endsWith('/api/')) {
+        baseUrl = baseUrl.slice(0, -5);
+    }
+    
     if (path.startsWith('/api')) {
         return baseUrl + path;
     }
