@@ -1,6 +1,8 @@
 function getApiBaseUrl() {
     if (window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl) {
-        return window.APP_CONFIG.apiBaseUrl;
+        const url = window.APP_CONFIG.apiBaseUrl;
+        console.log('API Base URL:', url);
+        return url;
     }
     const params = new URLSearchParams(window.location.search);
     const server = params.get('server');
@@ -17,19 +19,28 @@ function getApiBaseUrl() {
 }
 
 function getApiUrl(path) {
-    let baseUrl = getApiBaseUrl();
+    const baseUrl = getApiBaseUrl();
+    console.log('Path:', path);
+    
     if (path.startsWith('http')) return path;
     
-    if (baseUrl.endsWith('/api')) {
-        baseUrl = baseUrl.slice(0, -4);
-    } else if (baseUrl.endsWith('/api/')) {
-        baseUrl = baseUrl.slice(0, -5);
-    }
+    let result;
     
     if (path.startsWith('/api')) {
-        return baseUrl + path;
+        result = baseUrl + path;
+    } else if (path.startsWith('/')) {
+        result = baseUrl + '/api' + path;
+    } else {
+        result = baseUrl + '/api/' + path;
     }
-    return baseUrl + '/api' + path;
+    
+    if (result.includes('/api/api/')) {
+        console.warn('Found duplicate /api/api/, fixing...');
+        result = result.replace(/\/api\/api\//g, '/api/');
+    }
+    
+    console.log('Final API URL:', result);
+    return result;
 }
 
 window.api = {
