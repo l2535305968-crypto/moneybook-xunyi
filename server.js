@@ -25,6 +25,7 @@ if (!fs.existsSync(DATA_DIR)) {
 const PENDING_REQUESTS_FILE = path.join(DATA_DIR, 'pending_requests.json');
 const DELETED_ACCOUNTS_FILE = path.join(DATA_DIR, 'deleted_accounts.json');
 const GROUPS_FILE = path.join(DATA_DIR, 'groups.json');
+const FEEDBACK_FILE = path.join(DATA_DIR, 'feedback.json');
 const ADMIN_KEY = 'moneybook_admin_2026_secure_key';
 
 function generateId(prefix) {
@@ -1205,6 +1206,37 @@ app.delete('/api/groups/:groupId/members/:memberAccountId', (req, res) => {
     } catch (e) {
         console.error('Error removing group member:', e);
         res.status(500).json({ error: '移出群成员失败' });
+    }
+});
+
+// 提交反馈
+app.post('/api/feedback', (req, res) => {
+    try {
+        const { type, content, contact, accountId } = req.body;
+        if (!content || !content.trim()) {
+            return res.status(400).json({ error: '反馈内容不能为空' });
+        }
+
+        const feedback = {
+            id: generateId('fb'),
+            type: type || 'other',
+            content: content.trim(),
+            contact: contact || '',
+            accountId: accountId || '',
+            createTime: new Date().toISOString()
+        };
+
+        let feedbacks = [];
+        if (fs.existsSync(FEEDBACK_FILE)) {
+            try { feedbacks = JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8')); } catch (e) {}
+        }
+        feedbacks.push(feedback);
+        fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedbacks, null, 2));
+
+        res.json({ success: true, id: feedback.id });
+    } catch (e) {
+        console.error('Error saving feedback:', e);
+        res.status(500).json({ error: '提交反馈失败' });
     }
 });
 
