@@ -26,7 +26,7 @@ const PENDING_REQUESTS_FILE = path.join(DATA_DIR, 'pending_requests.json');
 const DELETED_ACCOUNTS_FILE = path.join(DATA_DIR, 'deleted_accounts.json');
 const GROUPS_FILE = path.join(DATA_DIR, 'groups.json');
 const FEEDBACK_FILE = path.join(DATA_DIR, 'feedback.json');
-const ADMIN_KEY = 'moneybook_admin_2026_secure_key';
+const ADMIN_KEY = process.env.ADMIN_KEY || 'moneybook_admin_2026_secure_key';
 
 function generateId(prefix) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -62,10 +62,7 @@ function getDefaultCategories() {
 
 function getDefaultAccounts() {
     return [
-        { id: 'acc_cash', name: '现金', type: 'cash', balance: 0, status: 'active' },
         { id: 'acc_ecny', name: '数字人民币', type: 'ecny', balance: 0, status: 'active' },
-        { id: 'acc_bank', name: '银行卡', type: 'card', balance: 0, status: 'active' },
-        { id: 'acc_credit', name: '信用卡', type: 'credit', balance: 0, status: 'active' },
         { id: 'acc_alipay', name: '支付宝', type: 'alipay', balance: 0, status: 'active' },
         { id: 'acc_wechat', name: '微信钱包', type: 'wechat', balance: 0, status: 'active' }
     ];
@@ -661,6 +658,14 @@ app.post('/api/account/rename', (req, res) => {
         console.error('Error renaming account:', e);
         res.status(500).json({ error: '重命名账号失败' });
     }
+});
+
+// 管理员登录
+app.post('/api/admin/login', (req, res) => {
+    const { key } = req.body;
+    if (!key) return res.status(400).json({ error: '请输入密钥' });
+    if (key !== ADMIN_KEY) return res.status(403).json({ error: '密钥错误' });
+    res.json({ token: ADMIN_KEY });
 });
 
 app.get('/api/admin/accounts', (req, res) => {

@@ -270,8 +270,8 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>账户ID</th>
                                 <th>账户名</th>
+                                <th>账户ID</th>
                                 <th>账户数</th>
                                 <th>记录数</th>
                                 <th>总资产</th>
@@ -387,16 +387,18 @@
             return LangStyle.formatCategoryNamePlain(cat);
         }
 
-        function adminLogin() {
+        async function adminLogin() {
             const key = document.getElementById('adminKey').value;
-            if (key === 'moneybook_admin_2026_secure_key') {
-                adminToken = key;
+            if (!key) { showToast('请输入管理员密钥'); return; }
+            try {
+                const result = await api.post('/admin/login', { key: key });
+                adminToken = result.token;
                 localStorage.setItem('adminToken', adminToken);
                 showAdminContent();
                 loadAccounts();
                 loadRequests();
                 loadFeedbacks();
-            } else {
+            } catch (err) {
                 showToast('密钥错误');
             }
         }
@@ -406,12 +408,17 @@
             document.getElementById('adminContent').classList.remove('hidden');
         }
 
-        function checkAuth() {
-            if (adminToken === 'moneybook_admin_2026_secure_key') {
+        async function checkAuth() {
+            if (!adminToken) return;
+            try {
+                await api.get('/admin/accounts', { 'admin-key': adminToken });
                 showAdminContent();
                 loadAccounts();
                 loadRequests();
                 loadFeedbacks();
+            } catch (err) {
+                localStorage.removeItem('adminToken');
+                adminToken = null;
             }
         }
 
@@ -593,8 +600,8 @@
             accounts.forEach(acc => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td><strong>${acc.name}</strong></td>
                     <td><span class="account-id">${acc.id}</span></td>
-                    <td>${acc.name}</td>
                     <td>${acc.accountCount}</td>
                     <td>${acc.recordCount}</td>
                     <td style="color: ${acc.totalBalance >= 0 ? '#2e7d32' : '#c62828'};">¥${acc.totalBalance.toFixed(2)}</td>
@@ -626,12 +633,12 @@
 
             document.getElementById('accountDetails').innerHTML = `
                 <div class="detail-item">
-                    <div class="detail-label">账户ID</div>
-                    <div class="detail-value"><span class="account-id">${acc.id}</span></div>
+                    <div class="detail-label">账户名称</div>
+                    <div class="detail-value"><strong>${acc.name}</strong></div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">账户名称</div>
-                    <div class="detail-value">${acc.name}</div>
+                    <div class="detail-label">账户ID</div>
+                    <div class="detail-value"><span class="account-id">${acc.id}</span></div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">账户数量</div>

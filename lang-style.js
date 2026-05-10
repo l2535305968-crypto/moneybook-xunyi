@@ -15,21 +15,15 @@ window.LangStyle = (function() {
     };
 
     var DEFAULT_ACCOUNTS_CLASSIC = [
-        { id: 'acc_cash',   name: '碎银子',             type: 'cash',   balance: 0, status: 'active' },
-        { id: 'acc_ecny',   name: '宝钞 (数币)',        type: 'ecny',   balance: 0, status: 'active' },
-        { id: 'acc_bank',   name: '钱庄',               type: 'card',   balance: 0, status: 'active' },
-        { id: 'acc_credit', name: '赊账 (信用卡)',      type: 'credit', balance: 0, status: 'active' },
-        { id: 'acc_alipay', name: '通宝 (支付宝)',      type: 'alipay', balance: 0, status: 'active' },
-        { id: 'acc_wechat', name: '交子 (微信)',        type: 'wechat', balance: 0, status: 'active' }
+        { id: 'acc_ecny',   name: '宝钞 (数币)',   type: 'ecny',   balance: 0, status: 'active' },
+        { id: 'acc_alipay', name: '通宝 (支付宝)',  type: 'alipay', balance: 0, status: 'active' },
+        { id: 'acc_wechat', name: '交子 (微信)',    type: 'wechat', balance: 0, status: 'active' }
     ];
 
     var DEFAULT_ACCOUNTS_MODERN = [
-        { id: 'acc_cash',   name: '现金',           type: 'cash',   balance: 0, status: 'active' },
-        { id: 'acc_ecny',   name: '数字人民币',     type: 'ecny',   balance: 0, status: 'active' },
-        { id: 'acc_bank',   name: '银行卡',         type: 'card',   balance: 0, status: 'active' },
-        { id: 'acc_credit', name: '信用卡',         type: 'credit', balance: 0, status: 'active' },
-        { id: 'acc_alipay', name: '支付宝',         type: 'alipay', balance: 0, status: 'active' },
-        { id: 'acc_wechat', name: '微信钱包',       type: 'wechat', balance: 0, status: 'active' }
+        { id: 'acc_ecny',   name: '数字人民币',  type: 'ecny',   balance: 0, status: 'active' },
+        { id: 'acc_alipay', name: '支付宝',      type: 'alipay', balance: 0, status: 'active' },
+        { id: 'acc_wechat', name: '微信钱包',    type: 'wechat', balance: 0, status: 'active' }
     ];
 
     function getStyle() {
@@ -102,7 +96,7 @@ window.LangStyle = (function() {
 
     function getAccountTypeSelectOptions(includeModernHint) {
         var html = '';
-        var types = ['cash', 'ecny', 'card', 'credit', 'alipay', 'wechat'];
+        var types = ['ecny', 'alipay', 'wechat'];
         if (getStyle() === 'classic') {
             types.forEach(function(t) {
                 var m = ACCOUNT_TYPE_MAP[t];
