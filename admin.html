@@ -288,7 +288,7 @@
         <div class="ink-card">
             <div class="ink-title">
                 <span>💬 用户反馈</span>
-                <button class="action-btn" onclick="loadFeedbacks()">🔄 刷新</button>
+                <button class="action-btn" onclick="loadAccounts().then(function(){ loadFeedbacks(); })">🔄 刷新</button>
             </div>
             <div id="feedbacksList">
                 <div style="text-align:center; padding: 30px; color: #ccc;">点击刷新加载反馈</div>
@@ -569,23 +569,43 @@
                     listEl.innerHTML = '<div style="text-align:center; padding:30px; color:#ccc;">暂无用户反馈</div>';
                     return;
                 }
+
+                var nameMap = {};
+                (accounts || []).forEach(function(a) { nameMap[a.id] = a.name; });
+
                 var typeMap = { bug: '🐛 问题报告', suggest: '💡 功能建议', other: '📝 其他' };
-                listEl.innerHTML = feedbacks.map(function(f) {
+                listEl.innerHTML = feedbacks.map(function(f, idx) {
                     var date = new Date(f.createTime).toLocaleString('zh-CN');
                     var typeLabel = typeMap[f.type] || f.type;
-                    return '<div style="padding:14px 0; border-bottom:1px solid #f0f0f0;">' +
-                        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-                            '<span style="font-size:13px; color:#333;">' + typeLabel + '</span>' +
-                            '<span style="font-size:11px; color:#ccc;">' + date + '</span>' +
+                    var accountName = f.accountId ? (nameMap[f.accountId] || '未知用户') : '匿名用户';
+                    var fid = 'fb_detail_' + idx;
+
+                    return '<div style="border-bottom:1px solid #f0f0f0;">' +
+                        '<div onclick="toggleFbDetail(\'' + fid + '\')" style="display:flex; justify-content:space-between; align-items:center; padding:14px 0; cursor:pointer;">' +
+                            '<div style="flex:1; min-width:0;">' +
+                                '<div style="font-size:14px; color:#333; font-weight:500; margin-bottom:4px;">' + typeLabel + '</div>' +
+                                '<div style="font-size:12px; color:#999;">' +
+                                    (f.accountId ? '👤 ' + accountName + ' <span style="color:#ccc; font-size:11px;">(' + f.accountId + ')</span>' : '👤 匿名') +
+                                '</div>' +
+                            '</div>' +
+                            '<span style="font-size:11px; color:#ccc; flex-shrink:0; margin-left:12px;">' + date + '</span>' +
                         '</div>' +
-                        '<div style="font-size:14px; color:#333; line-height:1.6; white-space:pre-wrap;">' + (f.content || '') + '</div>' +
-                        (f.contact ? '<div style="font-size:12px; color:#999; margin-top:4px;">📧 联系方式：' + f.contact + '</div>' : '') +
-                        (f.accountId ? '<div style="font-size:11px; color:#ccc; margin-top:2px;">账号：' + f.accountId + '</div>' : '') +
+                        '<div id="' + fid + '" style="display:none; padding:0 0 16px 0;">' +
+                            '<div style="font-size:14px; color:#333; line-height:1.7; white-space:pre-wrap; background:#fafafa; border-radius:12px; padding:14px; margin-bottom:10px;">' + (f.content || '') + '</div>' +
+                            (f.contact ? '<div style="font-size:12px; color:#666; margin-bottom:4px;">📧 联系方式：' + f.contact + '</div>' : '') +
+                            (f.accountId ? '<div style="font-size:11px; color:#bbb;">🆔 账号ID：' + f.accountId + '</div>' : '') +
+                            '<div style="font-size:11px; color:#ccc; margin-top:2px;">⏰ ' + date + '</div>' +
+                        '</div>' +
                     '</div>';
                 }).join('');
             } catch (err) {
                 console.error('加载反馈失败:', err);
             }
+        }
+
+        function toggleFbDetail(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = (el.style.display === 'none' ? 'block' : 'none');
         }
 
         function renderAccounts() {
