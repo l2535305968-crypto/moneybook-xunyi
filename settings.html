@@ -88,6 +88,8 @@
         .step-desc { font-size: 12px; color: #999; margin-top: 4px; }
         textarea.form-control { width: 100%; padding: 14px 16px; border: 1px solid #eee; border-radius: 14px; font-size: 14px; background: #fafafa; font-family: inherit; resize: vertical; min-height: 100px; }
         textarea.form-control:focus { outline: none; border-color: #ddd; background: #fff; }
+        .help-toggle-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .help-toggle-arrow { font-size: 14px; color: #ccc; transition: transform 0.3s; }
     </style>
 </head>
 <body>
@@ -216,76 +218,81 @@
             <button class="ink-btn ink-btn-danger" onclick="openClearModal()">清空所有记录</button>
         </div>
 
-        <div class="ink-card">
-            <div class="ink-title">📖 使用指南</div>
-            <div class="guide-step">
-                <div class="step-num">1</div>
-                <div><div class="step-text">登录或创建账号</div><div class="step-desc">首次使用需申请账号，已有账号直接登录。账号经管理员审批后启用。</div></div>
+        <div class="ink-card" id="helpCard">
+            <div class="help-toggle-header" onclick="toggleHelpPanel()">
+                <span class="ink-title" style="margin-bottom:0;">💬 帮助与反馈</span>
+                <span class="help-toggle-arrow" id="helpToggleArrow">▼</span>
             </div>
-            <div class="guide-step">
-                <div class="step-num">2</div>
-                <div><div class="step-text">添加账户</div><div class="step-desc">在「账户管理」中添加现金、银行卡、支付宝、微信钱包等账户。</div></div>
-            </div>
-            <div class="guide-step">
-                <div class="step-num">3</div>
-                <div><div class="step-text">开始记账</div><div class="step-desc">在「记账」页面输入金额、选择分类和账户后保存。支持微信/支付宝账单识别。</div></div>
-            </div>
-            <div class="guide-step">
-                <div class="step-num">4</div>
-                <div><div class="step-text">查看统计</div><div class="step-desc">「统计分析」中查看收支总览、支出饼图、月度趋势和分类明细。</div></div>
-            </div>
-            <div class="guide-step">
-                <div class="step-num">5</div>
-                <div><div class="step-text">管理分类与预算</div><div class="step-desc">在「分类管理」自定义分类；「预算管理」设置月度预算，追踪支出进度。</div></div>
-            </div>
-            <div class="guide-step">
-                <div class="step-num">6</div>
-                <div><div class="step-text">群组协作</div><div class="step-desc">创建或加入记账群组，与家人同事共享数据。群主可管理成员与分类。</div></div>
-            </div>
-        </div>
+            <div id="helpPanel" style="display:none; margin-top:15px;">
+                <div class="guide-step">
+                    <div class="step-num">1</div>
+                    <div><div class="step-text">登录或创建账号</div><div class="step-desc">首次使用需申请账号，已有账号直接登录。账号经管理员审批后启用。</div></div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">2</div>
+                    <div><div class="step-text">添加账户</div><div class="step-desc">在「账户管理」中添加现金、银行卡、支付宝、微信钱包等账户。</div></div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">3</div>
+                    <div><div class="step-text">开始记账</div><div class="step-desc">在「记账」页面输入金额、选择分类和账户后保存。支持微信/支付宝账单识别。</div></div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">4</div>
+                    <div><div class="step-text">查看统计</div><div class="step-desc">「统计分析」中查看收支总览、支出饼图、月度趋势和分类明细。</div></div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">5</div>
+                    <div><div class="step-text">管理分类与预算</div><div class="step-desc">在「分类管理」自定义分类；「预算管理」设置月度预算，追踪支出进度。</div></div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">6</div>
+                    <div><div class="step-text">群组协作</div><div class="step-desc">创建或加入记账群组，与家人同事共享数据。群主可管理成员与分类。</div></div>
+                </div>
 
-        <div class="ink-card">
-            <div class="ink-title">❓ 常见问题</div>
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question"><span>文风切换后显示没有变化？</span><span class="faq-arrow">▼</span></div>
-                <div class="faq-answer">切换文风后需刷新页面才能生效。在本页「文风」中选择后点击保存，页面自动刷新。</div>
-            </div>
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question"><span>如何导出我的记账数据？</span><span class="faq-arrow">▼</span></div>
-                <div class="faq-answer">在「数据导出」页面可按日期、账户、类型筛选后导出为 JSON 或 CSV 格式。</div>
-            </div>
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question"><span>创建群组后别人怎么加入？</span><span class="faq-arrow">▼</span></div>
-                <div class="faq-answer">创建群组后复制群ID发送给他人，对方在「群组」页面的「加入群」输入框中粘贴群ID即可。</div>
-            </div>
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question"><span>支持哪些货币？汇率如何设置？</span><span class="faq-arrow">▼</span></div>
-                <div class="faq-answer">在本页「货币与汇率」中可设置主货币（人民币、美元、欧元等）和显示货币，并自定义汇率。支持数字人民币。</div>
-            </div>
-        </div>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+                    <div class="ink-title">❓ 常见问题</div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>文风切换后显示没有变化？</span><span class="faq-arrow">▼</span></div>
+                        <div class="faq-answer">切换文风后需刷新页面才能生效。在本页「文风」中选择后点击保存，页面自动刷新。</div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>如何导出我的记账数据？</span><span class="faq-arrow">▼</span></div>
+                        <div class="faq-answer">在「数据导出」页面可按日期、账户、类型筛选后导出为 JSON 或 CSV 格式。</div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>创建群组后别人怎么加入？</span><span class="faq-arrow">▼</span></div>
+                        <div class="faq-answer">创建群组后复制群ID发送给他人，对方在「群组」页面的「加入群」输入框中粘贴群ID即可。</div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>支持哪些货币？汇率如何设置？</span><span class="faq-arrow">▼</span></div>
+                        <div class="faq-answer">在本页「货币与汇率」中可设置主货币（人民币、美元、欧元等）和显示货币，并自定义汇率。支持数字人民币。</div>
+                    </div>
+                </div>
 
-        <div class="ink-card">
-            <div class="ink-title">💬 问题反馈</div>
-            <div style="font-size: 13px; color: #999; margin-bottom: 15px; line-height: 1.6;">遇到问题或有改进建议？请填写以下表单，我们将尽快处理。</div>
-            <form id="feedbackForm">
-                <div class="form-group">
-                    <label>反馈类型</label>
-                    <select id="feedbackType">
-                        <option value="bug">🐛 问题报告</option>
-                        <option value="suggest">💡 功能建议</option>
-                        <option value="other">📝 其他</option>
-                    </select>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+                    <div class="ink-title">💬 问题反馈</div>
+                    <div style="font-size: 13px; color: #999; margin-bottom: 15px; line-height: 1.6;">遇到问题或有改进建议？请填写以下表单，我们将尽快处理。</div>
+                    <form id="feedbackForm">
+                        <div class="form-group">
+                            <label>反馈类型</label>
+                            <select id="feedbackType">
+                                <option value="bug">🐛 问题报告</option>
+                                <option value="suggest">💡 功能建议</option>
+                                <option value="other">📝 其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>详细描述</label>
+                            <textarea id="feedbackContent" class="form-control" placeholder="请详细描述您遇到的问题或建议..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>联系方式（选填）</label>
+                            <input type="text" id="feedbackContact" placeholder="邮箱或微信，方便我们回复您">
+                        </div>
+                        <button type="submit" class="ink-btn ink-btn-primary">提交反馈</button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label>详细描述</label>
-                    <textarea id="feedbackContent" class="form-control" placeholder="请详细描述您遇到的问题或建议..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>联系方式（选填）</label>
-                    <input type="text" id="feedbackContact" placeholder="邮箱或微信，方便我们回复您">
-                </div>
-                <button type="submit" class="ink-btn ink-btn-primary">提交反馈</button>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -550,6 +557,18 @@
         function showToast(message) {
             var toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show');
             setTimeout(function(){ toast.classList.remove('show'); }, 2500);
+        }
+
+        function toggleHelpPanel() {
+            var panel = document.getElementById('helpPanel');
+            var arrow = document.getElementById('helpToggleArrow');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                panel.style.display = 'none';
+                arrow.style.transform = '';
+            }
         }
 
         function toggleFaq(el) {
