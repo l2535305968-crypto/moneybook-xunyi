@@ -832,6 +832,24 @@ app.post('/api/admin/adjust-balance', (req, res) => {
     }
 });
 
+// 管理员查看反馈
+app.get('/api/admin/feedbacks', (req, res) => {
+    try {
+        const adminKey = req.headers['admin-key'];
+        if (adminKey !== ADMIN_KEY) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        if (!fs.existsSync(FEEDBACK_FILE)) {
+            return res.json([]);
+        }
+        const feedbacks = JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8'));
+        res.json(feedbacks.reverse());
+    } catch (e) {
+        console.error('Error loading feedbacks:', e);
+        res.status(500).json({ error: '获取反馈失败' });
+    }
+});
+
 app.post('/api/parse-bill', (req, res) => {
     try {
         const { text, source } = req.body;

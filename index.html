@@ -525,6 +525,49 @@
         }
         .toast.show { opacity: 1; }
 
+        .guide-trigger {
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-top: 12px; padding: 8px 18px;
+            border: 1px solid #eee; border-radius: 50px;
+            background: transparent; color: #999; font-size: 13px;
+            cursor: pointer; letter-spacing: 1px; transition: all 0.3s;
+        }
+        .guide-trigger:hover { border-color: #ccc; color: #666; }
+        .guide-flap {
+            position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
+            background: #fff; z-index: 3000; overflow-y: auto;
+            box-shadow: -4px 0 30px rgba(0,0,0,0.08);
+            transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+            padding: 30px 24px 60px;
+        }
+        .guide-flap.open { right: 0; }
+        .guide-flap-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.2); z-index: 2999;
+            opacity: 0; pointer-events: none; transition: opacity 0.35s;
+        }
+        .guide-flap-backdrop.show { opacity: 1; pointer-events: auto; }
+        .guide-flap-close {
+            float: right; background: none; border: none; font-size: 28px;
+            cursor: pointer; color: #ccc; line-height: 1;
+        }
+        .guide-flap-title {
+            font-size: 22px; font-family: 'Ma Shan Zheng','Noto Serif SC','STKaiti',cursive;
+            letter-spacing: 6px; color: #333; margin-bottom: 25px;
+        }
+        .guide-flap-step { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid #f8f7f5; align-items: flex-start; }
+        .guide-flap-step:last-child { border-bottom: none; }
+        .guide-flap-step-num {
+            width: 30px; height: 30px; border-radius: 50%; background: #f0f0f0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: #666; flex-shrink: 0;
+        }
+        .guide-flap-step-text { font-size: 14px; color: #333; }
+        .guide-flap-step-desc { font-size: 12px; color: #999; margin-top: 3px; line-height: 1.6; }
+        @media (max-width: 440px) {
+            .guide-flap { width: 90vw; right: -95vw; }
+        }
+
         @media (min-width: 768px) {
             body { padding-bottom: 0; }
             .ink-tab-bar { position: static; border-top: none; padding-bottom: 8px; }
@@ -537,6 +580,9 @@
         <div class="ink-login-card">
             <div class="ink-login-logo">墨记</div>
             <div class="ink-login-subtitle">静心记账 · 了然于心</div>
+
+            <button class="guide-trigger" onclick="openGuide()">📖 使用指南</button>
+            <div style="margin-bottom: 25px;"></div>
             
             <!-- 已有账号登录 -->
             <div style="margin-bottom: 15px;">
@@ -673,6 +719,32 @@
 
     <div class="toast" id="toast"></div>
 
+    <div class="guide-flap-backdrop" id="guideFlapBackdrop" onclick="closeGuide()"></div>
+    <div class="guide-flap" id="guideFlap">
+        <button class="guide-flap-close" onclick="closeGuide()">×</button>
+        <div class="guide-flap-title">使用指南</div>
+        <div class="guide-flap-step">
+            <div class="guide-flap-step-num">1</div>
+            <div><div class="guide-flap-step-text">登录或创建账号</div><div class="guide-flap-step-desc">首次使用请输入姓名申请账号，已有账号则输入账号ID或名称登录。账号需经管理员审批后启用。</div></div>
+        </div>
+        <div class="guide-flap-step">
+            <div class="guide-flap-step-num">2</div>
+            <div><div class="guide-flap-step-text">添加账户</div><div class="guide-flap-step-desc">在「账户管理」页面添加各类账户（现金、银行卡、支付宝、微信钱包等），设置初始余额。</div></div>
+        </div>
+        <div class="guide-flap-step">
+            <div class="guide-flap-step-num">3</div>
+            <div><div class="guide-flap-step-text">开始记账</div><div class="guide-flap-step-desc">点击「记账」页面，选择支出或收入，输入金额和分类，选择账户和日期后保存。支持微信/支付宝账单识别。</div></div>
+        </div>
+        <div class="guide-flap-step">
+            <div class="guide-flap-step-num">4</div>
+            <div><div class="guide-flap-step-text">查看统计与预算</div><div class="guide-flap-step-desc">在「统计分析」查看收支走势和分类占比；在「预算管理」设置月度预算，实时追踪支出进度。</div></div>
+        </div>
+        <div class="guide-flap-step">
+            <div class="guide-flap-step-num">5</div>
+            <div><div class="guide-flap-step-text">群组协作</div><div class="guide-flap-step-desc">创建或加入记账群组，与家人或同事共享记账数据。群主可管理成员、账户和分类。</div></div>
+        </div>
+    </div>
+
     <script src="config.js?v=20260508"></script>
     <script src="api.js?v=20260508"></script>
     <script src="lang-style.js"></script>
@@ -704,6 +776,16 @@
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function openGuide() {
+            document.getElementById('guideFlap').classList.add('open');
+            document.getElementById('guideFlapBackdrop').classList.add('show');
+        }
+
+        function closeGuide() {
+            document.getElementById('guideFlap').classList.remove('open');
+            document.getElementById('guideFlapBackdrop').classList.remove('show');
         }
 
         function showLogin() {

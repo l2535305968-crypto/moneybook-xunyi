@@ -233,13 +233,11 @@
                 <div class="ink-title">
                     <span>➕ 直接创建账号</span>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: flex-end;">
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label>账号名称</label>
-                        <input type="text" id="newAccountName" placeholder="输入账号名称" maxlength="20">
-                    </div>
-                    <button class="ink-btn ink-btn-primary" onclick="createAccount()" style="white-space: nowrap;">创建账号</button>
+                <div class="form-group">
+                    <label>账号名称</label>
+                    <input type="text" id="newAccountName" placeholder="输入账号名称" maxlength="20">
                 </div>
+                <button class="ink-btn ink-btn-primary" onclick="createAccount()">创建账号</button>
             </div>
 
             <div class="ink-card">
@@ -286,9 +284,20 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal" id="detailModal">
+        <div class="ink-card">
+            <div class="ink-title">
+                <span>💬 用户反馈</span>
+                <button class="action-btn" onclick="loadFeedbacks()">🔄 刷新</button>
+            </div>
+            <div id="feedbacksList">
+                <div style="text-align:center; padding: 30px; color: #ccc;">点击刷新加载反馈</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="detailModal">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">账户详情</span>
@@ -386,6 +395,7 @@
                 showAdminContent();
                 loadAccounts();
                 loadRequests();
+                loadFeedbacks();
             } else {
                 showToast('密钥错误');
             }
@@ -401,6 +411,7 @@
                 showAdminContent();
                 loadAccounts();
                 loadRequests();
+                loadFeedbacks();
             }
         }
 
@@ -541,6 +552,33 @@
             document.getElementById('totalRecords').textContent = totalRecords;
             document.getElementById('totalBalance').textContent = `¥${totalBalance.toFixed(0)}`;
             document.getElementById('pendingRequests').textContent = pendingRequests;
+        }
+
+        async function loadFeedbacks() {
+            try {
+                var feedbacks = await api.get('/admin/feedbacks', { 'admin-key': adminToken });
+                var listEl = document.getElementById('feedbacksList');
+                if (!feedbacks || feedbacks.length === 0) {
+                    listEl.innerHTML = '<div style="text-align:center; padding:30px; color:#ccc;">暂无用户反馈</div>';
+                    return;
+                }
+                var typeMap = { bug: '🐛 问题报告', suggest: '💡 功能建议', other: '📝 其他' };
+                listEl.innerHTML = feedbacks.map(function(f) {
+                    var date = new Date(f.createTime).toLocaleString('zh-CN');
+                    var typeLabel = typeMap[f.type] || f.type;
+                    return '<div style="padding:14px 0; border-bottom:1px solid #f0f0f0;">' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
+                            '<span style="font-size:13px; color:#333;">' + typeLabel + '</span>' +
+                            '<span style="font-size:11px; color:#ccc;">' + date + '</span>' +
+                        '</div>' +
+                        '<div style="font-size:14px; color:#333; line-height:1.6; white-space:pre-wrap;">' + (f.content || '') + '</div>' +
+                        (f.contact ? '<div style="font-size:12px; color:#999; margin-top:4px;">📧 联系方式：' + f.contact + '</div>' : '') +
+                        (f.accountId ? '<div style="font-size:11px; color:#ccc; margin-top:2px;">账号：' + f.accountId + '</div>' : '') +
+                    '</div>';
+                }).join('');
+            } catch (err) {
+                console.error('加载反馈失败:', err);
+            }
         }
 
         function renderAccounts() {
