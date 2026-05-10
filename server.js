@@ -795,7 +795,9 @@ app.post('/api/admin/reset-account', (req, res) => {
         }
         
         data.records = [];
-        (data.accounts || []).forEach(a => a.balance = 0);
+        data.budgets = [];
+        data.accounts = getDefaultAccounts();
+        data.categories = getDefaultCategories();
         if (saveAccount(accountId, data)) {
             res.json({ success: true });
         } else {
@@ -804,6 +806,65 @@ app.post('/api/admin/reset-account', (req, res) => {
     } catch (e) {
         console.error('Error resetting account:', e);
         res.status(500).json({ error: '重置账号失败' });
+    }
+});
+
+// 软重置：更新配置到最新版本，保留所有数据记录
+app.post('/api/admin/update-account', (req, res) => {
+    try {
+        const adminKey = req.headers['admin-key'];
+        if (adminKey !== ADMIN_KEY) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        
+        const { accountId } = req.body;
+        const data = loadAccount(accountId);
+        if (!data) {
+            return res.status(404).json({ error: 'Account not found' });
+        }
+        
+        const defaults = getDefaultAccounts();
+        const existingMap = {};
+        (data.accounts || []).forEach(function(a) { existingMap[a.id] = a; });
+        var mergedAccounts = [];
+        // 按默认顺序添加，已存在的保留原数据（余额等）
+        defaults.forEach(function(d) {
+            if (existingMap[d.id]) {
+                mergedAccounts.push(existingMap[d.id]);
+                delete existingMap[d.id];
+            } else {
+                mergedAccounts.push({ id: d.id, name: d.name, type: d.type, balance: 0, status: 'active' });
+            }
+        });
+        // 追加已有的自定义账户
+        Object.keys(existingMap).forEach(function(k) {
+            mergedAccounts.push(existingMap[k]);
+        });
+        data.accounts = mergedAccounts;
+        
+        var defaultCats = getDefaultCategories();
+        var catMap = {};
+        (data.categories || []).forEach(function(c) { catMap[c.id] = c; });
+        defaultCats.forEach(function(d) {
+            if (catMap[d.id]) {
+                catMap[d.id].name = d.name;
+                catMap[d.id].modernName = d.modernName;
+                catMap[d.id].icon = d.icon;
+                catMap[d.id].color = d.color;
+                catMap[d.id].type = d.type;
+            } else {
+                data.categories.push(d);
+            }
+        });
+        
+        if (saveAccount(accountId, data)) {
+            res.json({ success: true, accounts: data.accounts.length, categories: data.categories.length });
+        } else {
+            res.status(500).json({ error: '更新账号失败' });
+        }
+    } catch (e) {
+        console.error('Error updating account:', e);
+        res.status(500).json({ error: '更新账号失败' });
     }
 });
 

@@ -630,7 +630,8 @@
                         <button class="action-btn" onclick="viewAccount('${acc.id}')">查看</button>
                         <button class="action-btn" onclick="openEditModal('${acc.id}', '${acc.name}')">编辑</button>
                         <button class="action-btn export" onclick="exportAccount('${acc.id}', '${acc.name}')">导出</button>
-                        <button class="action-btn" style="background: #fff3e0; color: #e65100;" onclick="resetAccount('${acc.id}', '${acc.name}')">重置</button>
+                        <button class="action-btn" onclick="updateAccount('${acc.id}', '${acc.name}')">🔄 更新</button>
+                        <button class="action-btn" style="background: #ffebee; color: #c62828;" onclick="resetAccount('${acc.id}', '${acc.name}')">🗑️ 重置</button>
                         <button class="action-btn" style="background: #ffebee; color: #c62828;" onclick="confirmDelete('${acc.id}')">删除</button>
                     </td>
                 `;
@@ -803,17 +804,32 @@
         }
 
         async function resetAccount(id, name) {
-            if (!confirm(`确定要重置账户"${name}"吗？\n\n此操作会清空所有记账记录和余额，但保留账户结构！`)) return;
+            if (!confirm(`出厂重置账户「${name}」？\n\n⚠️ 将清空所有记账记录和预算，恢复为默认账户与分类。此操作不可恢复！`)) return;
 
             try {
                 await api.post('/admin/reset-account', {
                     accountId: id
                 }, { 'admin-key': adminToken });
 
-                showToast('账户已重置！');
+                showToast('账户已恢复出厂设置');
                 loadAccounts();
             } catch (err) {
                 showToast('重置失败');
+            }
+        }
+
+        async function updateAccount(id, name) {
+            if (!confirm(`软件更新账户「${name}」？\n\n🔄 将同步最新默认账户与分类配置，保留所有原有记账数据、余额和自定义账户。`)) return;
+
+            try {
+                var result = await api.post('/admin/update-account', {
+                    accountId: id
+                }, { 'admin-key': adminToken });
+
+                showToast('配置已更新（账户' + result.accounts + '个，分类' + result.categories + '个）');
+                loadAccounts();
+            } catch (err) {
+                showToast('更新失败');
             }
         }
 
