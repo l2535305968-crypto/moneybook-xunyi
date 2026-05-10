@@ -302,8 +302,13 @@
         <div class="header-title">账户管理</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
-            <a href="categories.html">📂 分类</a>
+            <a href="add.html">➕ 记账</a>
+            <a href="groups.html">👥 群组</a>
             <a href="statistics.html">📊 统计</a>
+            <a href="categories.html">📂 分类</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
         </div>
     </div>
 
@@ -354,11 +359,6 @@
                 <div class="form-group">
                     <label>账户类型</label>
                     <select id="newAccountType">
-                        <option value="cash">💵 现金</option>
-                        <option value="card">🏦 银行卡</option>
-                        <option value="credit">💳 信用卡</option>
-                        <option value="alipay">💙 支付宝</option>
-                        <option value="wechat">💚 微信钱包</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -388,11 +388,6 @@
                 <div class="form-group">
                     <label>账户类型</label>
                     <select id="editAccountType">
-                        <option value="cash">💵 现金</option>
-                        <option value="card">🏦 银行卡</option>
-                        <option value="credit">💳 信用卡</option>
-                        <option value="alipay">💙 支付宝</option>
-                        <option value="wechat">💚 微信钱包</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -421,47 +416,46 @@
             <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
+        </a>
         <a href="statistics.html" class="ink-tab-item">
             <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="ink-tab-item">
-            <span class="ink-tab-icon">📤</span>
-            <span>导出</span>
+        <a href="categories.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
         </a>
     </div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="ink-transition.js"></script>
     <script>
         let currentAccountId = localStorage.getItem('accountId');
         let accountData = null;
 
-        const typeIcons = {
-            cash: '💵',
-            card: '🏦',
-            credit: '💳',
-            alipay: '💙',
-            wechat: '💚'
-        };
-
-        const typeNames = {
-            cash: '现金',
-            card: '银行卡',
-            credit: '信用卡',
-            alipay: '支付宝',
-            wechat: '微信钱包'
-        };
+        function getTypeIcon(type) { return LangStyle.getAccountTypeIcon(type); }
+        function getTypeName(type) { return LangStyle.getAccountTypeName(type); }
 
         async function loadAccount() {
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
+                populateTypeSelectors();
                 renderAccounts();
                 updateTransferSelects();
             } catch (err) {
                 showToast('加载失败');
             }
+        }
+
+        function populateTypeSelectors() {
+            var options = LangStyle.getAccountTypeSelectOptions(true);
+            document.getElementById('newAccountType').innerHTML = options;
+            document.getElementById('editAccountType').innerHTML = LangStyle.getAccountTypeSelectOptions(false);
         }
 
         function renderAccounts() {
@@ -478,10 +472,10 @@
                 card.className = 'account-card';
                 card.style.opacity = acc.status === 'disabled' ? '0.5' : '1';
                 card.innerHTML = `
-                    <div class="account-icon">${typeIcons[acc.type] || '💰'}</div>
+                    <div class="account-icon">${getTypeIcon(acc.type)}</div>
                     <div class="account-info">
                         <div class="account-name">${acc.name}</div>
-                        <div class="account-type">${typeNames[acc.type] || acc.type}</div>
+                        <div class="account-type">${getTypeName(acc.type)}</div>
                     </div>
                     <div class="account-balance ${acc.balance >= 0 ? 'positive' : 'negative'}">¥${acc.balance.toFixed(2)}</div>
                     <div class="account-actions">

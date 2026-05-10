@@ -205,7 +205,12 @@
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
             <a href="accounts.html">🏦 账户</a>
+            <a href="groups.html">👥 群组</a>
+            <a href="statistics.html">📊 统计</a>
             <a href="categories.html">📂 分类</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
         </div>
     </div>
 
@@ -286,18 +291,23 @@
             <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
+        </a>
         <a href="statistics.html" class="ink-tab-item">
             <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="ink-tab-item">
-            <span class="ink-tab-icon">📤</span>
-            <span>导出</span>
+        <a href="categories.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
         </a>
     </div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="ink-transition.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
@@ -343,10 +353,7 @@
         }
 
         function formatCategoryName(cat) {
-            if (cat.modernName && cat.modernName !== cat.name) {
-                return `${cat.name}<br><span style="font-size: 0.85em; opacity: 0.65;">(${cat.modernName})</span>`;
-            }
-            return cat.name;
+            return LangStyle.formatCategoryNamePlain(cat);
         }
 
         function switchType(type) {
@@ -368,7 +375,7 @@
                 item.dataset.id = cat.id;
                 item.innerHTML = `
                     <div class="category-icon">${cat.icon}</div>
-                    <div class="category-name">${formatCategoryName(cat)}</div>
+                    <div class="category-name">${LangStyle.formatCategoryName(cat)}</div>
                 `;
                 item.onclick = () => selectCategory(cat.id);
                 grid.appendChild(item);

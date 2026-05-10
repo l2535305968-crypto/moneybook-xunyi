@@ -538,21 +538,21 @@
             <div class="ink-login-logo">墨记</div>
             <div class="ink-login-subtitle">静心记账 · 了然于心</div>
             
-            <!-- 已有账户登录 -->
+            <!-- 已有账号登录 -->
             <div style="margin-bottom: 15px;">
-                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">已有账户</div>
-                <input type="text" id="accountIdInput" class="ink-input" placeholder="输入账户ID或账户名称">
+                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">已有账号</div>
+                <input type="text" id="accountIdInput" class="ink-input" placeholder="输入账号ID或账号名称">
                 <button class="ink-login-btn" onclick="loginWithAccountId()">登录</button>
             </div>
             
             <div class="divider"></div>
             
-            <!-- 申请新账户 -->
+            <!-- 申请新账号 -->
             <div>
-                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">开立新账户</div>
+                <div style="font-size: 13px; margin-bottom: 10px; color: #999; text-align: left; letter-spacing: 2px;">开立新账号</div>
                 <input type="text" id="accountNameInput" class="ink-input" placeholder="请告知您的姓名" maxlength="20">
                 <button class="ink-login-btn alt" onclick="requestAccount()">申请</button>
-                <div class="login-hint">账户需经审批后启用</div>
+                <div class="login-hint">账号需经审批后启用</div>
             </div>
         </div>
     </div>
@@ -567,11 +567,15 @@
             </div>
         </div>
         <div class="header-links">
-            <a href="accounts.html">账户</a>
-            <a href="categories.html">分类</a>
-            <a href="statistics.html">统计</a>
-            <a href="groups.html">群组</a>
-            <a href="admin.html">管理</a>
+            <a href="add.html">➕ 记账</a>
+            <a href="accounts.html">🏦 账户</a>
+            <a href="statistics.html">📊 统计</a>
+            <a href="categories.html">📂 分类</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="groups.html">👥 群组</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
+            <a href="admin.html">🔐 管理</a>
         </div>
     </div>
 
@@ -669,8 +673,9 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
     <script src="ink-transition.js"></script>
@@ -691,10 +696,7 @@
         }
 
         function formatCategoryName(cat) {
-            if (cat.modernName && cat.modernName !== cat.name) {
-                return `${cat.icon} ${cat.name} <span style="font-size: 0.85em; opacity: 0.65; margin-left: 4px; font-family: system-ui;">(${cat.modernName})</span>`;
-            }
-            return `${cat.icon} ${cat.name}`;
+            return LangStyle.formatCategoryNameSelect(cat);
         }
 
         function showToast(message) {
@@ -720,7 +722,7 @@
             const accountInput = document.getElementById('accountIdInput').value.trim();
             
             if (!accountInput) {
-                showToast('请输入账户ID或名称');
+                showToast('请输入账号ID或名称');
                 return;
             }
 
@@ -741,7 +743,7 @@
                 await loadAccount();
                 showToast('登录成功');
             } catch (err) {
-                showToast('账户不存在，请检查');
+                showToast('账号不存在，请检查');
                 currentAccountId = null;
                 localStorage.removeItem('accountId');
                 localStorage.removeItem('accountName');
@@ -825,15 +827,12 @@
         function updateAccountSelector() {
             const selector = document.getElementById('accountSelector');
             selector.innerHTML = '';
-            accountData.accounts.forEach(acc => {
-                const option = document.createElement('option');
-                option.value = acc.id;
-                option.textContent = `${acc.name} ¥${acc.balance.toFixed(2)}`;
-                if (acc.id === currentAccountId) {
-                    option.selected = true;
-                }
-                selector.appendChild(option);
-            });
+            // 显示当前登录账号的名称
+            const option = document.createElement('option');
+            option.value = currentAccountId;
+            option.textContent = `${accountData.name} (账号)`;
+            option.selected = true;
+            selector.appendChild(option);
         }
 
         function updateBalance() {
@@ -974,7 +973,7 @@
                     item.innerHTML = `
                         <div class="record-icon">${cat.icon}</div>
                         <div class="record-info">
-                            <div class="record-category">${cat.modernName && cat.modernName !== cat.name ? `${cat.name} <span style="font-size: 0.85em; opacity: 0.65;">(${cat.modernName})</span>` : cat.name}</div>
+                            <div class="record-category">${LangStyle.formatCategoryNamePlain(cat)}</div>
                             <div class="record-remark">${record.remark || ''} · ${timeStr}</div>
                         </div>
                         <div>
@@ -1082,9 +1081,7 @@
             loadRecords();
         }
 
-        document.getElementById('accountSelector').addEventListener('change', (e) => {
-            window.location.href = `?aid=${e.target.value}`;
-        });
+
 
         loadAccount();
     </script>

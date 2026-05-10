@@ -208,9 +208,13 @@
         <div class="header-title">分类管理</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
+            <a href="add.html">➕ 记账</a>
             <a href="accounts.html">🏦 账户</a>
-            <a href="budget.html">📊 预算</a>
-            <a href="statistics.html">📈 统计</a>
+            <a href="groups.html">👥 群组</a>
+            <a href="statistics.html">📊 统计</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
         </div>
     </div>
 
@@ -306,18 +310,23 @@
             <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
+        </a>
         <a href="statistics.html" class="ink-tab-item">
             <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="ink-tab-item">
-            <span class="ink-tab-icon">📤</span>
-            <span>导出</span>
+        <a href="categories.html" class="ink-tab-item active">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
         </a>
     </div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="ink-transition.js"></script>
     <script>
         let currentAccountId = localStorage.getItem('accountId');
@@ -331,10 +340,7 @@
         const colors = ['#FCE4EC','#E8F5E9','#E3F2FD','#F3E5F5','#E0F7FA','#FFF8E1','#FFF3E0','#F5F5DC'];
 
         function formatCategoryName(cat) {
-            if (cat.modernName && cat.modernName !== cat.name) {
-                return `<span>${cat.name}<span style="font-size: 0.85em; opacity: 0.65; margin-left: 6px; font-family: system-ui;">(${cat.modernName})</span></span>`;
-            }
-            return cat.name;
+            return LangStyle.formatCategoryName(cat);
         }
 
         async function loadAccount() {

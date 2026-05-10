@@ -48,11 +48,6 @@
             z-index: 100;
             border-bottom: 1px solid #eee;
         }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
         .header-title {
             font-size: 32px;
             font-family: 'Ma Shan Zheng', 'Noto Serif SC', 'STKaiti', cursive;
@@ -68,17 +63,18 @@
             font-size: 14px;
             opacity: 0.3;
         }
-        .back-btn {
-            background: #f5f5f5;
-            border: none;
-            color: #666;
-            padding: 10px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
+        .header-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 10px;
         }
-        .back-btn:hover { background: #eee; color: #333; }
+        .header-links a { 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 13px; 
+            opacity: 0.9; 
+        }
+        .header-links a:hover { color: #333; }
         .main-content {
             max-width: 800px;
             margin: 0 auto;
@@ -498,10 +494,17 @@
 </head>
 <body>
     <div class="ink-header">
-        <div class="header-top">
-            <button class="back-btn" onclick="location.href='groups.html'">◀ 返回</button>
-            <div class="header-title" id="groupName">群详情</div>
-            <div style="width: 60px;"></div>
+        <div class="header-title" id="groupName">群详情</div>
+        <div class="header-links">
+            <a href="index.html">🏠 首页</a>
+            <a href="add.html">➕ 记账</a>
+            <a href="accounts.html">🏦 账户</a>
+            <a href="groups.html">👥 群组</a>
+            <a href="statistics.html">📊 统计</a>
+            <a href="categories.html">📂 分类</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
         </div>
     </div>
 
@@ -646,8 +649,32 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <div class="ink-tab-bar">
+        <a href="index.html" class="ink-tab-item">
+            <span class="ink-tab-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="add.html" class="ink-tab-item">
+            <span class="ink-tab-icon">➕</span>
+            <span>记账</span>
+        </a>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
+        </a>
+        <a href="statistics.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📊</span>
+            <span>统计</span>
+        </a>
+        <a href="categories.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
+        </a>
+    </div>
+
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="ink-transition.js"></script>
     <script>
         let groupId = new URLSearchParams(location.search).get('id');
@@ -700,10 +727,7 @@
         }
 
         function formatCategoryName(cat) {
-            if (cat.modernName && cat.modernName !== cat.name) {
-                return `${cat.icon} ${cat.name} (${cat.modernName})`;
-            }
-            return `${cat.icon} ${cat.name}`;
+            return LangStyle.formatCategoryNameSelect(cat);
         }
 
         function setType(type) {
@@ -757,7 +781,8 @@
             const accountsHtml = groupData.accounts ? groupData.accounts.map(a => 
                 `<div class="account-badge">${a.name} <span>¥${a.balance.toFixed(2)}</span></div>`
             ).join('') : '';
-            document.getElementById('groupAccounts').innerHTML = accountsHtml;
+            document.getElementById('groupAccounts').innerHTML = accountsHtml +
+                (isCreator ? `<div class="account-badge" style="cursor:pointer; border-style:dashed; opacity:0.7;" onclick="openAddAccountModal()">➕ 添加账户</div>` : '');
 
             // 计算成员统计
             const memberStats = {};
@@ -865,7 +890,7 @@
 
             container.innerHTML = records.slice().reverse().map(r => {
                 const cat = categories.find(c => c.id === r.categoryId) || { name: '其他', icon: '📦' };
-                const displayName = cat.modernName && cat.modernName !== cat.name ? `${cat.name} (${cat.modernName})` : cat.name;
+                const displayName = LangStyle.formatCategoryNamePlain(cat);
                 return `
                     <div class="record-item">
                         <div class="record-icon">${cat.icon}</div>
@@ -1020,7 +1045,7 @@
             }
 
             container.innerHTML = filtered.map(c => {
-                const displayName = c.modernName && c.modernName !== c.name ? `${c.name} (${c.modernName})` : c.name;
+                const displayName = LangStyle.formatCategoryNamePlain(c);
                 return `
                 <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid #f8f7f5;">
                     <div style="display:flex; align-items:center; gap:14px;">
@@ -1049,6 +1074,30 @@
                 loadGroup();
             } catch (err) {
                 showToast('移出失败');
+            }
+        }
+
+        function openAddAccountModal() {
+            document.getElementById('addAccountModal').classList.add('show');
+            document.getElementById('newAccountName').value = '';
+        }
+
+        function closeAddAccountModal() {
+            document.getElementById('addAccountModal').classList.remove('show');
+        }
+
+        async function addAccount() {
+            const name = document.getElementById('newAccountName').value.trim();
+            const type = document.getElementById('newAccountType').value;
+            if (!name) { showToast('请输入账户名称'); return; }
+
+            try {
+                await api.post(`/api/groups/${groupId}/accounts`, { name, type });
+                showToast('账户已添加！');
+                closeAddAccountModal();
+                loadGroup();
+            } catch (err) {
+                showToast('添加账户失败');
             }
         }
 

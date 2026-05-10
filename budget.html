@@ -210,9 +210,13 @@
         <div class="header-title">预算管理</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
+            <a href="add.html">➕ 记账</a>
             <a href="accounts.html">🏦 账户</a>
+            <a href="groups.html">👥 群组</a>
+            <a href="statistics.html">📊 统计</a>
             <a href="categories.html">📂 分类</a>
-            <a href="statistics.html">📈 统计</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
         </div>
     </div>
 
@@ -277,18 +281,23 @@
             <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
+        </a>
         <a href="statistics.html" class="ink-tab-item">
             <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="ink-tab-item">
-            <span class="ink-tab-icon">📤</span>
-            <span>导出</span>
+        <a href="categories.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
         </a>
     </div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="ink-transition.js"></script>
     <script>
         let currentAccountId = localStorage.getItem('accountId');
@@ -305,23 +314,25 @@
         }
 
         function formatCategoryName(cat) {
-            if (cat.modernName && cat.modernName !== cat.name) {
-                return `${cat.name} (${cat.modernName})`;
-            }
-            return cat.name;
+            return LangStyle.formatCategoryNamePlain(cat);
         }
 
         async function loadAccount() {
             try {
                 accountData = await api.get(`/account/${currentAccountId}`);
-                budgets = await api.get(`/budgets/${currentAccountId}`);
-
-                updateMonthDisplay();
-                renderBudgets();
-                updateCategorySelect();
             } catch (err) {
-                showToast('加载失败');
+                showToast('加载账号失败');
+                return;
             }
+            try {
+                budgets = await api.get(`/budgets/${currentAccountId}`);
+            } catch (e) {
+                budgets = [];
+            }
+
+            updateMonthDisplay();
+            renderBudgets();
+            updateCategorySelect();
         }
 
         function updateMonthDisplay() {
@@ -340,9 +351,11 @@
         }
 
         function getMonthExpenses() {
+            if (!accountData || !accountData.records) return [];
             const monthStr = formatMonth(currentMonth);
+            const day = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
             const startDate = monthStr + '-01T00:00:00.000Z';
-            const endDate = monthStr + '-' + new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate() + 'T23:59:59.999Z';
+            const endDate = monthStr + '-' + day + 'T23:59:59.999Z';
 
             return accountData.records.filter(r => {
                 if (r.type !== 'expense') return false;

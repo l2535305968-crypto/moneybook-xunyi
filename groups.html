@@ -67,6 +67,18 @@
             font-size: 14px;
             opacity: 0.3;
         }
+        .header-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 10px;
+        }
+        .header-links a { 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 13px; 
+            opacity: 0.9; 
+        }
+        .header-links a:hover { color: #333; }
 
         .main-content { 
             max-width: 700px; 
@@ -302,6 +314,16 @@
 <body>
     <div class="ink-header">
         <div class="header-title">记账小群</div>
+        <div class="header-links">
+            <a href="index.html">🏠 首页</a>
+            <a href="add.html">➕ 记账</a>
+            <a href="accounts.html">🏦 账户</a>
+            <a href="statistics.html">📊 统计</a>
+            <a href="categories.html">📂 分类</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
+        </div>
     </div>
 
     <div class="main-content" id="mainContent">
@@ -338,9 +360,13 @@
             <span class="ink-tab-icon">🏠</span>
             <span>首页</span>
         </a>
+        <a href="add.html" class="ink-tab-item">
+            <span class="ink-tab-icon">➕</span>
+            <span>记账</span>
+        </a>
         <a href="groups.html" class="ink-tab-item active">
             <span class="ink-tab-icon">👥</span>
-            <span>群</span>
+            <span>群组</span>
         </a>
         <a href="statistics.html" class="ink-tab-item">
             <span class="ink-tab-icon">📊</span>
@@ -349,10 +375,6 @@
         <a href="categories.html" class="ink-tab-item">
             <span class="ink-tab-icon">📂</span>
             <span>分类</span>
-        </a>
-        <a href="admin.html" class="ink-tab-item">
-            <span class="ink-tab-icon">⚙️</span>
-            <span>管理</span>
         </a>
     </div>
 
@@ -396,8 +418,8 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
     <script src="ink-transition.js"></script>
     <script>
         let currentAccountId = localStorage.getItem('accountId');

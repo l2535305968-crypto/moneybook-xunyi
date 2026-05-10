@@ -9,8 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="ink-transition.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="config.js"></script>
-    <script src="api.js"></script>
+    <script src="config.js?v=20260508"></script>
+    <script src="api.js?v=20260508"></script>
+    <script src="lang-style.js"></script>
     <script src="ink-transition.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -239,9 +240,13 @@
         <div class="header-title">统计分析</div>
         <div class="header-links">
             <a href="index.html">🏠 首页</a>
+            <a href="add.html">➕ 记账</a>
             <a href="accounts.html">🏦 账户</a>
+            <a href="groups.html">👥 群组</a>
             <a href="categories.html">📂 分类</a>
-            <a href="budget.html">📊 预算</a>
+            <a href="budget.html">💰 预算</a>
+            <a href="export.html">📤 导出</a>
+            <a href="settings.html">⚙️ 设置</a>
         </div>
     </div>
 
@@ -303,13 +308,17 @@
             <span class="ink-tab-icon">➕</span>
             <span>记账</span>
         </a>
+        <a href="groups.html" class="ink-tab-item">
+            <span class="ink-tab-icon">👥</span>
+            <span>群组</span>
+        </a>
         <a href="statistics.html" class="ink-tab-item active">
             <span class="ink-tab-icon">📊</span>
             <span>统计</span>
         </a>
-        <a href="export.html" class="ink-tab-item">
-            <span class="ink-tab-icon">📤</span>
-            <span>导出</span>
+        <a href="categories.html" class="ink-tab-item">
+            <span class="ink-tab-icon">📂</span>
+            <span>分类</span>
         </a>
     </div>
 
@@ -378,10 +387,7 @@
         }
 
         function formatCategoryName(cat) {
-            if (cat.modernName && cat.modernName !== cat.name) {
-                return `${cat.name} (${cat.modernName})`;
-            }
-            return cat.name;
+            return LangStyle.formatCategoryNamePlain(cat);
         }
 
         function renderCharts() {
